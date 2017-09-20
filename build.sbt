@@ -12,6 +12,7 @@ lazy val smartBackpaker = (project in file(".")).
       http4sClient,
       http4sDsl,
       http4sCirce,
+      scalaScraper,
       typesafeConfig,
       logback,
       scalaTest % Test
