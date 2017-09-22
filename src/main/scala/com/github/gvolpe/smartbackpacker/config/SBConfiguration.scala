@@ -7,8 +7,8 @@ object SBConfiguration {
   private lazy val configuration  = ConfigFactory.load("smart-backpacker")
   private lazy val safeConfig     = new SafeConfigReader(configuration)
 
-  def pageId(countryName: String): Option[Long] = {
-    safeConfig.long("visa-requirements.page-id." + countryName)
+  def page(countryName: String): Option[String] = {
+    safeConfig.string("visa-requirements.page." + countryName)
   }
 
 }
