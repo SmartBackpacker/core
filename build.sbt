@@ -9,9 +9,12 @@ lazy val smartBackpaker = (project in file(".")).
     )),
     name := "Smart Backpacker API",
     libraryDependencies ++= Seq(
+      http4sServer,
       http4sClient,
       http4sDsl,
       http4sCirce,
+      circe,
+      circeGeneric,
       scalaScraper,
       typesafeConfig,
       logback,

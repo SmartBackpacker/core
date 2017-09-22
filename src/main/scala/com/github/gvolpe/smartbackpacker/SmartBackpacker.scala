@@ -1,20 +1,25 @@
 package com.github.gvolpe.smartbackpacker
 
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
-import com.github.gvolpe.smartbackpacker.parser.WikiPageParser
+import com.github.gvolpe.smartbackpacker.parser.{AirlineQualityPageParser, WikiPageParser}
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 
-object SmartBackpacker extends App with WikiPageParser {
+object SmartBackpacker extends App with WikiPageParser with AirlineQualityPageParser {
 
   println("Smart Backpacker API")
 
-  val wikiPage = SBConfiguration.page("Argentina").getOrElse("http://google.com")
+  val wikiPage = SBConfiguration.wikiPage("Argentina").getOrElse("http://google.com")
+  val airlineQualityPage = SBConfiguration.airlineQualityPage("RyanAir").getOrElse("http://google.com")
 
-  val browser = JsoupBrowser()
-  override val htmlDocument = browser.get(wikiPage)
+  val userAgent  ="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
 
-  val list = parseVisaRequirements
+  val browser = new JsoupBrowser(userAgent)
+  override val htmlDocument = browser.get(airlineQualityPage)
 
-  list.foreach(println)
+  parseAirlineReviews
+
+//  val list = parseVisaRequirements
+//
+//  list.foreach(println)
 
 }
