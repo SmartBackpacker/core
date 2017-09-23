@@ -2,7 +2,10 @@ package com.github.gvolpe.smartbackpacker
 
 object model {
 
-  type Country = String
+  type CountryCode  = String
+  type CountryName  = String
+  type Language     = String
+  type Currency     = String
 
   sealed trait VisaCategory extends Product with Serializable
   case object VisaNotRequired extends VisaCategory
@@ -43,6 +46,19 @@ object model {
     }
   }
 
-  case class VisaRequirements(country: Country, visaCategory: VisaCategory, description: String)
+  case class VisaRequirements(country: CountryName,
+                              visaCategory: VisaCategory,
+                              description: String)
+
+  case class ExchangeRate(base: Currency,
+                          date: String,
+                          rates: AnyRef)
+
+  case class DestinationInfo(countryName: CountryName,
+                             countryCode: CountryCode,
+                             visaRequirements: VisaRequirements,
+                             exchangeRate: ExchangeRate,
+                             language: Language,
+                             timezone: String)
 
 }

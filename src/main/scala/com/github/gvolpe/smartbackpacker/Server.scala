@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.http.VisaRequirementsHttpEndpoint
+import com.github.gvolpe.smartbackpacker.http.DestinationInfoHttpEndpoint
 import fs2.Stream
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.util.StreamApp
@@ -19,7 +19,7 @@ object Server extends StreamApp[IO] {
     //val services = tweetService |+| helloWorldService
     BlazeBuilder[IO]
       .bindHttp(8080, "localhost")
-      .mountService(VisaRequirementsHttpEndpoint.service)
+      .mountService(DestinationInfoHttpEndpoint.service)
       .serve
 
 }
