@@ -50,9 +50,10 @@ object model {
                               visaCategory: VisaCategory,
                               description: String)
 
-  case class ExchangeRate(base: Currency,
+  case class ExchangeRate(baseCurrency: Currency,
+                          foreignCurrency: Currency,
                           date: String,
-                          rates: AnyRef)
+                          rate: Double)
 
   case class DestinationInfo(countryName: CountryName,
                              countryCode: CountryCode,

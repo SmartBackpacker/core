@@ -1,10 +1,10 @@
 package com.github.gvolpe.smartbackpacker
 
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
-import com.github.gvolpe.smartbackpacker.parser.{AirlineQualityPageParser, WikiPageParser}
+import com.github.gvolpe.smartbackpacker.parser.AirlineQualityPageParser
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 
-object SmartBackpacker extends App with WikiPageParser with AirlineQualityPageParser {
+object SmartBackpacker extends App with AirlineQualityPageParser {
 
   println("Smart Backpacker API")
 

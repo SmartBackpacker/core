@@ -2,14 +2,8 @@ package com.github.gvolpe.smartbackpacker
 
 import com.github.gvolpe.smartbackpacker.model._
 import io.circe.{Encoder, Json}
-import shapeless.Unwrapped
 
 package object http {
-
-  implicit def encodeAnyVal[T, U](implicit ev: T <:< AnyVal,
-                                  unwrapped: Unwrapped.Aux[T, U],
-                                  encoder: Encoder[U]): Encoder[T] =
-    Encoder.instance[T](value => encoder(unwrapped.unwrap(value)))
 
   implicit val visaCategoryEncoder: Encoder[VisaCategory] = Encoder.instance {
     case vr @ VisaRequired                => Json.fromString(vr.toString)
