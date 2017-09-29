@@ -46,8 +46,11 @@ object model {
     }
   }
 
-  case class VisaRequirements(country: CountryName,
-                              visaCategory: VisaCategory,
+  case class VisaRequirementsFor(country: CountryName,
+                                 visaCategory: VisaCategory,
+                                 description: String)
+
+  case class VisaRequirements(visaCategory: VisaCategory,
                               description: String)
 
   case class ExchangeRate(baseCurrency: Currency,

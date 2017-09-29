@@ -14,9 +14,9 @@ object WikiPageParser {
 
 class WikiPageParser[F[_] : Sync] {
 
-  def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirements] = Sync[F].delay {
-    val countryCode = if (to == "Viet Nam") "Vietnam" else to.toLowerCase().capitalize
-    parseVisaRequirements(from).find(_.country == countryCode).get
+  def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsFor] = Sync[F].delay {
+    parseVisaRequirements(from).find(_.country == to)
+      .getOrElse(VisaRequirementsFor(to, UnknownVisaCategory, "No information available"))
   }
 
   // TODO: Make this request asynchronous
@@ -26,11 +26,11 @@ class WikiPageParser[F[_] : Sync] {
     browser.get(wikiPage)
   }
 
-  private def parseVisaRequirements(from: CountryCode): List[VisaRequirements] = {
+  private def parseVisaRequirements(from: CountryCode): List[VisaRequirementsFor] = {
     val table = htmlDocument(from) >> extractor(".sortable td", texts)
 
     table.toList.grouped(3).map { seq =>
-      VisaRequirements(seq.head.asCountry, seq(1).asVisaCategory, seq(2).asDescription)
+      VisaRequirementsFor(seq.head.asCountry, seq(1).asVisaCategory, seq(2).asDescription)
     }.toList
   }
 

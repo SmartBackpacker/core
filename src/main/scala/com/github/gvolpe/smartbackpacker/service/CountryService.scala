@@ -1,7 +1,8 @@
 package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.model.{CountryCode, Currency, DestinationInfo, ExchangeRate}
+import com.github.gvolpe.smartbackpacker.config.SBConfiguration
+import com.github.gvolpe.smartbackpacker.model.{CountryCode, Currency, DestinationInfo, ExchangeRate, VisaRequirements}
 import com.github.gvolpe.smartbackpacker.parser.WikiPageParser
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
@@ -45,11 +46,12 @@ class CountryService() {
       foreignCurrency   = countryInfo.currencies.head.code
       exchangeRate      <- httpClient.expect[CurrencyExchangeDTO](fixerUri + foreignCurrency)
       parsedRate        = exchangeRate.rates.getOrElse(foreignCurrency, 0.0)
-      visaRequirements  <- WikiPageParser[IO].visaRequirementsFor(from, countryInfo.name)
+      countryName       = SBConfiguration.countryName(to).getOrElse(countryInfo.name)
+      visaRequirements  <- WikiPageParser[IO].visaRequirementsFor(from, countryName)
     } yield DestinationInfo(
-      countryName = countryInfo.name,
+      countryName = visaRequirements.country,
       countryCode = to,
-      visaRequirements = visaRequirements,
+      visaRequirements = VisaRequirements(visaRequirements.visaCategory, visaRequirements.description),
       exchangeRate = ExchangeRate(exchangeRate.base, foreignCurrency, exchangeRate.date, parsedRate),
       language = countryInfo.languages.head.name,
       timezone = countryInfo.timezones.head
