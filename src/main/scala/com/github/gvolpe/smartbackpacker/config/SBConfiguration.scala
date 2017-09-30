@@ -12,7 +12,7 @@ object SBConfiguration {
     safeConfig.string(s"visa-requirements.page.$countryCode")
   }
 
-  def airlineQualityPage(airlineName: String): Option[String] = {
+  def airlineReviewPage(airlineName: String): Option[String] = {
     safeConfig.string(s"airline-reviews.page.$airlineName")
   }
 

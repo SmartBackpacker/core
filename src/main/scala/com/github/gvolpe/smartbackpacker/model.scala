@@ -65,4 +65,10 @@ object model {
                              language: Language,
                              timezone: String)
 
+  case class AirlineReview(name: String,
+                           rating: Double,
+                           address: String,
+                           website: String,
+                           logo: String)
+
 }
