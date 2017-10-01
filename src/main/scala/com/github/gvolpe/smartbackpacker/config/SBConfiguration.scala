@@ -20,4 +20,8 @@ object SBConfiguration {
     safeConfig.string(s"countries.name.$countryCode")
   }
 
+  def countryCurrency(countryCode: CountryCode): Option[String] = {
+    safeConfig.string(s"countries.currency.$countryCode")
+  }
+
 }

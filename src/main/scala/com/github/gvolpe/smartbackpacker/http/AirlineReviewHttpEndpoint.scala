@@ -11,7 +11,7 @@ import org.http4s.dsl._
 
 object AirlineReviewHttpEndpoint {
 
-  val service = HttpService[IO] {
+  val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "airline" / airline =>
       TripAdvisorAirlinesParser[IO].airlineReviewsFor(airline).attempt.unsafeRunSync() match {
         case Right(review) => Ok(review.asJson)

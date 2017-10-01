@@ -61,9 +61,7 @@ object model {
   case class DestinationInfo(countryName: CountryName,
                              countryCode: CountryCode,
                              visaRequirements: VisaRequirements,
-                             exchangeRate: ExchangeRate,
-                             language: Language,
-                             timezone: String)
+                             exchangeRate: ExchangeRate)
 
   case class AirlineReview(name: String,
                            rating: Double,

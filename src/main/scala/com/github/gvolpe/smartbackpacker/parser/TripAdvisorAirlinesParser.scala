@@ -26,35 +26,44 @@ class TripAdvisorAirlinesParser[F[_] : Sync] {
     browser.get(page)
   }
 
-  // TODO: Use applicative to parse in parallel
   private def parseAirlineReviews(airlineName: String): Option[AirlineReview] = {
-    val doc = htmlDocument(airlineName)
+    val doc: Document = htmlDocument(airlineName)
 
-    val rating = for {
+    import cats.instances.option._
+    import cats.syntax.apply._
+
+    (rating(doc), contactInfo(doc), logo(doc)).mapN { (r, i, l) =>
+      AirlineReview(airlineName, r.toDouble, i._1, i._2, l)
+    }
+  }
+
+  private def rating(doc: Document): Option[String] = {
+    val seq = for {
       airline <- doc >> elementList(".airlineRating")
       span    <- airline >?> extractor(".prw_rup span")
       result  <- span >?> attr("content")
     } yield result
+    seq.headOption
+  }
 
-    val contactInfo = for {
+  private def contactInfo(doc: Document): Option[(String, String)] = {
+    val seq = for {
       info    <- doc >> elementList("#contact_info")
       address <- (info >?> extractor(".address", text)).map(_.drop(14))
       hlink   <- info >?> element(".website a")
       website <- hlink >?> attr("href")
     } yield (address, website)
+    seq.headOption
+  }
 
-    val logo = for {
+  private def logo(doc: Document): Option[String] = {
+    val seq = for {
       header  <- doc >> elementList(".header_logo")
       source  <- header >?> element("img")
       image   <- source >?> attr("src")
       if image.contains("airlines/logos")
     } yield image
-
-    for {
-      r <- rating.headOption
-      i <- contactInfo.headOption
-      l <- logo.headOption
-    } yield AirlineReview(airlineName, r.toDouble, i._1, i._2, l)
+    seq.headOption
   }
 
 }
