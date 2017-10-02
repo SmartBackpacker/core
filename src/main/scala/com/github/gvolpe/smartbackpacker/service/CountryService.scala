@@ -50,7 +50,7 @@ class CountryService[F[_] : Effect](httpClient: Client[F], wikiPageParser: Abstr
 
   private def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirementsFor] = {
     val countryName = SBConfiguration.countryName(to).getOrElse("")
-    WikiPageParser[F].visaRequirementsFor(from, countryName)
+    wikiPageParser.visaRequirementsFor(from, countryName)
   }
 
 }

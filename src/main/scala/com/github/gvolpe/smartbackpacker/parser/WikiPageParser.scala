@@ -16,7 +16,7 @@ class WikiPageParser[F[_] : Sync] extends AbstractWikiPageParser[F] {
 
   override def htmlDocument(from: CountryCode): Document = {
     val browser = new JsoupBrowser()
-    val wikiPage = SBConfiguration.wikiPage("AR").getOrElse("http://google.com")
+    val wikiPage = SBConfiguration.wikiPage(from).getOrElse("http://google.com")
     browser.get(wikiPage)
   }
 

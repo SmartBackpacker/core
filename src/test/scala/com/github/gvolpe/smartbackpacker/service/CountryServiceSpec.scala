@@ -32,7 +32,7 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     info.countryCode      should be ("IE")
     info.countryName      should be ("Ireland")
     info.exchangeRate     should be (0.0)
-    info.visaRequirements should be (VisaRequirements(VisaNotRequired, "Freedom of movement"))
+    info.visaRequirements should be (VisaRequirements(VisaNotRequired, "Freedom of movement; ID card valid"))
   }
 
   it should "validate countries" in {
@@ -41,5 +41,7 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     val info = service.destinationInformation("AR", "AR", "EUR").attempt.unsafeRunSync()
     info should be (Left(CountriesMustBeDifferent))
   }
+
+  // TODO: Add test for all the countries
 
 }
