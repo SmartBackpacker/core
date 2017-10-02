@@ -16,7 +16,7 @@ object model {
   case object UnknownVisaCategory extends VisaCategory
 
   object VisaCategory {
-    def parse(value: String) = value.toLowerCase match {
+    def parse(value: String): VisaCategory = value.toLowerCase match {
       case v: String =>
         if (v.contains("visa not required")) VisaNotRequired
         else if (v.contains("visa required")) VisaRequired

@@ -9,21 +9,26 @@ import net.ruippeixotog.scalascraper.dsl.DSL._
 import net.ruippeixotog.scalascraper.model.Document
 
 object WikiPageParser {
-  def apply[F[_]: Sync]: WikiPageParser[F] = new WikiPageParser[F]()
+  def apply[F[_]: Sync]: WikiPageParser[F] = new WikiPageParser[F]
 }
 
-class WikiPageParser[F[_] : Sync] {
+class WikiPageParser[F[_] : Sync] extends AbstractWikiPageParser[F] {
+
+  override def htmlDocument(from: CountryCode): Document = {
+    val browser = new JsoupBrowser()
+    val wikiPage = SBConfiguration.wikiPage("AR").getOrElse("http://google.com")
+    browser.get(wikiPage)
+  }
+
+}
+
+abstract class AbstractWikiPageParser[F[_] : Sync] {
+
+  def htmlDocument(from: CountryCode): Document
 
   def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsFor] = Sync[F].delay {
     parseVisaRequirements(from).find(_.country == to)
       .getOrElse(VisaRequirementsFor(to, UnknownVisaCategory, "No information available"))
-  }
-
-  // TODO: Make this request asynchronous
-  private def htmlDocument(from: CountryCode): Document = {
-    val browser = new JsoupBrowser()
-    val wikiPage = SBConfiguration.wikiPage("AR").getOrElse("http://google.com")
-    browser.get(wikiPage)
   }
 
   private def parseVisaRequirements(from: CountryCode): List[VisaRequirementsFor] = {

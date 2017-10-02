@@ -17,7 +17,7 @@ trait DestinationInfoHttpEndpoint {
 
   val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) =>
-      CountryService().destinationInformation(from, to, baseCurrency).attempt.unsafeRunSync() match {
+      CountryService[IO].destinationInformation(from, to, baseCurrency).attempt.unsafeRunSync() match {
         case Right(destinationInfo) => Ok(destinationInfo.asJson)
         case Left(error)            => BadRequest(Json.fromString(error.getMessage))
       }

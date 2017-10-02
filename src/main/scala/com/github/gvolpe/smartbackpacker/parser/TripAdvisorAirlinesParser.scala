@@ -12,18 +12,23 @@ object TripAdvisorAirlinesParser {
   def apply[F[_] : Sync]: TripAdvisorAirlinesParser[F] = new TripAdvisorAirlinesParser[F]()
 }
 
-class TripAdvisorAirlinesParser[F[_] : Sync] {
+class TripAdvisorAirlinesParser[F[_] : Sync] extends AbstractTripAdvisorAirlinesParser[F] {
+
+  override def htmlDocument(airlineName: String): Document = {
+    val browser = new JsoupBrowser()
+    val page = SBConfiguration.airlineReviewPage(airlineName).getOrElse("http://www.google.com")
+    browser.get(page)
+  }
+
+}
+
+abstract class AbstractTripAdvisorAirlinesParser[F[_] : Sync] {
+
+  def htmlDocument(airlineName: String): Document
 
   def airlineReviewsFor(airlineName: String): F[AirlineReview] = Sync[F].delay {
     parseAirlineReviews(airlineName)
       .getOrElse(AirlineReview(airlineName, 0.0, "", "", ""))
-  }
-
-  // TODO: Make this request asynchronous
-  private def htmlDocument(airlineName: String): Document = {
-    val browser = new JsoupBrowser()
-    val page = SBConfiguration.airlineReviewPage(airlineName).getOrElse("http://www.google.com")
-    browser.get(page)
   }
 
   private def parseAirlineReviews(airlineName: String): Option[AirlineReview] = {
