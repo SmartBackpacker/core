@@ -32,12 +32,12 @@ class TripAdvisorAirlinesParser[F[_] : Sync] {
     import cats.instances.option._
     import cats.syntax.apply._
 
-    (rating(doc), contactInfo(doc), logo(doc)).mapN { (r, i, l) =>
+    (parseRating(doc), parseContactInfo(doc), parseLogo(doc)).mapN { (r, i, l) =>
       AirlineReview(airlineName, r.toDouble, i._1, i._2, l)
     }
   }
 
-  private def rating(doc: Document): Option[String] = {
+  private def parseRating(doc: Document): Option[String] = {
     val seq = for {
       airline <- doc >> elementList(".airlineRating")
       span    <- airline >?> extractor(".prw_rup span")
@@ -46,7 +46,7 @@ class TripAdvisorAirlinesParser[F[_] : Sync] {
     seq.headOption
   }
 
-  private def contactInfo(doc: Document): Option[(String, String)] = {
+  private def parseContactInfo(doc: Document): Option[(String, String)] = {
     val seq = for {
       info    <- doc >> elementList("#contact_info")
       address <- (info >?> extractor(".address", text)).map(_.drop(14))
@@ -56,7 +56,7 @@ class TripAdvisorAirlinesParser[F[_] : Sync] {
     seq.headOption
   }
 
-  private def logo(doc: Document): Option[String] = {
+  private def parseLogo(doc: Document): Option[String] = {
     val seq = for {
       header  <- doc >> elementList(".header_logo")
       source  <- header >?> element("img")
