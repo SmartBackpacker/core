@@ -3,6 +3,7 @@ package com.github.gvolpe
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.model.CountryCode
 import com.github.gvolpe.smartbackpacker.parser.AbstractWikiPageParser
+import com.github.gvolpe.smartbackpacker.service.AbstractExchangeRateService
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
 
@@ -15,6 +16,12 @@ package object smartbackpacker {
       val browser = JsoupBrowser()
       val fileContent = Source.fromResource("wikiPageTest.html").mkString
       browser.parseString(fileContent).asInstanceOf[Document]
+    }
+  }
+
+  object TestExchangeRateService extends AbstractExchangeRateService[IO] {
+    override protected def retrieveExchangeRate(uri: String): IO[service.CurrencyExchangeDTO] = IO {
+      service.CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
 

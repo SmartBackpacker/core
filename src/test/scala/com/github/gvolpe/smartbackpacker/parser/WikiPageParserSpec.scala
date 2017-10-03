@@ -6,6 +6,8 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 class WikiPageParserSpec extends FlatSpecLike with Matchers {
 
+  behavior of "WikiPageParser"
+
   it should "find Visa Requirements" in {
     val requirements = TestWikiPageParser.visaRequirementsFor("AR", "Romania").unsafeRunSync()
     requirements.visaCategory  should be (VisaNotRequired)

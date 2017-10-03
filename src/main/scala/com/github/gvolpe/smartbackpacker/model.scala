@@ -81,4 +81,5 @@ object model {
                            website: String,
                            logo: String)
 
+  case class CountryNotFound(countryCode: CountryCode) extends Exception(s"Country code not found $countryCode")
 }

@@ -18,6 +18,6 @@ lazy val smartBackpaker = (project in file(".")).
       scalaScraper,
       typesafeConfig,
       logback,
-      scalaTest % Test
+      scalaTest
     )
   )
