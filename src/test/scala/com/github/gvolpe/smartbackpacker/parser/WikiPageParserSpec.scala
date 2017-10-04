@@ -24,7 +24,7 @@ trait WikiPageParserFixture extends PropertyChecks {
   val examples = Table(
     ("description", "from", "to", "expectedCategory", "expectedDescription"),
     ("find VisaNotRequired in Visa Requirements", "AR", "Romania", VisaNotRequired, "90 days within any 180 day period"),
-    ("find VisaWaiverProgram in Visa Requirements", "IE", "United States", VisaWaiverProgram, "90 days"),
+    ("find VisaWaiverProgram in Visa Requirements", "IE", "United States", VisaWaiverProgram, "90 days ESTA required if arriving by air or cruise ship.[196] ESTA is valid for two years when issued. Holders of non-biometric passports must obtain a visa for the United States as they are ineligible to apply for an ESTA. Leaving the United States and re-entering from Canada or Mexico will not reset the original 90 day maximum stay. You can only reset the timer by leaving North America."),
     ("find VisaRequired in Visa Requirements", "AR", "Cameroon", VisaRequired, "No information available"),
     ("find VisaOnArrival in Visa Requirements", "AR", "Egypt", VisaOnArrival, "30 days"),
     ("find ElectronicVisa in Visa Requirements", "AR", "India", ElectronicVisa, "60 days; e-Visa holders must arrive via 24 designated airports or 3 designated seaports.[92]"),
