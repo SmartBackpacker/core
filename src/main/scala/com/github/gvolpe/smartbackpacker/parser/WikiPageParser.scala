@@ -44,6 +44,8 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
       }
     }
 
+  // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
+  // TODO: This will require add more visa categories (See Polish page)
   private def parseVisaRequirements(from: CountryCode): List[VisaRequirementsFor] = {
     val table = htmlDocument(from) >> extractor(".sortable td", wikiTableExtractor)
     val tableSize = htmlDocument(from) >> extractor(".sortable th", texts)

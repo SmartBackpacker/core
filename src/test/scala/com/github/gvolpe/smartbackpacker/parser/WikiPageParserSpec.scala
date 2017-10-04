@@ -33,6 +33,7 @@ trait WikiPageParserFixture extends PropertyChecks {
     ("find FreeVisaOnArrival in Visa Requirements", "DE", "Papua New Guinea", FreeVisaOnArrival, "60 days. Free of charge."),
     ("find VisaDeFactoRequired in Visa Requirements", "FJ", "Andorra", VisaDeFactoRequired, "There are no visa requirements for entry into Andorra, but it can only be accessed by passing through France or Spain. A multiple entry visa is required to re-enter either France or Spain when leaving Andorra. All visitors can stay for 3 months."),
     ("find AdmissionRefused in Visa Requirements", "GN", "Jordan", AdmissionRefused, "No information available"),
+    ("find TravelBanned in Visa Requirements", "KR", "Iraq", TravelBanned, "As of 2007, due to safety concerns, South Korean government bans its citizens from visiting Iraq."),
     ("NOT find Visa Requirements (UnknownVisaCategory)", "AR", "Mars", UnknownVisaCategory, "No information available")
   )
 

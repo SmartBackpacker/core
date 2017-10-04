@@ -11,6 +11,7 @@ object model {
   case object VisaNotRequired             extends VisaCategory
   case object VisaWaiverProgram           extends VisaCategory
   case object AdmissionRefused            extends VisaCategory
+  case object TravelBanned                extends VisaCategory
   case object VisaRequired                extends VisaCategory
   case object VisaDeFactoRequired         extends VisaCategory
   case object ElectronicVisa              extends VisaCategory
@@ -21,11 +22,12 @@ object model {
   case object OnlineReciprocityFee        extends VisaCategory
   case object UnknownVisaCategory         extends VisaCategory
 
-  // TODO: Parse special cases: "On-line registration or eVisa", "With Home Return Permit only" (HK to CN)
+  // TODO: Parse special cases: "On-line registration or eVisa", "(Mainland China) With Home Return Permit only" (HK to CN)
   object VisaCategory {
     def parse(value: String): VisaCategory = value.toLowerCase match {
       case v: String =>
-        if (v.contains("admission refused") || v.contains("travel banned")) AdmissionRefused
+        if (v.contains("admission refused")) AdmissionRefused
+        else if (v.contains("travel banned")) TravelBanned
         else if (v.contains("visa waiver program")) VisaWaiverProgram
         else if (v.contains("visa not required") || v.contains("freedom of movement")) VisaNotRequired
         else if (v.contains("visa required") || v.contains("tourist card required")) VisaRequired
