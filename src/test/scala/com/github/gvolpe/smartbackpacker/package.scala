@@ -14,7 +14,7 @@ package object smartbackpacker {
   object TestWikiPageParser extends AbstractWikiPageParser[IO] {
     override def htmlDocument(from: CountryCode): Document = {
       val browser = JsoupBrowser()
-      val fileContent = Source.fromResource("wikiPageTest.html").mkString
+      val fileContent = Source.fromResource(s"wikiPageTest-$from.html").mkString
       browser.parseString(fileContent).asInstanceOf[Document]
     }
   }

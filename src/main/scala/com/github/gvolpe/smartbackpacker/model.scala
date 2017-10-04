@@ -20,8 +20,7 @@ object model {
   case object OnlineReciprocityFee        extends VisaCategory
   case object UnknownVisaCategory         extends VisaCategory
 
-  // TODO: Parse special cases: "On-line registration or eVisa", "With Home Return Permit only"
-  // FJ to AD - DE to AU - GN to BH - HK to CN
+  // TODO: Parse special cases: "On-line registration or eVisa", "With Home Return Permit only" (HK to CN)
   object VisaCategory {
     def parse(value: String): VisaCategory = value.toLowerCase match {
       case v: String =>
