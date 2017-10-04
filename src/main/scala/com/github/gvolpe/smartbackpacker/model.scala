@@ -9,6 +9,7 @@ object model {
 
   sealed trait VisaCategory extends Product with Serializable
   case object VisaNotRequired             extends VisaCategory
+  case object VisaWaiverProgram           extends VisaCategory
   case object AdmissionRefused            extends VisaCategory
   case object VisaRequired                extends VisaCategory
   case object VisaDeFactoRequired         extends VisaCategory
@@ -24,8 +25,9 @@ object model {
   object VisaCategory {
     def parse(value: String): VisaCategory = value.toLowerCase match {
       case v: String =>
-        if (v.contains("admission refused")) AdmissionRefused
-        else if (v.contains("visa not required")) VisaNotRequired
+        if (v.contains("admission refused") || v.contains("travel banned")) AdmissionRefused
+        else if (v.contains("visa waiver program")) VisaWaiverProgram
+        else if (v.contains("visa not required") || v.contains("freedom of movement")) VisaNotRequired
         else if (v.contains("visa required") || v.contains("tourist card required")) VisaRequired
         else if (v.contains("visa de facto required")) VisaDeFactoRequired
         else if (v.contains("evisitor")) ElectronicVisitor
@@ -33,7 +35,7 @@ object model {
         else if ((v.contains("e-visa") || v.contains("evisa") || v.contains("electronic"))
           && v.contains("on arrival")) ElectronicVisaPlusOnArrival
         else if (v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) ElectronicVisa
-        else if (v.contains("free visa on arrival")) FreeVisaOnArrival
+        else if (v.contains("free") && v.contains("on arrival")) FreeVisaOnArrival
         else if (v.contains("on arrival")) VisaOnArrival
         else UnknownVisaCategory
       case _ => UnknownVisaCategory

@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.parser
 
 import com.github.gvolpe.smartbackpacker.TestWikiPageParser
-import com.github.gvolpe.smartbackpacker.model.{AdmissionRefused, ElectronicVisa, ElectronicVisaPlusOnArrival, ElectronicVisitor, FreeVisaOnArrival, UnknownVisaCategory, VisaDeFactoRequired, VisaNotRequired, VisaOnArrival, VisaRequired}
+import com.github.gvolpe.smartbackpacker.model._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
 
@@ -24,6 +24,7 @@ trait WikiPageParserFixture extends PropertyChecks {
   val examples = Table(
     ("description", "from", "to", "expectedCategory", "expectedDescription"),
     ("find VisaNotRequired in Visa Requirements", "AR", "Romania", VisaNotRequired, "90 days within any 180 day period"),
+    ("find VisaWaiverProgram in Visa Requirements", "IE", "United States", VisaWaiverProgram, "90 days"),
     ("find VisaRequired in Visa Requirements", "AR", "Cameroon", VisaRequired, "No information available"),
     ("find VisaOnArrival in Visa Requirements", "AR", "Egypt", VisaOnArrival, "30 days"),
     ("find ElectronicVisa in Visa Requirements", "AR", "India", ElectronicVisa, "60 days; e-Visa holders must arrive via 24 designated airports or 3 designated seaports.[92]"),
