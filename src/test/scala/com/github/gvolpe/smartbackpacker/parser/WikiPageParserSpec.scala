@@ -30,6 +30,7 @@ trait WikiPageParserFixture extends PropertyChecks {
     ("find ElectronicVisa in Visa Requirements", "AR", "India", ElectronicVisa, "60 days; e-Visa holders must arrive via 24 designated airports or 3 designated seaports.[92]"),
     ("find ElectronicVisaPlusOnArrival in Visa Requirements", "AR", "Ethiopia", ElectronicVisaPlusOnArrival, "No information available"),
     ("find ElectronicVisitor in Visa Requirements", "DE", "Australia", ElectronicVisitor, "90 days on each visit in 12-month period if granted"),
+    ("find ElectronicTravelAuthority in Visa Requirements", "SG", "Australia", ElectronicTravelAuthority, "90 days on each visit in 12-month period if granted. May enter using SmartGate on arrival in Australia [25]"),
     ("find FreeVisaOnArrival in Visa Requirements", "DE", "Papua New Guinea", FreeVisaOnArrival, "60 days. Free of charge."),
     ("find VisaDeFactoRequired in Visa Requirements", "FJ", "Andorra", VisaDeFactoRequired, "There are no visa requirements for entry into Andorra, but it can only be accessed by passing through France or Spain. A multiple entry visa is required to re-enter either France or Spain when leaving Andorra. All visitors can stay for 3 months."),
     ("find AdmissionRefused in Visa Requirements", "GN", "Jordan", AdmissionRefused, "No information available"),

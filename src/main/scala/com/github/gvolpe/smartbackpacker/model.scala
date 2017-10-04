@@ -16,6 +16,7 @@ object model {
   case object VisaDeFactoRequired         extends VisaCategory
   case object ElectronicVisa              extends VisaCategory
   case object ElectronicVisitor           extends VisaCategory
+  case object ElectronicTravelAuthority   extends VisaCategory
   case object FreeVisaOnArrival           extends VisaCategory
   case object VisaOnArrival               extends VisaCategory
   case object ElectronicVisaPlusOnArrival extends VisaCategory
@@ -27,15 +28,15 @@ object model {
     def parse(value: String): VisaCategory = value.toLowerCase match {
       case v: String =>
         if (v.contains("admission refused")) AdmissionRefused
-        else if (v.contains("travel banned")) TravelBanned
+        else if (v.contains("travel banned") || v.contains("travel restricted")) TravelBanned
         else if (v.contains("visa waiver program")) VisaWaiverProgram
         else if (v.contains("visa not required") || v.contains("freedom of movement")) VisaNotRequired
-        else if (v.contains("visa required") || v.contains("tourist card required")) VisaRequired
+        else if (v.contains("visa required") || v.contains("tourist card required") || v.contains("certificate required") || v.contains("identity required") || v.contains("approval required")) VisaRequired
         else if (v.contains("visa de facto required")) VisaDeFactoRequired
         else if (v.contains("evisitor")) ElectronicVisitor
         else if (v.contains("online reciprocity fee")) OnlineReciprocityFee
-        else if ((v.contains("e-visa") || v.contains("evisa") || v.contains("electronic"))
-          && v.contains("on arrival")) ElectronicVisaPlusOnArrival
+        else if ((v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) && v.contains("on arrival")) ElectronicVisaPlusOnArrival
+        else if (v.contains("electronic travel authority")) ElectronicTravelAuthority
         else if (v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) ElectronicVisa
         else if (v.contains("free") && v.contains("on arrival")) FreeVisaOnArrival
         else if (v.contains("on arrival")) VisaOnArrival
