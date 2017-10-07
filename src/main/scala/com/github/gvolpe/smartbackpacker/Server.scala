@@ -10,7 +10,7 @@ object Server extends StreamApp[IO] {
 
   override def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, Nothing] =
     BlazeBuilder[IO]
-      .bindHttp(8080, "localhost")
+      .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "localhost")
       .mountService(DestinationInfoHttpEndpoint.service)
       .mountService(AirlineReviewHttpEndpoint.service)
       .serve
