@@ -43,12 +43,11 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
       }
     }
 
-  private def colspanExtractor: HtmlExtractor[Element, Option[Element]] = { e =>
-    e.find { q =>
-      Try(q.attr("colspan")) match {
-        case Success(_) => true
-        case Failure(_) => false
-      }
+  private def colspanExtractor: HtmlExtractor[Element, Option[Element]] = _.find { e =>
+    Try(e.attr("colspan")) match {
+      case Success(cs) if cs == "2" => true
+      case Success(_)               => true
+      case Failure(_)               => false
     }
   }
 
