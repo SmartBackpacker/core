@@ -1,5 +1,7 @@
 import Dependencies._
 
+enablePlugins(JavaAppPackaging)
+
 lazy val smartBackpaker = (project in file(".")).
   settings(
     inThisBuild(List(
