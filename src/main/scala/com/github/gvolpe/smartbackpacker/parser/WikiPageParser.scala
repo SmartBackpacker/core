@@ -30,7 +30,9 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
   def htmlDocument(from: CountryCode): Document
 
   def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsFor] = Sync[F].delay {
-    parseVisaRequirements(from).find(_.country == to)
+    val requirements = parseVisaRequirements(from)
+    requirements.find(_.country == to)
+      .orElse(requirements.find(_.country.contains(to)))
       .getOrElse(VisaRequirementsFor(to, UnknownVisaCategory, "No information available"))
   }
 
