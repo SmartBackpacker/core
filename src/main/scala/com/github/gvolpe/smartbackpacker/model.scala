@@ -51,7 +51,7 @@ object model {
 
   implicit class DescriptionOps(value: String) {
     def asDescription: String = {
-      if (value.isEmpty) "No information available"
+      if (value.isEmpty) "No more information available"
       else value
     }
   }

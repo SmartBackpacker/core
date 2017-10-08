@@ -64,12 +64,17 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
   // TODO: This will require add more visa categories (See Polish page)
   private def parseVisaRequirements(from: CountryCode): List[VisaRequirementsFor] = {
-    val colspan = htmlDocument(from) >> extractor(".sortable td", colspanExtractor)
-    val table = htmlDocument(from) >> extractor(".sortable td", wikiTableExtractor)
-    val tableSize = htmlDocument(from) >> extractor(".sortable th", texts)
+    // Get first of all sortable tables
+    val wikiTables = (htmlDocument(from) >> elementList(".sortable")).headOption
+    // Find out whether it's an irregular or regular table
+    val colspan = wikiTables.flatMap(_ >> extractor(".sortable td", colspanExtractor))
+    // Extract all the information from the first wikitable found
+    val table = wikiTables.toList.flatMap(_ >> extractor(".sortable td", wikiTableExtractor))
+    // Find out the number of columns
+    val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
 
     val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
-    table.toList.grouped(tableSize.size).map(mapper).toList
+    table.grouped(tableSize.getOrElse(3)).map(mapper).toList
   }
 
 }
