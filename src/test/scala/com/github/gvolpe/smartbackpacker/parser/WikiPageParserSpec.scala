@@ -18,10 +18,42 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for $to" in {
-      val requirements = TestWikiPageParser.visaRequirementsFor("GB", to).unsafeRunSync()
-      requirements.visaCategory  should not be UnknownVisaCategory
-      requirements.description   should not be empty
+    it should s"parse the visa requirements for AR -> $to" in {
+      if (to != "Argentina") {
+        val requirements = TestWikiPageParser.visaRequirementsFor("AR", to).unsafeRunSync()
+        requirements.visaCategory should not be UnknownVisaCategory
+        requirements.description  should not be empty
+      }
+    }
+  }
+
+  forAll(countries) { to =>
+    it should s"parse the visa requirements for GB -> $to" in {
+      if (to != "United Kingdom") {
+        val requirements = TestWikiPageParser.visaRequirementsFor("GB", to).unsafeRunSync()
+        requirements.visaCategory should not be UnknownVisaCategory
+        requirements.description  should not be empty
+      }
+    }
+  }
+
+  forAll(countries) { to =>
+    it should s"parse the visa requirements for IE -> $to" in {
+      if (to != "Ireland") {
+        val requirements = TestWikiPageParser.visaRequirementsFor("IE", to).unsafeRunSync()
+        requirements.visaCategory should not be UnknownVisaCategory
+        requirements.description  should not be empty
+      }
+    }
+  }
+
+  forAll(countries) { to =>
+    it should s"parse the visa requirements for KR -> $to" in {
+      if (to != "South Korea") {
+        val requirements = TestWikiPageParser.visaRequirementsFor("KR", to).unsafeRunSync()
+        requirements.visaCategory should not be UnknownVisaCategory
+        requirements.description  should not be empty
+      }
     }
   }
 
@@ -46,7 +78,7 @@ trait WikiPageParserFixture extends PropertyChecks {
     ("NOT find Visa Requirements (UnknownVisaCategory)", "AR", "Planet Mars", UnknownVisaCategory, "No information available")
   )
 
-  // TODO: Not working fot Aruba, Bermuda, Côte d'Ivoire, Gibraltar, Hong Kong, Macao, Taiwan
+  // TODO: Not working fot Aruba, Bermuda, Gibraltar, Hong Kong, Macao, Taiwan
 
   val countries = Table(
     "Afghanistan",
@@ -230,6 +262,7 @@ trait WikiPageParserFixture extends PropertyChecks {
     "Uganda",
     "Ukraine",
     "United Arab Emirates",
+    "United Kingdom",
     "United States",
     "Uruguay",
     "Uzbekistan",

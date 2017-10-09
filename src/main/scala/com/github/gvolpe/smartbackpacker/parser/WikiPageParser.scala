@@ -66,13 +66,14 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
   private def parseVisaRequirements(from: CountryCode): List[VisaRequirementsFor] = {
     // Get first of all sortable tables
     val wikiTables = (htmlDocument(from) >> elementList(".sortable")).headOption
-    // Find out whether it's an irregular or regular table
+    // Find out whether it's an irregular (colspan=2) or regular table
     val colspan = wikiTables.flatMap(_ >> extractor(".sortable td", colspanExtractor))
     // Extract all the information from the first wikitable found
     val table = wikiTables.toList.flatMap(_ >> extractor(".sortable td", wikiTableExtractor))
     // Find out the number of columns
     val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
 
+    // Group it per country using the corresponding mapper
     val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
     table.grouped(tableSize.getOrElse(3)).map(mapper).toList
   }

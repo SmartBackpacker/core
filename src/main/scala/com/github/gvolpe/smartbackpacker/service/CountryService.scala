@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.Effect
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
-import com.github.gvolpe.smartbackpacker.model.{CountryCode, CountryNotFound, Currency, DestinationInfo, ExchangeRate, VisaRequirements, VisaRequirementsFor}
+import com.github.gvolpe.smartbackpacker.model.{CountryCode, CountryNotFound, Currency, DestinationInfo, ExchangeRate, UnknownVisaCategory, VisaRequirements, VisaRequirementsFor}
 import com.github.gvolpe.smartbackpacker.parser.{AbstractWikiPageParser, WikiPageParser}
 
 object CountryService {
@@ -35,9 +35,20 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
 
   private def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirementsFor] = {
     val ifEmpty: F[VisaRequirementsFor] = Effect[F].raiseError(CountryNotFound(to))
-    SBConfiguration.countryName(to).fold(ifEmpty) { countryName =>
-      wikiPageParser.visaRequirementsFor(from, countryName)
+
+    // Some country names have different ways to be spelled. Eg. ["Côte d'Ivoire", "Ivory Coast"]
+    def iter(countryNames: List[String]): F[VisaRequirementsFor] = countryNames match {
+      case (country :: Nil) =>
+        wikiPageParser.visaRequirementsFor(from, country)
+      case (country :: xs)  =>
+        Effect[F].flatMap(wikiPageParser.visaRequirementsFor(from, country)) { result =>
+          if (result.visaCategory == UnknownVisaCategory) iter(xs)
+          else Effect[F].delay(result)
+        }
+      case Nil              => ifEmpty
     }
+
+    iter(SBConfiguration.countryNames(to))
   }
 
 }

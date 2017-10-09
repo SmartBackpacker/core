@@ -16,8 +16,8 @@ object SBConfiguration {
     safeConfig.string(s"airline-reviews.page.$airlineName")
   }
 
-  def countryName(countryCode: CountryCode): Option[String] = {
-    safeConfig.string(s"countries.name.$countryCode")
+  def countryNames(countryCode: CountryCode): List[String] = {
+    safeConfig.list(s"country.name.$countryCode")
   }
 
   def countryCurrency(countryCode: CountryCode): Option[String] = {

@@ -23,4 +23,9 @@ class SafeConfigReader(config: Config) {
   def long(key: String): Option[Long] = safeRead[Long](config.getLong)(key)
   def boolean(key: String): Option[Boolean] = safeRead[Boolean](config.getBoolean)(key)
 
+  def list(key: String): List[String] = {
+    import scala.collection.JavaConverters._
+    safeRead[java.util.List[String]](config.getStringList)(key).toList.flatMap(_.asScala)
+  }
+
 }
