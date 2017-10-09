@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker._
+import com.github.gvolpe.smartbackpacker.{TestWikiPageParser, _}
 import com.github.gvolpe.smartbackpacker.model.{ExchangeRate, VisaNotRequired, VisaRequirements}
 import org.scalatest.{FlatSpecLike, Matchers}
 
@@ -17,7 +17,7 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     val info = service.destinationInformation("AR", "RO", "EUR").unsafeRunSync()
     info.countryCode      should be ("RO")
     info.countryName      should be ("Romania")
-    info.exchangeRate     should be (ExchangeRate("EUR", "RON", "", 4.59))
+    info.exchangeRate     should be (ExchangeRate("EUR", "RON", 4.59))
     info.visaRequirements should be (VisaRequirements(VisaNotRequired, "90 days within any 180 day period"))
   }
 
@@ -27,8 +27,8 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     val info = service.destinationInformation("DE", "IE", "EUR").unsafeRunSync()
     info.countryCode      should be ("IE")
     info.countryName      should be ("Ireland")
-    info.exchangeRate     should be (ExchangeRate("EUR", "EUR", "", 0.0))
-    info.visaRequirements should be (VisaRequirements(VisaNotRequired, "3 months"))
+    info.exchangeRate     should be (ExchangeRate("EUR", "EUR", 0.0))
+    info.visaRequirements should be (VisaRequirements(VisaNotRequired, "Freedom of movement; ID card valid"))
   }
 
   it should "validate countries" in {

@@ -14,7 +14,7 @@ class ExchangeServiceSpec extends FlatSpecLike with Matchers {
 
   it should "return an empty exchange rate" in {
     val exchangeRate = TestExchangeRateService.exchangeRateFor("", "").unsafeRunSync()
-    exchangeRate should be (CurrencyExchangeDTO("", "", Map()))
+    exchangeRate should be (CurrencyExchangeDTO("", "", Map("" -> 0.0)))
   }
 
 }

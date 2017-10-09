@@ -71,7 +71,6 @@ object model {
 
   case class ExchangeRate(baseCurrency: Currency,
                           foreignCurrency: Currency,
-                          date: String,
                           rate: Double)
 
   case class DestinationInfo(countryName: CountryName,

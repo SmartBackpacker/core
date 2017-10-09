@@ -12,7 +12,7 @@ import scala.io.Source
 package object smartbackpacker {
 
   object TestWikiPageParser extends AbstractWikiPageParser[IO] {
-    override def htmlDocument(from: CountryCode): Document = {
+    override def htmlDocument(from: CountryCode): IO[Document] = IO {
       val browser = JsoupBrowser()
       val fileContent = Source.fromResource(s"wikiPageTest-$from.html").mkString
       browser.parseString(fileContent).asInstanceOf[Document]

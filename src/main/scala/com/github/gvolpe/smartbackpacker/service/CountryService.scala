@@ -14,7 +14,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
   def destinationInformation(from: CountryCode, to: CountryCode, baseCurrency: Currency): F[DestinationInfo] = {
     import cats.syntax.apply._
 
-    Effect[F].flatMap(validateCountries(from, to)) { _ =>
+    Effect[F].>>=(validateCountries(from, to)) { _ =>
       val foreignCurrency = SBConfiguration.countryCurrency(to).getOrElse("EUR")
 
       (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN { (vr, er) =>
@@ -22,14 +22,14 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
           countryName = vr.country,
           countryCode = to,
           visaRequirements = VisaRequirements(vr.visaCategory, vr.description),
-          exchangeRate = ExchangeRate(er.base, foreignCurrency, er.date, er.rates.getOrElse(foreignCurrency, 0.0))
+          exchangeRate = ExchangeRate(er.base, foreignCurrency, er.rates.getOrElse(foreignCurrency, -1.0))
         )
       }
     }
   }
 
   private def validateCountries(from: CountryCode, to: CountryCode): F[(CountryCode, CountryCode)] = {
-    if (from != to) Effect[F].delay((from, to))
+    if (from != to) Effect[F].pure((from, to))
     else Effect[F].raiseError(CountriesMustBeDifferent)
   }
 
@@ -41,7 +41,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
       case (country :: Nil) =>
         wikiPageParser.visaRequirementsFor(from, country)
       case (country :: xs)  =>
-        Effect[F].flatMap(wikiPageParser.visaRequirementsFor(from, country)) { result =>
+        Effect[F].>>=(wikiPageParser.visaRequirementsFor(from, country)) { result =>
           if (result.visaCategory == UnknownVisaCategory) iter(xs)
           else Effect[F].delay(result)
         }
