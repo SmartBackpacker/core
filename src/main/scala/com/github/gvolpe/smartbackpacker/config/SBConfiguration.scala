@@ -17,7 +17,7 @@ object SBConfiguration {
   }
 
   def countryNames(countryCode: CountryCode): List[String] = {
-    safeConfig.list(s"country.name.$countryCode")
+    safeConfig.list(s"countries.name.$countryCode")
   }
 
   def countryCurrency(countryCode: CountryCode): Option[String] = {
