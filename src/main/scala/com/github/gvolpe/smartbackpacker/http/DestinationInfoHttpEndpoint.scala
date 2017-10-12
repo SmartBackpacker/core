@@ -7,11 +7,12 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
-import org.http4s.dsl._
+import org.http4s.client.dsl.Http4sClientDsl
+import org.http4s.dsl.io._
 
 object DestinationInfoHttpEndpoint extends DestinationInfoHttpEndpoint
 
-trait DestinationInfoHttpEndpoint {
+trait DestinationInfoHttpEndpoint extends Http4sClientDsl[IO] {
 
   object BaseCurrencyQueryParamMatcher extends QueryParamDecoderMatcher[String]("baseCurrency")
 

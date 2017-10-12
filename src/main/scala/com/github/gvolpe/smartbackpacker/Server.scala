@@ -8,11 +8,10 @@ import org.http4s.util.StreamApp
 
 object Server extends StreamApp[IO] {
 
-  override def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, Nothing] =
+  override def stream(args: List[String], requestShutdown: IO[Unit]): Stream[IO, StreamApp.ExitCode] =
     BlazeBuilder[IO]
       .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
       .mountService(DestinationInfoHttpEndpoint.service)
-      .mountService(AirlineReviewHttpEndpoint.service)
       .serve
 
 }
