@@ -22,4 +22,10 @@ package object http {
     case uv @ UnknownVisaCategory         => Json.fromString(uv.toString)
   }
 
+  implicit val baggageTypeEncoder: Encoder[BaggageType] = Encoder.instance {
+    case bag @ SmallBag    => Json.fromString(bag.toString)
+    case bag @ CabinBag    => Json.fromString(bag.toString)
+    case bag @ CheckedBag  => Json.fromString(bag.toString)
+  }
+
 }

@@ -85,4 +85,21 @@ object model {
                            logo: String)
 
   case class CountryNotFound(countryCode: CountryCode) extends Exception(s"Country code not found $countryCode")
+
+  // Airlines
+  sealed trait BaggageType extends Product with Serializable
+  case object SmallBag extends BaggageType
+  case object CabinBag extends BaggageType
+  case object CheckedBag extends BaggageType
+
+  case class BaggageSize(height: Int, width: Int, depth: Int)
+
+  case class BaggageAllowance(baggageType: BaggageType,
+                              kgs: Option[Int],
+                              size: BaggageSize)
+
+  case class BaggagePolicy(allowance: List[BaggageAllowance],
+                           extra: Option[String])
+
+  case class Airline(name: String, baggagePolicy: BaggagePolicy)
 }
