@@ -78,8 +78,11 @@ abstract class AbstractAirlineService[F[_] : Effect] {
     )
   )
 
-  def baggagePolicy: F[List[Airline]] = Effect[F].delay {
-    airlines
+  def baggagePolicy(airlineName: String): F[Airline] = {
+    val ifEmpty: F[Airline] = Effect[F].raiseError(AirlineNotFound(airlineName))
+    airlines.find(_.name == airlineName).fold(ifEmpty) { policy =>
+      Effect[F].delay(policy)
+    }
   }
 
 }

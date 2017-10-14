@@ -102,4 +102,6 @@ object model {
                            extra: Option[String])
 
   case class Airline(name: String, baggagePolicy: BaggagePolicy)
+
+  case class AirlineNotFound(airlineName: String) extends Exception(s"Airline not found $airlineName")
 }
