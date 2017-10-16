@@ -37,7 +37,9 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns
   private def wikiTableExtractor: HtmlExtractor[Element, Iterable[String]] = _.flatMap { e =>
-    val text = e.text.split('!').head.trim // for cases like Ivory Coast
+    val sortTextSpan  = e >?> elementList(".sorttext")
+    val sortText      = sortTextSpan.flatMap(_.headOption).map(_.text)
+    val text          = sortText.getOrElse(e.text.split('!').head.trim) // for cases like Ivory Coast
     Try(e.attr("colspan")) match {
       case Success(cs) if cs == "2" => Seq(text, "")
       case Success(_)               => Seq(text)

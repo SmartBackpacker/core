@@ -19,7 +19,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for AR -> $to" in {
-      if (to != "Argentina") {
+      if (to != "Argentina" && to != "France") { // it's France and territories for AR
         val requirements = TestWikiPageParser.visaRequirementsFor("AR", to).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
@@ -49,7 +49,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for KR -> $to" in {
-      if (to != "South Korea") {
+      if (to != "South Korea" && to != "France") { // it's France and territories for KR
         val requirements = TestWikiPageParser.visaRequirementsFor("KR", to).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty

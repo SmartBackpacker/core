@@ -21,9 +21,10 @@ object model {
   case object VisaOnArrival               extends VisaCategory
   case object ElectronicVisaPlusOnArrival extends VisaCategory
   case object OnlineReciprocityFee        extends VisaCategory
+  case object MainlandTravelPermit        extends VisaCategory
+  case object HomeReturnPermitOnly        extends VisaCategory
   case object UnknownVisaCategory         extends VisaCategory
 
-  // TODO: Parse special cases: "On-line registration or eVisa", "(Mainland China) With Home Return Permit only" (HK to CN)
   object VisaCategory {
     def parse(value: String): VisaCategory = value.toLowerCase match {
       case v: String =>
@@ -35,6 +36,8 @@ object model {
         else if (v.contains("visa de facto required")) VisaDeFactoRequired
         else if (v.contains("evisitor")) ElectronicVisitor
         else if (v.contains("online reciprocity fee")) OnlineReciprocityFee
+        else if (v.contains("mainland travel permit")) MainlandTravelPermit
+        else if (v.contains("home return permit only")) HomeReturnPermitOnly
         else if ((v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) && v.contains("on arrival")) ElectronicVisaPlusOnArrival
         else if (v.contains("electronic travel authority")) ElectronicTravelAuthority
         else if (v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) ElectronicVisa
