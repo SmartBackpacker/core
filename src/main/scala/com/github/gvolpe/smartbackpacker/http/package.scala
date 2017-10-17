@@ -17,7 +17,7 @@ package object http {
     case et @ ElectronicTravelAuthority   => Json.fromString(et.toString)
     case fv @ FreeVisaOnArrival           => Json.fromString(fv.toString)
     case oa @ VisaOnArrival               => Json.fromString(oa.toString)
-    case ea @ ElectronicVisaPlusOnArrival => Json.fromString(ea.toString)
+    case ea @ ElectronicVisaPlusVisaOnArrival => Json.fromString(ea.toString)
     case or @ OnlineReciprocityFee        => Json.fromString(or.toString)
     case mt @ MainlandTravelPermit        => Json.fromString(mt.toString)
     case hr @ HomeReturnPermitOnly        => Json.fromString(hr.toString)

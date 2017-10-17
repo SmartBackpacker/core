@@ -8,22 +8,22 @@ object model {
   type Currency     = String
 
   sealed trait VisaCategory extends Product with Serializable
-  case object VisaNotRequired             extends VisaCategory
-  case object VisaWaiverProgram           extends VisaCategory
-  case object AdmissionRefused            extends VisaCategory
-  case object TravelBanned                extends VisaCategory
-  case object VisaRequired                extends VisaCategory
-  case object VisaDeFactoRequired         extends VisaCategory
-  case object ElectronicVisa              extends VisaCategory
-  case object ElectronicVisitor           extends VisaCategory
-  case object ElectronicTravelAuthority   extends VisaCategory
-  case object FreeVisaOnArrival           extends VisaCategory
-  case object VisaOnArrival               extends VisaCategory
-  case object ElectronicVisaPlusOnArrival extends VisaCategory
-  case object OnlineReciprocityFee        extends VisaCategory
-  case object MainlandTravelPermit        extends VisaCategory
-  case object HomeReturnPermitOnly        extends VisaCategory
-  case object UnknownVisaCategory         extends VisaCategory
+  case object VisaNotRequired                 extends VisaCategory
+  case object VisaWaiverProgram               extends VisaCategory
+  case object AdmissionRefused                extends VisaCategory
+  case object TravelBanned                    extends VisaCategory
+  case object VisaRequired                    extends VisaCategory
+  case object VisaDeFactoRequired             extends VisaCategory
+  case object ElectronicVisa                  extends VisaCategory
+  case object ElectronicVisitor               extends VisaCategory
+  case object ElectronicTravelAuthority       extends VisaCategory
+  case object FreeVisaOnArrival               extends VisaCategory
+  case object VisaOnArrival                   extends VisaCategory
+  case object ElectronicVisaPlusVisaOnArrival extends VisaCategory
+  case object OnlineReciprocityFee            extends VisaCategory
+  case object MainlandTravelPermit            extends VisaCategory
+  case object HomeReturnPermitOnly            extends VisaCategory
+  case object UnknownVisaCategory             extends VisaCategory
 
   object VisaCategory {
     def parse(value: String): VisaCategory = value.toLowerCase match {
@@ -38,7 +38,7 @@ object model {
         else if (v.contains("online reciprocity fee")) OnlineReciprocityFee
         else if (v.contains("mainland travel permit")) MainlandTravelPermit
         else if (v.contains("home return permit only")) HomeReturnPermitOnly
-        else if ((v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) && v.contains("on arrival")) ElectronicVisaPlusOnArrival
+        else if ((v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) && v.contains("on arrival")) ElectronicVisaPlusVisaOnArrival
         else if (v.contains("electronic travel authority")) ElectronicTravelAuthority
         else if (v.contains("e-visa") || v.contains("evisa") || v.contains("electronic")) ElectronicVisa
         else if (v.contains("free") && v.contains("on arrival")) FreeVisaOnArrival

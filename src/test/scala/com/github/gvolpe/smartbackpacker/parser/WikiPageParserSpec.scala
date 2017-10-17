@@ -68,7 +68,7 @@ trait WikiPageParserFixture extends PropertyChecks {
     ("find VisaRequired in Visa Requirements", "AR", "Cameroon", VisaRequired, "No more information available"),
     ("find VisaOnArrival in Visa Requirements", "AR", "Egypt", VisaOnArrival, "30 days"),
     ("find ElectronicVisa in Visa Requirements", "AR", "India", ElectronicVisa, "60 days; e-Visa holders must arrive via 24 designated airports or 3 designated seaports.[92]"),
-    ("find ElectronicVisaPlusOnArrival in Visa Requirements", "AR", "Ethiopia", ElectronicVisaPlusOnArrival, "No more information available"),
+    ("find ElectronicVisaPlusOnArrival in Visa Requirements", "AR", "Ethiopia", ElectronicVisaPlusVisaOnArrival, "No more information available"),
     ("find ElectronicVisitor in Visa Requirements", "DE", "Australia", ElectronicVisitor, "90 days on each visit in 12-month period if granted"),
     ("find ElectronicTravelAuthority in Visa Requirements", "SG", "Australia", ElectronicTravelAuthority, "90 days on each visit in 12-month period if granted. May enter using SmartGate on arrival in Australia [25]"),
     ("find FreeVisaOnArrival in Visa Requirements", "DE", "Papua New Guinea", FreeVisaOnArrival, "60 days. Free of charge."),
