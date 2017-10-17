@@ -40,10 +40,16 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     val sortTextSpan  = e >?> elementList(".sorttext")
     val sortText      = sortTextSpan.flatMap(_.headOption).map(_.text)
     val text          = sortText.getOrElse(e.text.split('!').head.trim) // for cases like Ivory Coast
-    Try(e.attr("colspan")) match {
-      case Success(cs) if cs == "2" => Seq(text, "")
-      case Success(_)               => Seq(text)
-      case Failure(_)               => Seq(text)
+
+    // FIXME: Hardcoded solution until I find a better way to solve the rowspan issue for Australian citizens
+    if (text.contains("Due to safety concerns") && (text.contains("Burundi") || text.contains("Somalia"))) {
+      Seq.empty
+    } else {
+      Try(e.attr("colspan")) match {
+        case Success(cs) if cs == "2" => Seq(text, "")
+        case Success(_)               => Seq(text)
+        case Failure(_)               => Seq(text)
+      }
     }
   }
 
@@ -55,12 +61,28 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     }
   }
 
-  private val normalTableMapper: List[String] => VisaRequirementsFor = seq => {
-    VisaRequirementsFor(seq.head.asCountry, seq(1).asVisaCategory, seq(2).asDescription)
+  private val normalTableMapper: List[String] => VisaRequirementsFor = {
+    case (c :: v :: d :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription)
+    case (c :: v :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, "")
+    case (c :: Nil) =>
+      VisaRequirementsFor(c.asCountry, UnknownVisaCategory, "")
+    case _ =>
+      VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }
 
-  private val colspanTableMapper: List[String] => VisaRequirementsFor = seq => {
-    VisaRequirementsFor(seq.head.asCountry, seq(1).asVisaCategory, seq(2).asDescription + " " + seq(3))
+  private val colspanTableMapper: List[String] => VisaRequirementsFor = {
+    case (c :: v :: d :: x :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription + " " + x)
+    case (c :: v :: d :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription)
+    case (c :: v :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, "")
+    case (c :: Nil) =>
+      VisaRequirementsFor(c.asCountry, UnknownVisaCategory, "")
+    case _ =>
+      VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }
 
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
@@ -78,7 +100,8 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
 
       // Group it per country using the corresponding mapper
       val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
-      table.grouped(tableSize.getOrElse(3)).map(mapper).toList
+      val result = table.grouped(tableSize.getOrElse(3)).map(mapper).toList
+      result
     }
 
 }
