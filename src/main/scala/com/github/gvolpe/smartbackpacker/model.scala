@@ -107,4 +107,13 @@ object model {
   case class Airline(name: String, baggagePolicy: BaggagePolicy)
 
   case class AirlineNotFound(airlineName: String) extends Exception(s"Airline not found $airlineName")
+
+  // Visa Restriction Index
+  sealed trait VisaRestrictionsIndexValues
+  case class Rank(value: Int) extends VisaRestrictionsIndexValues
+  case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
+  case class PlacesCount(value: Int) extends VisaRestrictionsIndexValues
+
+  case class VisaRestrictionIndex(rank: Int, countries: List[String], count: Int)
+
 }

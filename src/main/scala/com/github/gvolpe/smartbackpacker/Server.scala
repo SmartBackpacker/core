@@ -13,6 +13,7 @@ object Server extends StreamApp[IO] {
       .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
       .mountService(DestinationInfoHttpEndpoint.service)
       .mountService(AirlinesHttpEndpoint.service)
+      .mountService(VisaRestrictionIndexHttpEndpoint.service)
       .serve
 
 }
