@@ -62,6 +62,8 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
   }
 
   private val normalTableMapper: List[String] => VisaRequirementsFor = {
+    case (c :: v :: d :: _ :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription)
     case (c :: v :: d :: Nil) =>
       VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription)
     case (c :: v :: Nil) =>
@@ -73,6 +75,8 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
   }
 
   private val colspanTableMapper: List[String] => VisaRequirementsFor = {
+    case (c :: v :: d :: x :: _ :: Nil) =>
+      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription + " " + x)
     case (c :: v :: d :: x :: Nil) =>
       VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription + " " + x)
     case (c :: v :: d :: Nil) =>
