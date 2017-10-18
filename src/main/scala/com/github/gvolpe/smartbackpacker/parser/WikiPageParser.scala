@@ -36,13 +36,15 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     }
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns
-  private val wikiTableExtractor: HtmlExtractor[Element, Iterable[String]] = _.flatMap { e =>
+  private def wikiTableExtractor(from: CountryCode): HtmlExtractor[Element, Iterable[String]] = _.flatMap { e =>
     val sortTextSpan  = e >?> elementList(".sorttext")
     val sortText      = sortTextSpan.flatMap(_.headOption).map(_.text)
     val text          = sortText.getOrElse(e.text.split('!').head.trim) // for cases like Ivory Coast
 
-    // FIXME: Hardcoded solution until I find a better way to solve the rowspan issue for Australian citizens
-    if (text.contains("Due to safety concerns") && (text.contains("Burundi") || text.contains("Somalia"))) {
+    // FIXME: Hardcoded solution until I find a better way to solve the rowspan issue for Australian and Canadian citizens
+    if (from == "AU" && text.contains("Due to safety concerns") && (text.contains("Burundi") || text.contains("Somalia"))) {
+      Seq.empty
+    } else if (from == "CA" && text.contains("Due to safety concerns") && (text.contains("Iraq") || text.contains("Somalia"))) {
       Seq.empty
     } else {
       Try(e.attr("colspan")) match {
@@ -98,7 +100,7 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
       // Find out whether it's an irregular (colspan=2) or regular table
       val colspan = wikiTables.flatMap(_ >> extractor(".sortable td", colspanExtractor))
       // Extract all the information from the first wikitable found
-      val table = wikiTables.toList.flatMap(_ >> extractor(".sortable td", wikiTableExtractor))
+      val table = wikiTables.toList.flatMap(_ >> extractor(".sortable td", wikiTableExtractor(from)))
       // Find out the number of columns
       val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
 
