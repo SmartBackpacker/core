@@ -27,7 +27,8 @@ class ExchangeRateService[F[_] : Effect](client: Client[F]) extends AbstractExch
 abstract class AbstractExchangeRateService[F[_] : Effect] {
 
   protected val fixerUri: Currency => Currency => String = baseCurrency => foreignCurrency => {
-    s"http://api.fixer.io/latest?base=$baseCurrency&symbols=$foreignCurrency"
+    //s"http://api.fixer.io/latest?base=$baseCurrency&symbols=$foreignCurrency"
+    s"http://localhost:8081/latest?base=$baseCurrency&symbols=$foreignCurrency"
   }
 
   protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO]
