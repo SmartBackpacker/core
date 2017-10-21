@@ -2,5 +2,5 @@ Smart Backpacker API
 ====================
 
 Backend of the Smart Backpacker App.
-- Link to app in Google Play Store
-- Link to app in Apple Store
+- Download it for Android [here](https://play.google.com/store/apps/details?id=io.github.gvolpe.sb).
+- Download it for iOS here - NOT AVAILABLE YET
