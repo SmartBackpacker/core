@@ -54,10 +54,16 @@ object model {
 
   implicit class DescriptionOps(value: String) {
     def asDescription(extra: String): String = {
+
+      def removeBrackets(v: String): String = {
+        val regex = """\[[^\]]+\]""".r
+        regex.replaceAllIn(v, "")
+      }
+
       if (value.isEmpty && extra.isEmpty) "No more information available"
-      else if (value.isEmpty) extra
-      else if (extra.isEmpty) value
-      else value + " " + extra
+      else if (value.isEmpty) removeBrackets(extra)
+      else if (extra.isEmpty) removeBrackets(value)
+      else removeBrackets(value + " " + extra)
     }
   }
 
