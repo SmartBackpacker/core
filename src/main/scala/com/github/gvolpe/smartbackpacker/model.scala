@@ -53,9 +53,11 @@ object model {
   }
 
   implicit class DescriptionOps(value: String) {
-    def asDescription: String = {
-      if (value.isEmpty) "No more information available"
-      else value
+    def asDescription(extra: String): String = {
+      if (value.isEmpty && extra.isEmpty) "No more information available"
+      else if (value.isEmpty) extra
+      else if (extra.isEmpty) value
+      else value + " " + extra
     }
   }
 
