@@ -102,7 +102,8 @@ object model {
                               size: BaggageSize)
 
   case class BaggagePolicy(allowance: List[BaggageAllowance],
-                           extra: Option[String])
+                           extra: Option[String],
+                           website: Option[String])
 
   case class Airline(name: String, baggagePolicy: BaggagePolicy)
 
