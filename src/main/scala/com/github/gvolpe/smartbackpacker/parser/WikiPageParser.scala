@@ -46,6 +46,8 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
       Seq.empty
     } else if (from == "CA" && text.contains("Due to safety concerns") && (text.contains("Iraq") || text.contains("Somalia"))) {
       Seq.empty
+    } else if (from == "RU" && text.contains("Due to safety concerns") && (text.contains("Libya") || text.contains("Somalia") || text.contains("Syria"))) {
+      Seq.empty
     } else {
       Try(e.attr("colspan")) match {
         case Success(cs) if cs == "2" => Seq(text, "")

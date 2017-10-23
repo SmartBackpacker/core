@@ -68,6 +68,16 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
     }
   }
 
+  forAll(countries) { to =>
+    it should s"parse the visa requirements for RU -> $to" in {
+      if (to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
+        val requirements = TestWikiPageParser.visaRequirementsFor("RU", to).unsafeRunSync()
+        requirements.visaCategory should not be UnknownVisaCategory
+        requirements.description  should not be empty
+      }
+    }
+  }
+
 }
 
 trait WikiPageParserFixture extends PropertyChecks {
