@@ -84,6 +84,7 @@ trait WikiPageParserFixture extends PropertyChecks {
 
   val examples = Table(
     ("description", "from", "to", "expectedCategory", "expectedDescription"),
+    ("find VisaRequired for rowspan case in Visa Requirements", "CA", "Somalia", VisaRequired, "Visa may be obtained on arrival, provided an invitation letter by the sponsor had been submitted to the authorities before arrival. Due to safety concerns, Canadian government advises its citizens against all travel to Somalia."),
     ("find VisaNotRequired in Visa Requirements", "AR", "Romania", VisaNotRequired, "90 days within any 180 day period"),
     ("find VisaWaiverProgram in Visa Requirements", "IE", "United States", VisaWaiverProgram, "90 days ESTA required if arriving by air or cruise ship. ESTA is valid for two years when issued. Holders of non-biometric passports must obtain a visa for the United States as they are ineligible to apply for an ESTA. Leaving the United States and re-entering from Canada or Mexico will not reset the original 90 day maximum stay. You can only reset the timer by leaving North America."),
     ("find VisaRequired in Visa Requirements", "AR", "Cameroon", VisaRequired, "No more information available"),

@@ -41,19 +41,10 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     val sortText      = sortTextSpan.flatMap(_.headOption).map(_.text)
     val text          = sortText.getOrElse(e.text.split('!').head.trim) // for cases like Ivory Coast
 
-    // FIXME: Hardcoded solution until I find a better way to solve the rowspan issue for Australian and Canadian citizens
-    if (from.value == "AU" && text.contains("Due to safety concerns") && (text.contains("Burundi") || text.contains("Somalia"))) {
-      Seq.empty
-    } else if (from.value == "CA" && text.contains("Due to safety concerns") && (text.contains("Iraq") || text.contains("Somalia"))) {
-      Seq.empty
-    } else if (from.value == "RU" && text.contains("Due to safety concerns") && (text.contains("Libya") || text.contains("Somalia") || text.contains("Syria"))) {
-      Seq.empty
-    } else {
-      Try(e.attr("colspan")) match {
-        case Success(cs) if cs == "2" => Seq(text, "")
-        case Success(_)               => Seq(text)
-        case Failure(_)               => Seq(text)
-      }
+    Try(e.attr("colspan")) match {
+      case Success(cs) if cs == "2" => Seq(text, "")
+      case Success(_)               => Seq(text)
+      case Failure(_)               => Seq(text)
     }
   }
 
@@ -66,8 +57,9 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
   }
 
   private val normalTableMapper: List[String] => VisaRequirementsFor = {
-    case (c :: v :: d :: _ :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
+    case (c :: v :: d :: x :: Nil) =>
+      val extra = if (x == "X" || x == "√") "" else x
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(extra))
     case (c :: v :: d :: Nil) =>
       VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
@@ -101,18 +93,40 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
       val wikiTables = (doc >> elementList(".sortable")).headOption
       // Find out whether it's an irregular (colspan=2) or regular table
       val colspan = wikiTables.flatMap(_ >> extractor(".sortable td", colspanExtractor))
-      // Extract all the information from the first wikitable found
-      val table = wikiTables.toList.flatMap(_ >> extractor(".sortable td", wikiTableExtractor(from)))
       // Find out the number of columns
       val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
-
-      // FIXME: This should be the start of the rowspan solution. If there's a rowspan in the td elements then combine the last td element with the next tr
-      // val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", wikiTableExtractor(from)))
+      // Extract all the rows with visa information
+      val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", elementList))
+      // Parse every row, extract the field and combine them whenever there's a rowspan
+      val info  = rowspanMapper(from)(table)
 
       // Group it per country using the corresponding mapper
       val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
-      val result = table.grouped(tableSize.getOrElse(3)).map(mapper).toList
+      val result = info.grouped(tableSize.getOrElse(3)).map(mapper).toList
       result
     }
+
+  private val parseColumns: Element => CountryCode => List[String] = e => cc => {
+    e.children.toList.flatMap(_ >> extractor("td", wikiTableExtractor(cc)))
+  }
+
+  private val rowspanMapper: CountryCode => List[Element] => List[String] = from => {
+    case (x :: y :: xs) =>
+      if (x.children.exists(_.hasAttr("rowspan"))) {
+        val first  = parseColumns(x)(from)
+        val second = parseColumns(y)(from)
+        val lastCombined = first.lastOption.toList.map(_ ++ " " ++ second.mkString)
+        // Drop the last element and append the combined one
+        (first.dropRight(1) ::: lastCombined) ::: rowspanMapper(from)(xs)
+      } else {
+        val noRowspan = parseColumns(x)(from)
+        noRowspan ::: rowspanMapper(from)(y :: xs)
+      }
+    case (x :: xs) =>
+      val noRowspan = parseColumns(x)(from)
+      noRowspan ::: rowspanMapper(from)(xs)
+    case _ =>
+      List.empty[String]
+  }
 
 }
