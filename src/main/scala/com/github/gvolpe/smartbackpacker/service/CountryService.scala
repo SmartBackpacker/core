@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.Effect
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
-import com.github.gvolpe.smartbackpacker.model.{CountryCode, CountryNotFound, Currency, DestinationInfo, ExchangeRate, UnknownVisaCategory, VisaRequirements, VisaRequirementsFor}
+import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.parser.{AbstractWikiPageParser, WikiPageParser}
 
 object CountryService {
@@ -15,14 +15,14 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
     import cats.syntax.apply._
 
     Effect[F].>>=(validateCountries(from, to)) { _ =>
-      val foreignCurrency = SBConfiguration.countryCurrency(to).getOrElse("EUR")
+      val foreignCurrency = SBConfiguration.countryCurrency(to).getOrElse("EUR").as[Currency]
 
       (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN { (vr, er) =>
         DestinationInfo(
           countryName = vr.country,
           countryCode = to,
           visaRequirements = VisaRequirements(vr.visaCategory, vr.description),
-          exchangeRate = ExchangeRate(er.base, foreignCurrency, er.rates.getOrElse(foreignCurrency, -1.0))
+          exchangeRate = ExchangeRate(er.base.as[Currency], foreignCurrency, er.rates.getOrElse(foreignCurrency.value, -1.0))
         )
       }
     }
@@ -39,9 +39,9 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
     // Some country names have different ways to be spelled. Eg. ["Côte d'Ivoire", "Ivory Coast"]
     def iter(countryNames: List[String]): F[VisaRequirementsFor] = countryNames match {
       case (country :: Nil) =>
-        wikiPageParser.visaRequirementsFor(from, country)
+        wikiPageParser.visaRequirementsFor(from, country.as[CountryName])
       case (country :: xs)  =>
-        Effect[F].>>=(wikiPageParser.visaRequirementsFor(from, country)) { result =>
+        Effect[F].>>=(wikiPageParser.visaRequirementsFor(from, country.as[CountryName])) { result =>
           if (result.visaCategory == UnknownVisaCategory) iter(xs)
           else Effect[F].delay(result)
         }

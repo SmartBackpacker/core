@@ -228,14 +228,14 @@ class InMemoryAirlineDao[F[_] : Effect] extends AirlineDao[F] {
 
   )
 
-  override def findAirline(airlineName: String): F[Option[Airline]] = Effect[F].delay {
-    airlines.find(_.name == airlineName)
+  override def findAirline(airlineName: AirlineName): F[Option[Airline]] = Effect[F].delay {
+    airlines.find(_.name == airlineName.value)
   }
 
 }
 
 abstract class AirlineDao[F[_] : Effect] {
 
-  def findAirline(airlineName: String): F[Option[Airline]]
+  def findAirline(airlineName: AirlineName): F[Option[Airline]]
 
 }

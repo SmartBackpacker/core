@@ -11,7 +11,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
 
   forAll(examples) { (description, from, to, expectedCategory, expectedDescription) =>
     it should description in {
-      val requirements = TestWikiPageParser.visaRequirementsFor(from, to).unsafeRunSync()
+      val requirements = TestWikiPageParser.visaRequirementsFor(from.as[CountryCode], to.as[CountryName]).unsafeRunSync()
       requirements.visaCategory  should be (expectedCategory)
       requirements.description   should be (expectedDescription)
     }
@@ -20,7 +20,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
   forAll(countries) { to =>
     it should s"parse the visa requirements for AR -> $to" in {
       if (to != "Argentina" && to != "France") { // it's France and territories for AR
-        val requirements = TestWikiPageParser.visaRequirementsFor("AR", to).unsafeRunSync()
+        val requirements = TestWikiPageParser.visaRequirementsFor("AR".as[CountryCode], to.as[CountryName]).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
       }
@@ -30,7 +30,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
   forAll(countries) { to =>
     it should s"parse the visa requirements for GB -> $to" in {
       if (to != "United Kingdom") {
-        val requirements = TestWikiPageParser.visaRequirementsFor("GB", to).unsafeRunSync()
+        val requirements = TestWikiPageParser.visaRequirementsFor("GB".as[CountryCode], to.as[CountryName]).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
       }
@@ -40,7 +40,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
   forAll(countries) { to =>
     it should s"parse the visa requirements for IE -> $to" in {
       if (to != "Ireland") {
-        val requirements = TestWikiPageParser.visaRequirementsFor("IE", to).unsafeRunSync()
+        val requirements = TestWikiPageParser.visaRequirementsFor("IE".as[CountryCode], to.as[CountryName]).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
       }
@@ -50,7 +50,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
   forAll(countries) { to =>
     it should s"parse the visa requirements for KR -> $to" in {
       if (to != "South Korea" && to != "France") { // it's France and territories for KR
-        val requirements = TestWikiPageParser.visaRequirementsFor("KR", to).unsafeRunSync()
+        val requirements = TestWikiPageParser.visaRequirementsFor("KR".as[CountryCode], to.as[CountryName]).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
       }
@@ -61,7 +61,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
     it should s"parse the visa requirements for CA -> $to" in {
       if (to != "Canada" && to != "France" && to != "Australia"
           && to != "Denmark" && to != "Netherlands" && to != "United Kingdom") { // it's France and territories, etc
-        val requirements = TestWikiPageParser.visaRequirementsFor("CA", to).unsafeRunSync()
+        val requirements = TestWikiPageParser.visaRequirementsFor("CA".as[CountryCode], to.as[CountryName]).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
       }
@@ -71,7 +71,7 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
   forAll(countries) { to =>
     it should s"parse the visa requirements for RU -> $to" in {
       if (to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
-        val requirements = TestWikiPageParser.visaRequirementsFor("RU", to).unsafeRunSync()
+        val requirements = TestWikiPageParser.visaRequirementsFor("RU".as[CountryCode], to.as[CountryName]).unsafeRunSync()
         requirements.visaCategory should not be UnknownVisaCategory
         requirements.description  should not be empty
       }

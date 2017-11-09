@@ -42,11 +42,11 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     val text          = sortText.getOrElse(e.text.split('!').head.trim) // for cases like Ivory Coast
 
     // FIXME: Hardcoded solution until I find a better way to solve the rowspan issue for Australian and Canadian citizens
-    if (from == "AU" && text.contains("Due to safety concerns") && (text.contains("Burundi") || text.contains("Somalia"))) {
+    if (from.value == "AU" && text.contains("Due to safety concerns") && (text.contains("Burundi") || text.contains("Somalia"))) {
       Seq.empty
-    } else if (from == "CA" && text.contains("Due to safety concerns") && (text.contains("Iraq") || text.contains("Somalia"))) {
+    } else if (from.value == "CA" && text.contains("Due to safety concerns") && (text.contains("Iraq") || text.contains("Somalia"))) {
       Seq.empty
-    } else if (from == "RU" && text.contains("Due to safety concerns") && (text.contains("Libya") || text.contains("Somalia") || text.contains("Syria"))) {
+    } else if (from.value == "RU" && text.contains("Due to safety concerns") && (text.contains("Libya") || text.contains("Somalia") || text.contains("Syria"))) {
       Seq.empty
     } else {
       Try(e.attr("colspan")) match {
@@ -67,30 +67,30 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
 
   private val normalTableMapper: List[String] => VisaRequirementsFor = {
     case (c :: v :: d :: _ :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, "")
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsFor(c.asCountry, UnknownVisaCategory, "")
+      VisaRequirementsFor(c.asCountryName, UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
+      VisaRequirementsFor("Not Found".as[CountryName], UnknownVisaCategory, "")
   }
 
   private val colspanTableMapper: List[String] => VisaRequirementsFor = {
     case (c :: v :: d :: x :: _ :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: x :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsFor(c.asCountry, v.asVisaCategory, "")
+      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsFor(c.asCountry, UnknownVisaCategory, "")
+      VisaRequirementsFor(c.asCountryName, UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
+      VisaRequirementsFor("Not Found".as[CountryName], UnknownVisaCategory, "")
   }
 
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
@@ -105,6 +105,9 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
       val table = wikiTables.toList.flatMap(_ >> extractor(".sortable td", wikiTableExtractor(from)))
       // Find out the number of columns
       val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
+
+      // FIXME: This should be the start of the rowspan solution. If there's a rowspan in the td elements then combine the last td element with the next tr
+      // val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", wikiTableExtractor(from)))
 
       // Group it per country using the corresponding mapper
       val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)

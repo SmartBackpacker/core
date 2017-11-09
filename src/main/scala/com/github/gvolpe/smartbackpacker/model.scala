@@ -1,11 +1,14 @@
 package com.github.gvolpe.smartbackpacker
 
+import scala.reflect.ClassTag
+
 object model {
 
-  type CountryCode  = String
-  type CountryName  = String
-  type Language     = String
-  type Currency     = String
+  class CountryCode(val value: String) extends AnyVal
+  class CountryName(val value: String) extends AnyVal
+  class Language(val value: String) extends AnyVal
+  class Currency(val value: String) extends AnyVal
+  class AirlineName(val value: String) extends AnyVal
 
   sealed trait VisaCategory extends Product with Serializable
   case object VisaNotRequired                 extends VisaCategory
@@ -48,6 +51,11 @@ object model {
     }
   }
 
+  implicit class ValueClasses(value: String) {
+    def as[A : ClassTag]: A =
+      implicitly[ClassTag[A]].runtimeClass.getConstructors.head.newInstance(value).asInstanceOf[A]
+  }
+
   implicit class VisaCategoryOps(value: String) {
     def asVisaCategory: VisaCategory = VisaCategory.parse(value)
   }
@@ -68,8 +76,8 @@ object model {
   }
 
   implicit class CountryOps(value: String) {
-    def asCountry: String = {
-      value.dropWhile(_.toInt == 160) // Remove whitespaces at the start
+    def asCountryName: CountryName = {
+      new CountryName(value.dropWhile(_.toInt == 160)) // Remove whitespaces at the start
     }
   }
 

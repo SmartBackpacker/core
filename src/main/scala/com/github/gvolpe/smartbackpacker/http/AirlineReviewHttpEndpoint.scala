@@ -13,7 +13,7 @@
 //
 //  val service: HttpService[IO] = HttpService[IO] {
 //    case GET -> Root / "airline" / airline =>
-//      TripAdvisorAirlinesParser[IO].airlineReviewsFor(airline).attempt.unsafeRunSync() match {
+//      TripAdvisorAirlinesParser[IO].airlineReviewsFor(airline).attempt flatMap {
 //        case Right(review) => Ok(review.asJson)
 //        case Left(error)   => BadRequest(Json.fromString(error.getMessage))
 //      }

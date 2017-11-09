@@ -8,8 +8,8 @@ object SBConfiguration {
   private lazy val configuration  = ConfigFactory.load("smart-backpacker")
   private lazy val safeConfig     = new SafeConfigReader(configuration)
 
-  def wikiPage(countryCode: String): Option[String] = {
-    safeConfig.string(s"visa-requirements.page.$countryCode")
+  def wikiPage(countryCode: CountryCode): Option[String] = {
+    safeConfig.string(s"visa-requirements.page.${countryCode.value}")
   }
 
   def airlineReviewPage(airlineName: String): Option[String] = {
@@ -17,11 +17,11 @@ object SBConfiguration {
   }
 
   def countryNames(countryCode: CountryCode): List[String] = {
-    safeConfig.list(s"countries.name.$countryCode")
+    safeConfig.list(s"countries.name.${countryCode.value}")
   }
 
   def countryCurrency(countryCode: CountryCode): Option[String] = {
-    safeConfig.string(s"countries.currency.$countryCode")
+    safeConfig.string(s"countries.currency.${countryCode.value}")
   }
 
 }

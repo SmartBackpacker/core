@@ -34,11 +34,11 @@ abstract class AbstractExchangeRateService[F[_] : Effect] {
   protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO]
 
   def exchangeRateFor(baseCurrency: Currency, foreignCurrency: Currency): F[CurrencyExchangeDTO] = {
-    val ifEmpty = Effect[F].pure(CurrencyExchangeDTO(baseCurrency, "", Map(baseCurrency -> 0.0)))
+    val ifEmpty = Effect[F].pure(CurrencyExchangeDTO(baseCurrency.value, "", Map(baseCurrency.value -> 0.0)))
     validateCurrencies(baseCurrency, foreignCurrency).fold(ifEmpty) { uri =>
       Effect[F].map(retrieveExchangeRate(uri)) { exchangeRate =>
         if (exchangeRate.rates.nonEmpty) exchangeRate
-        else exchangeRate.copy(rates = Map(baseCurrency -> -1.0))
+        else exchangeRate.copy(rates = Map(baseCurrency.value -> -1.0))
       }
     }
   }
