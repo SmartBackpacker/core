@@ -7,7 +7,16 @@ lazy val smartBackpaker = (project in file(".")).
     inThisBuild(List(
       organization := "com.github.gvolpe",
       scalaVersion := "2.12.3",
-      version      := "0.1.0-SNAPSHOT"
+      version      := "0.1.0",
+      scalacOptions := Seq(
+        "-deprecation",
+        "-encoding",
+        "UTF-8",
+        "-feature",
+        "-language:existentials",
+        "-language:higherKinds",
+        "-Ypartial-unification"
+      )
     )),
     name := "Smart Backpacker API",
     coverageExcludedPackages := ".*TripAdvisorAirlinesParser*;.*Server*",

@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect._
+import cats.syntax.applicativeError._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.service.CountryService
 import io.circe.Json
@@ -19,9 +20,9 @@ trait DestinationInfoHttpEndpoint extends Http4sClientDsl[IO] {
 
   val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) =>
-      CountryService[IO].destinationInformation(from.as[CountryCode], to.as[CountryCode], baseCurrency.as[Currency]).attempt flatMap {
-        case Right(destinationInfo) => Ok(destinationInfo.asJson)
-        case Left(error)            => BadRequest(Json.fromString(error.getMessage))
+      val info = CountryService[IO].destinationInformation(from.as[CountryCode], to.as[CountryCode], baseCurrency.as[Currency])
+      info.flatMap(x => Ok(x.asJson)).recoverWith {
+        case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }
   }
 

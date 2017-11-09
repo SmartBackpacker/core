@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect._
+import cats.syntax.applicativeError._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.service.AirlineService
 import io.circe.Json
@@ -19,9 +20,9 @@ trait AirlinesHttpEndpoint extends Http4sClientDsl[IO] {
 
   val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "airlines" :? AirlineNameQueryParamMatcher(airline) =>
-      AirlineService[IO].baggagePolicy(airline.as[AirlineName]).attempt flatMap {
-        case Right(policy) => Ok(policy.asJson)
-        case Left(error)   => BadRequest(Json.fromString(error.getMessage))
+      val policy = AirlineService[IO].baggagePolicy(airline.as[AirlineName])
+      policy.flatMap(x => Ok(x.asJson)).recoverWith {
+        case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }
   }
 

@@ -19,7 +19,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
 
       (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN { (vr, er) =>
         DestinationInfo(
-          countryName = vr.country,
+          countryName = vr.country.as[CountryName],
           countryCode = to,
           visaRequirements = VisaRequirements(vr.visaCategory, vr.description),
           exchangeRate = ExchangeRate(er.base.as[Currency], foreignCurrency, er.rates.getOrElse(foreignCurrency.value, -1.0))

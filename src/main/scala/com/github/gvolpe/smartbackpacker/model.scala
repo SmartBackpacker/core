@@ -76,12 +76,12 @@ object model {
   }
 
   implicit class CountryOps(value: String) {
-    def asCountryName: CountryName = {
-      new CountryName(value.dropWhile(_.toInt == 160)) // Remove whitespaces at the start
+    def asCountryName: String = {
+      value.dropWhile(_.toInt == 160) // Remove whitespaces at the start
     }
   }
 
-  case class VisaRequirementsFor(country: CountryName,
+  case class VisaRequirementsFor(country: String,
                                  visaCategory: VisaCategory,
                                  description: String)
 

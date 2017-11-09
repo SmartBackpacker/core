@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect._
+import cats.syntax.applicativeError._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
 import io.circe.Json
@@ -17,10 +18,12 @@ trait VisaRestrictionIndexHttpEndpoint extends Http4sClientDsl[IO] {
 
   val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "visa-restriction-index" / countryCode =>
-      VisaRestrictionIndexService[IO].findIndex(countryCode.as[CountryCode]).attempt flatMap {
-        case Right(Some(index)) => Ok(index.asJson)
-        case Right(None)        => NotFound(countryCode)
-        case Left(error)        => BadRequest(Json.fromString(error.getMessage))
+      val ioIndex = VisaRestrictionIndexService[IO].findIndex(countryCode.as[CountryCode])
+      ioIndex.flatMap {
+        case Some(index)  => Ok(index.asJson)
+        case None         => NotFound(countryCode)
+      }.recoverWith {
+        case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }
   }
 

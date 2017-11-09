@@ -31,8 +31,8 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
 
   def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsFor] =
     Effect[F].map(parseVisaRequirements(from)) { requirements =>
-      requirements.find(_.country == to)
-        .getOrElse(VisaRequirementsFor(to, UnknownVisaCategory, "No information available"))
+      requirements.find(_.country == to.value)
+        .getOrElse(VisaRequirementsFor(to.value, UnknownVisaCategory, "No information available"))
     }
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns
@@ -75,7 +75,7 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     case (c :: Nil) =>
       VisaRequirementsFor(c.asCountryName, UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsFor("Not Found".as[CountryName], UnknownVisaCategory, "")
+      VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }
 
   private val colspanTableMapper: List[String] => VisaRequirementsFor = {
@@ -90,7 +90,7 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
     case (c :: Nil) =>
       VisaRequirementsFor(c.asCountryName, UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsFor("Not Found".as[CountryName], UnknownVisaCategory, "")
+      VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }
 
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo

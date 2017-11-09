@@ -2,9 +2,7 @@ package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.Effect
 import com.github.gvolpe.smartbackpacker.model.Currency
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
-import org.http4s._
 import org.http4s.client.blaze._
 import org.http4s.circe._
 import org.http4s.client.Client
@@ -15,11 +13,8 @@ object ExchangeRateService {
 
 class ExchangeRateService[F[_] : Effect](client: Client[F]) extends AbstractExchangeRateService[F] {
 
-  implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[F, A] = jsonOf[F, A]
-  implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[F, A] = jsonEncoderOf[F, A]
-
   override protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO] = {
-    client.expect[CurrencyExchangeDTO](uri)
+    client.expect[CurrencyExchangeDTO](uri)(jsonOf[F, CurrencyExchangeDTO])
   }
 
 }
@@ -27,8 +22,8 @@ class ExchangeRateService[F[_] : Effect](client: Client[F]) extends AbstractExch
 abstract class AbstractExchangeRateService[F[_] : Effect] {
 
   protected val fixerUri: Currency => Currency => String = baseCurrency => foreignCurrency => {
-    //s"http://api.fixer.io/latest?base=$baseCurrency&symbols=$foreignCurrency"
-    s"http://localhost:8081/latest?base=$baseCurrency&symbols=$foreignCurrency"
+    //s"http://api.fixer.io/latest?base=${baseCurrency.value}&symbols=${foreignCurrency.value}"
+    s"http://localhost:8081/latest?base=${baseCurrency.value}&symbols=${foreignCurrency.value}"
   }
 
   protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO]

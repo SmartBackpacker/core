@@ -1,8 +1,8 @@
 import sbt._
 
 object Dependencies {
-  lazy val Http4sVersion  = "0.18.0-M4"
-  lazy val CirceVersion   = "0.9.0-M1"
+  lazy val Http4sVersion  = "0.18.0-M5"
+  lazy val CirceVersion   = "0.9.0-M2"
 
   lazy val http4sServer   = "org.http4s"        %% "http4s-blaze-server"          % Http4sVersion
   lazy val http4sClient   = "org.http4s"        %% "http4s-blaze-client"          % Http4sVersion
@@ -13,7 +13,7 @@ object Dependencies {
 
   lazy val scalaScraper   = "net.ruippeixotog"  %% "scala-scraper"                % "2.0.0"
 
-  lazy val typesafeConfig = "com.typesafe"      % "config"                        % "1.3.1"
+  lazy val typesafeConfig = "com.typesafe"      %  "config"                       % "1.3.1"
   lazy val logback        = "ch.qos.logback"    %  "logback-classic"              % "1.2.1"
 
   lazy val scalaTest      = "org.scalatest"     %% "scalatest"                    % "3.0.3"   % Test
