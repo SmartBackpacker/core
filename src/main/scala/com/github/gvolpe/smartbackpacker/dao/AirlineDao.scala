@@ -1,13 +1,13 @@
 package com.github.gvolpe.smartbackpacker.dao
 
-import cats.effect.Effect
+import cats.effect.Sync
 import com.github.gvolpe.smartbackpacker.model._
 
 object AirlineDao {
-  def apply[F[_] : Effect]: AirlineDao[F] = new InMemoryAirlineDao[F]()
+  def apply[F[_] : Sync]: AirlineDao[F] = new InMemoryAirlineDao[F]()
 }
 
-class InMemoryAirlineDao[F[_] : Effect] extends AirlineDao[F] {
+class InMemoryAirlineDao[F[_] : Sync] extends AirlineDao[F] {
 
   // https://wikitravel.org/en/Discount_airlines_in_Europe
 
@@ -228,13 +228,14 @@ class InMemoryAirlineDao[F[_] : Effect] extends AirlineDao[F] {
 
   )
 
-  override def findAirline(airlineName: AirlineName): F[Option[Airline]] = Effect[F].delay {
-    airlines.find(_.name == airlineName.value)
-  }
+  override def findAirline(airlineName: AirlineName): F[Option[Airline]] =
+    Sync[F].delay {
+      airlines.find(_.name == airlineName.value)
+    }
 
 }
 
-abstract class AirlineDao[F[_] : Effect] {
+abstract class AirlineDao[F[_] : Sync] {
 
   def findAirline(airlineName: AirlineName): F[Option[Airline]]
 

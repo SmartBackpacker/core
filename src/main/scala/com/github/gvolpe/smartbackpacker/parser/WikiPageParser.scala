@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.parser
 
-import cats.effect.Effect
+import cats.Functor
+import cats.effect.Sync
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
@@ -12,12 +13,12 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 import scala.util.{Failure, Success, Try}
 
 object WikiPageParser {
-  def apply[F[_]: Effect]: WikiPageParser[F] = new WikiPageParser[F]
+  def apply[F[_]: Sync]: WikiPageParser[F] = new WikiPageParser[F]
 }
 
-class WikiPageParser[F[_] : Effect] extends AbstractWikiPageParser[F] {
+class WikiPageParser[F[_] : Sync] extends AbstractWikiPageParser[F] {
 
-  override def htmlDocument(from: CountryCode): F[Document] = Effect[F].delay {
+  override def htmlDocument(from: CountryCode): F[Document] = Sync[F].delay {
     val browser = new JsoupBrowser()
     val wikiPage = SBConfiguration.wikiPage(from).getOrElse("http://google.com")
     browser.get(wikiPage)
@@ -25,18 +26,18 @@ class WikiPageParser[F[_] : Effect] extends AbstractWikiPageParser[F] {
 
 }
 
-abstract class AbstractWikiPageParser[F[_] : Effect] {
+abstract class AbstractWikiPageParser[F[_] : Sync] {
 
   def htmlDocument(from: CountryCode): F[Document]
 
   def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsFor] =
-    Effect[F].map(parseVisaRequirements(from)) { requirements =>
+    Functor[F].map(parseVisaRequirements(from)) { requirements =>
       requirements.find(_.country == to.value)
         .getOrElse(VisaRequirementsFor(to.value, UnknownVisaCategory, "No information available"))
     }
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns
-  private def wikiTableExtractor(from: CountryCode): HtmlExtractor[Element, Iterable[String]] = _.flatMap { e =>
+  private val wikiTableExtractor: HtmlExtractor[Element, Iterable[String]] = _.flatMap { e =>
     val sortTextSpan  = e >?> elementList(".sorttext")
     val sortText      = sortTextSpan.flatMap(_.headOption).map(_.text)
     val text          = sortText.getOrElse(e.text.split('!').head.trim) // for cases like Ivory Coast
@@ -88,7 +89,7 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
   // TODO: This will require add more visa categories (See Polish page)
   private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsFor]] =
-    Effect[F].map(htmlDocument(from)) { doc =>
+    Functor[F].map(htmlDocument(from)) { doc =>
       // Get first of all sortable tables
       val wikiTables = (doc >> elementList(".sortable")).headOption
       // Find out whether it's an irregular (colspan=2) or regular table
@@ -98,7 +99,7 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
       // Extract all the rows with visa information
       val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", elementList))
       // Parse every row, extract the field and combine them whenever there's a rowspan
-      val info  = rowspanMapper(from)(table)
+      val info  = rowspanMapper(table)
 
       // Group it per country using the corresponding mapper
       val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
@@ -106,25 +107,25 @@ abstract class AbstractWikiPageParser[F[_] : Effect] {
       result
     }
 
-  private val parseColumns: Element => CountryCode => List[String] = e => cc => {
-    e.children.toList.flatMap(_ >> extractor("td", wikiTableExtractor(cc)))
+  private val parseColumns: Element => List[String] = e => {
+    e.children.toList.flatMap(_ >> extractor("td", wikiTableExtractor))
   }
 
-  private val rowspanMapper: CountryCode => List[Element] => List[String] = from => {
+  private val rowspanMapper: List[Element] => List[String] = {
     case (x :: y :: xs) =>
       if (x.children.exists(_.hasAttr("rowspan"))) {
-        val first  = parseColumns(x)(from)
-        val second = parseColumns(y)(from)
+        val first  = parseColumns(x)
+        val second = parseColumns(y)
         val lastCombined = first.lastOption.toList.map(_ ++ " " ++ second.mkString)
         // Drop the last element and append the combined one
-        (first.dropRight(1) ::: lastCombined) ::: rowspanMapper(from)(xs)
+        (first.dropRight(1) ::: lastCombined) ::: rowspanMapper(xs)
       } else {
-        val noRowspan = parseColumns(x)(from)
-        noRowspan ::: rowspanMapper(from)(y :: xs)
+        val noRowspan = parseColumns(x)
+        noRowspan ::: rowspanMapper(y :: xs)
       }
     case (x :: xs) =>
-      val noRowspan = parseColumns(x)(from)
-      noRowspan ::: rowspanMapper(from)(xs)
+      val noRowspan = parseColumns(x)
+      noRowspan ::: rowspanMapper(xs)
     case _ =>
       List.empty[String]
   }
