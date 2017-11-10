@@ -7,7 +7,7 @@ lazy val smartBackpaker = (project in file(".")).
     inThisBuild(List(
       organization := "com.github.gvolpe",
       scalaVersion := "2.12.3",
-      version      := "0.1.0",
+      version      := "0.2.0",
       scalacOptions := Seq(
         "-deprecation",
         "-encoding",
@@ -27,6 +27,8 @@ lazy val smartBackpaker = (project in file(".")).
       http4sCirce,
       circe,
       circeGeneric,
+      doobieCore,
+      doobiePostgres,
       scalaScraper,
       typesafeConfig,
       logback,

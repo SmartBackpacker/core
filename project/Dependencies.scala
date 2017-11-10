@@ -3,6 +3,7 @@ import sbt._
 object Dependencies {
   lazy val Http4sVersion  = "0.18.0-M5"
   lazy val CirceVersion   = "0.9.0-M2"
+  lazy val DoobieVersion  = "0.5.0-M9"
 
   lazy val http4sServer   = "org.http4s"        %% "http4s-blaze-server"          % Http4sVersion
   lazy val http4sClient   = "org.http4s"        %% "http4s-blaze-client"          % Http4sVersion
@@ -10,6 +11,9 @@ object Dependencies {
   lazy val http4sCirce    = "org.http4s"        %% "http4s-circe"                 % Http4sVersion
   lazy val circe          = "io.circe"          %% "circe-core"                   % CirceVersion
   lazy val circeGeneric   = "io.circe"          %% "circe-generic"                % CirceVersion
+
+  lazy val doobieCore     = "org.tpolecat"      %% "doobie-core"                  % DoobieVersion
+  lazy val doobiePostgres = "org.tpolecat"      %% "doobie-postgres"              % DoobieVersion
 
   lazy val scalaScraper   = "net.ruippeixotog"  %% "scala-scraper"                % "2.0.0"
 
