@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.service
 
 import cats.Monad
 import cats.effect.Sync
-import com.github.gvolpe.smartbackpacker.dao.AirlineDao
+import com.github.gvolpe.smartbackpacker.persistence.AirlineDao
 import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, AirlineNotFound}
 
 object AirlineService {

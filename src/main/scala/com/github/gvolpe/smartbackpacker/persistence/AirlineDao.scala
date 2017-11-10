@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.dao
+package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.effect.Sync
 import com.github.gvolpe.smartbackpacker.model._
