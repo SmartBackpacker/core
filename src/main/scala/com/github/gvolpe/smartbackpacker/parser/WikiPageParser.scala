@@ -86,27 +86,6 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
       VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }
 
-  // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
-  // TODO: This will require add more visa categories (See Polish page)
-  private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsFor]] =
-    Functor[F].map(htmlDocument(from)) { doc =>
-      // Get first of all sortable tables
-      val wikiTables = (doc >> elementList(".sortable")).headOption
-      // Find out whether it's an irregular (colspan=2) or regular table
-      val colspan = wikiTables.flatMap(_ >> extractor(".sortable td", colspanExtractor))
-      // Find out the number of columns
-      val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
-      // Extract all the rows with visa information
-      val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", elementList))
-      // Parse every row, extract the field and combine them whenever there's a rowspan
-      val info  = rowspanMapper(table)
-
-      // Group it per country using the corresponding mapper
-      val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
-      val result = info.grouped(tableSize.getOrElse(3)).map(mapper).toList
-      result
-    }
-
   private val parseColumns: Element => List[String] = e => {
     e.children.toList.flatMap(_ >> extractor("td", wikiTableExtractor))
   }
@@ -129,5 +108,26 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
     case _ =>
       List.empty[String]
   }
+
+  // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
+  // TODO: This will require add more visa categories (See Polish page)
+  private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsFor]] =
+    Functor[F].map(htmlDocument(from)) { doc =>
+      // Get first of all sortable tables
+      val wikiTables = (doc >> elementList(".sortable")).headOption
+      // Find out whether it's an irregular (colspan=2) or regular table
+      val colspan = wikiTables.flatMap(_ >> extractor(".sortable td", colspanExtractor))
+      // Find out the number of columns
+      val tableSize = wikiTables.map { e => (e >> extractor(".sortable th", texts)).size }
+      // Extract all the rows with visa information
+      val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", elementList))
+      // Parse every row, extract the field and combine them whenever there's a rowspan
+      val info  = rowspanMapper(table)
+
+      // Group it per country using the corresponding mapper
+      val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
+      val result = info.grouped(tableSize.getOrElse(3)).map(mapper).toList
+      result
+    }
 
 }

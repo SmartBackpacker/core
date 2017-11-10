@@ -111,6 +111,15 @@ object model {
   case object CabinBag extends BaggageType
   case object CheckedBag extends BaggageType
 
+  object BaggageType {
+    def fromString(value: String): Option[BaggageType] = value match {
+      case "SmallBag"   => Some(SmallBag)
+      case "CabinBag"   => Some(CabinBag)
+      case "CheckedBag" => Some(CheckedBag)
+      case _            => None
+    }
+  }
+
   case class BaggageSize(height: Int, width: Int, depth: Int)
 
   case class BaggageAllowance(baggageType: BaggageType,
