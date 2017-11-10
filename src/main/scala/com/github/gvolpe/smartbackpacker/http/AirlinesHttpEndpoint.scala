@@ -12,15 +12,15 @@ import org.http4s.circe._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.io._
 
-object AirlinesHttpEndpoint extends AirlinesHttpEndpoint
+object AirlinesHttpEndpoint extends AirlinesHttpEndpoint(AirlineService[IO])
 
-trait AirlinesHttpEndpoint extends Http4sClientDsl[IO] {
+class AirlinesHttpEndpoint(airlineService: AirlineService[IO]) extends Http4sClientDsl[IO] {
 
   object AirlineNameQueryParamMatcher extends QueryParamDecoderMatcher[String]("name")
 
   val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "airlines" :? AirlineNameQueryParamMatcher(airline) =>
-      val policy = AirlineService[IO].baggagePolicy(airline.as[AirlineName])
+      val policy = airlineService.baggagePolicy(airline.as[AirlineName])
       policy.flatMap(x => Ok(x.asJson)).recoverWith {
         case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }

@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.effect.{Async, Sync}
-import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, BaggageAllowance, BaggagePolicy, BaggageSize, BaggageType}
+import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName}
 import com.github.gvolpe.smartbackpacker.persistence.static.AirlinesData
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
