@@ -19,7 +19,7 @@ lazy val smartBackpaker = (project in file(".")).
       )
     )),
     name := "Smart Backpacker API",
-    coverageExcludedPackages := ".*TripAdvisorAirlinesParser*;.*Server*",
+    coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*",
     libraryDependencies ++= Seq(
       http4sServer,
       http4sClient,

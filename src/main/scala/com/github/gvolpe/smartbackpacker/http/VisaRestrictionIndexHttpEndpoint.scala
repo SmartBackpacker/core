@@ -12,13 +12,13 @@ import org.http4s.circe._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.io._
 
-object VisaRestrictionIndexHttpEndpoint extends VisaRestrictionIndexHttpEndpoint
+object VisaRestrictionIndexHttpEndpoint extends VisaRestrictionIndexHttpEndpoint(VisaRestrictionIndexService[IO])
 
-trait VisaRestrictionIndexHttpEndpoint extends Http4sClientDsl[IO] {
+class VisaRestrictionIndexHttpEndpoint(visaRestrictionIndexService: VisaRestrictionIndexService[IO]) extends Http4sClientDsl[IO] {
 
   val service: HttpService[IO] = HttpService[IO] {
     case GET -> Root / "visa-restriction-index" / countryCode =>
-      val ioIndex = VisaRestrictionIndexService[IO].findIndex(countryCode.as[CountryCode])
+      val ioIndex = visaRestrictionIndexService.findIndex(countryCode.as[CountryCode])
       ioIndex.flatMap {
         case Some(index)  => Ok(index.asJson)
         case None         => NotFound(countryCode)

@@ -71,13 +71,7 @@ object model {
       if (value.isEmpty && extra.isEmpty) "No more information available"
       else if (value.isEmpty) removeBrackets(extra)
       else if (extra.isEmpty) removeBrackets(value)
-      else removeBrackets(value + " " + extra)
-    }
-  }
-
-  implicit class CountryOps(value: String) {
-    def asCountryName: String = {
-      value.dropWhile(_.toInt == 160) // Remove whitespaces at the start
+      else removeBrackets(s"$value $extra")
     }
   }
 
@@ -107,9 +101,9 @@ object model {
 
   // Airlines
   sealed trait BaggageType extends Product with Serializable
-  case object SmallBag extends BaggageType
-  case object CabinBag extends BaggageType
-  case object CheckedBag extends BaggageType
+  case object SmallBag    extends BaggageType
+  case object CabinBag    extends BaggageType
+  case object CheckedBag  extends BaggageType
 
   object BaggageType {
     def fromString(value: String): Option[BaggageType] = value match {
@@ -135,10 +129,10 @@ object model {
   case class AirlineNotFound(airlineName: String) extends Exception(s"Airline not found $airlineName")
 
   // Visa Restriction Index
-  sealed trait VisaRestrictionsIndexValues
-  case class Rank(value: Int) extends VisaRestrictionsIndexValues
+  sealed trait VisaRestrictionsIndexValues extends Product with Serializable
+  case class Rank(value: Int)               extends VisaRestrictionsIndexValues
   case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
-  case class PlacesCount(value: Int) extends VisaRestrictionsIndexValues
+  case class PlacesCount(value: Int)        extends VisaRestrictionsIndexValues
 
   case class VisaRestrictionIndex(rank: Int, countries: List[String], count: Int)
 

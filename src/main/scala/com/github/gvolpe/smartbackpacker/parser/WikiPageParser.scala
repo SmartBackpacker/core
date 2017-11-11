@@ -60,28 +60,28 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
   private val normalTableMapper: List[String] => VisaRequirementsFor = {
     case (c :: v :: d :: x :: Nil) =>
       val extra = if (x == "X" || x == "√") "" else x
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(extra))
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(extra))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, "")
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, UnknownVisaCategory, "")
+      VisaRequirementsFor(c.noWhiteSpaces, UnknownVisaCategory, "")
     case _ =>
       VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }
 
   private val colspanTableMapper: List[String] => VisaRequirementsFor = {
     case (c :: v :: d :: x :: _ :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: x :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, v.asVisaCategory, "")
+      VisaRequirementsFor(c.noWhiteSpaces, v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsFor(c.asCountryName, UnknownVisaCategory, "")
+      VisaRequirementsFor(c.noWhiteSpaces, UnknownVisaCategory, "")
     case _ =>
       VisaRequirementsFor("Not Found", UnknownVisaCategory, "")
   }

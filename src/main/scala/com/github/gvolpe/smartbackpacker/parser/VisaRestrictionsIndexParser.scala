@@ -37,10 +37,6 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Effect] {
     }
   }
 
-  implicit class RicherString(value: String) {
-    def noWhiteSpaces: String = value.dropWhile(_.toInt == 160)
-  }
-
   private val wikiTableExtractor: HtmlExtractor[Element, Iterable[VisaRestrictionsIndexValues]] = _.map { e =>
     Try(e.text.toInt) match {
       case Success(n) =>
