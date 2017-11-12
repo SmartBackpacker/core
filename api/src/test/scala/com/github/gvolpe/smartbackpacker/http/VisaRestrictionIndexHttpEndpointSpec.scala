@@ -17,7 +17,7 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers {
   object MockVisaRestrictionIndexParser extends AbstractVisaRestrictionsIndexParser[IO] {
     override val htmlDocument: IO[Document] = IO {
       val browser = JsoupBrowser()
-      val fileContent = Source.fromResource(s"visaRestrictionswikiPageTest.html").mkString
+      val fileContent = Source.fromResource(s"visaRestrictionsWikiPageTest.html").mkString
       browser.parseString(fileContent).asInstanceOf[Document]
     }
   }
@@ -30,22 +30,22 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers {
     val countryCode = "AR"
     val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
 
-//    val task = httpService(request).value.unsafeRunSync()
-//    task should not be None
-//    task foreach { response =>
-//      response.status should be (Status.Ok)
-//    }
+    val task = httpService(request).value.unsafeRunSync()
+    task should not be None
+    task foreach { response =>
+      response.status should be (Status.Ok)
+    }
   }
 
   it should "NOT retrieve visa restriction index for a non-existent country" in {
     val countryCode = "XX"
     val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
 
-//    val task = httpService(request).value.unsafeRunSync()
-//    task should not be None
-//    task foreach { response =>
-//      response.status should be (Status.NotFound)
-//    }
+    val task = httpService(request).value.unsafeRunSync()
+    task should not be None
+    task foreach { response =>
+      response.status should be (Status.NotFound)
+    }
   }
 
 }
