@@ -6,8 +6,6 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 class ExchangeServiceSpec extends FlatSpecLike with Matchers {
 
-  behavior of "ExchangeService"
-
   it should "retrieve a fake exchange rate" in {
     val exchangeRate = TestExchangeRateService.exchangeRateFor("EUR".as[Currency], "RON".as[Currency]).unsafeRunSync()
     exchangeRate should be (CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59)))

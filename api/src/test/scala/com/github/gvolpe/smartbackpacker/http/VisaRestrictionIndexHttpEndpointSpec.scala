@@ -12,8 +12,6 @@ import scala.io.Source
 
 class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers {
 
-  behavior of "VisaRestrictionIndexHttpEndpoint"
-
   object MockVisaRestrictionIndexParser extends AbstractVisaRestrictionsIndexParser[IO] {
     override val htmlDocument: IO[Document] = IO {
       val browser = JsoupBrowser()

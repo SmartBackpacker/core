@@ -10,8 +10,6 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 class AirlinesHttpEndpointSpec extends FlatSpecLike with Matchers with AirlinesHttpEndpointFixture {
 
-  behavior of "AirlinesHttpEndpoint"
-
   val httpService: HttpService[IO] =
     new AirlinesHttpEndpoint(
       new AirlineService[IO](new InMemoryAirlineDao[IO])

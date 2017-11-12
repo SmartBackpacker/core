@@ -7,8 +7,6 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserFixture {
 
-  behavior of "WikiPageParser"
-
   forAll(examples) { (description, from, to, expectedCategory, expectedDescription) =>
     it should description in {
       val requirements = TestWikiPageParser.visaRequirementsFor(from.as[CountryCode], to.as[CountryName]).unsafeRunSync()

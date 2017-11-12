@@ -6,7 +6,11 @@ import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
 object AirlineDao {
-  def apply[F[_] : Async]: AirlineDao[F] = new PostgresAirlineDao[F]
+  def apply[F[_] : Async]: AirlineDao[F] = new PostgresAirlineDao[F](
+    Transactor.fromDriverManager[F](
+      "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
+    )
+  )
 }
 
 class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
@@ -36,15 +40,11 @@ class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
 
 }
 
-class PostgresAirlineDao[F[_] : Async] extends AirlineDao[F] {
+class PostgresAirlineDao[F[_] : Async](xa: Transactor[F]) extends AirlineDao[F] {
 
   import cats.syntax.applicativeError._
   import doobie.free.connection.ConnectionIO
   import doobie.implicits._
-
-  private val xa: Transactor.Aux[F, Unit] = Transactor.fromDriverManager[F](
-    "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
-  )
 
   override def findAirline(airlineName: AirlineName): F[Option[Airline]] = {
     val airlineStatement: ConnectionIO[AirlineDTO] =

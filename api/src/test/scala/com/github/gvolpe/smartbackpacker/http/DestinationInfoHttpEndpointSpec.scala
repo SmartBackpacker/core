@@ -10,8 +10,6 @@ import org.scalatest.prop.PropertyChecks
 
 class DestinationInfoHttpEndpointSpec extends FlatSpecLike with Matchers with DestinationInfoHttpEndpointFixture {
 
-  behavior of "DestinationInfoHttpEndpoint"
-
   val httpService: HttpService[IO] = new DestinationInfoHttpEndpoint(
     new CountryService[IO](TestWikiPageParser, TestExchangeRateService)
   ).service

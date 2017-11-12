@@ -1,7 +1,8 @@
 package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.{Effect, Sync}
-import cats.{Applicative, Monad}
+import cats.syntax.applicative._
+import cats.syntax.flatMap._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.parser.{AbstractWikiPageParser, WikiPageParser}
@@ -15,7 +16,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
   def destinationInformation(from: CountryCode, to: CountryCode, baseCurrency: Currency): F[DestinationInfo] = {
     import cats.syntax.apply._
 
-    Monad[F].>>=(validateCountries(from, to)) { _ =>
+    validateCountries(from, to).>>= { _ =>
       val foreignCurrency = SBConfiguration.countryCurrency(to).getOrElse("EUR").as[Currency]
 
       (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN { (vr, er) =>
@@ -30,7 +31,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
   }
 
   private def validateCountries(from: CountryCode, to: CountryCode): F[(CountryCode, CountryCode)] = {
-    if (from != to) Applicative[F].pure((from, to))
+    if (from != to) (from, to).pure
     else Sync[F].raiseError(CountriesMustBeDifferent)
   }
 
@@ -42,7 +43,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
       case (country :: Nil) =>
         wikiPageParser.visaRequirementsFor(from, country.as[CountryName])
       case (country :: xs)  =>
-        Monad[F].>>=(wikiPageParser.visaRequirementsFor(from, country.as[CountryName])) { result =>
+        wikiPageParser.visaRequirementsFor(from, country.as[CountryName]).>>= { result =>
           if (result.visaCategory == UnknownVisaCategory) iter(xs)
           else Sync[F].delay(result)
         }

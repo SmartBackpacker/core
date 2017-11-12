@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.parser
 
-import cats.Functor
 import cats.effect.Sync
+import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
@@ -31,7 +31,7 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
   def htmlDocument(from: CountryCode): F[Document]
 
   def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsFor] =
-    Functor[F].map(parseVisaRequirements(from)) { requirements =>
+    parseVisaRequirements(from).map { requirements =>
       requirements.find(_.country == to.value)
         .getOrElse(VisaRequirementsFor(to.value, UnknownVisaCategory, "No information available"))
     }
@@ -112,7 +112,7 @@ abstract class AbstractWikiPageParser[F[_] : Sync] {
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
   // TODO: This will require add more visa categories (See Polish page)
   private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsFor]] =
-    Functor[F].map(htmlDocument(from)) { doc =>
+    htmlDocument(from).map { doc =>
       // Get first of all sortable tables
       val wikiTables = (doc >> elementList(".sortable")).headOption
       // Find out whether it's an irregular (colspan=2) or regular table

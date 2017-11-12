@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.parser
 
-import cats.effect.Effect
+import cats.effect.Sync
+import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
@@ -11,24 +12,24 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 import scala.util.{Failure, Success, Try}
 
 object VisaRestrictionsIndexParser {
-  def apply[F[_] : Effect]: VisaRestrictionsIndexParser[F] = new VisaRestrictionsIndexParser[F]()
+  def apply[F[_] : Sync]: VisaRestrictionsIndexParser[F] = new VisaRestrictionsIndexParser[F]()
 }
 
-class VisaRestrictionsIndexParser[F[_] : Effect] extends AbstractVisaRestrictionsIndexParser[F] {
+class VisaRestrictionsIndexParser[F[_] : Sync] extends AbstractVisaRestrictionsIndexParser[F] {
 
-  override val htmlDocument: F[Document] = Effect[F].delay {
+  override val htmlDocument: F[Document] = Sync[F].delay {
     val browser = new JsoupBrowser()
     browser.get("https://en.wikipedia.org/wiki/Travel_visa")
   }
 
 }
 
-abstract class AbstractVisaRestrictionsIndexParser[F[_] : Effect] {
+abstract class AbstractVisaRestrictionsIndexParser[F[_] : Sync] {
 
   val htmlDocument: F[Document]
 
   def parse: F[List[VisaRestrictionIndex]] = {
-    Effect[F].map(htmlDocument) { doc =>
+    htmlDocument.map { doc =>
       val wikiTable: List[Element] = doc >> elementList(".sortable")
       val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
       result.grouped(3).take(104).map {

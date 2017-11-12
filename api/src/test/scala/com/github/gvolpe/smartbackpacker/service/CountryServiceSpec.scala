@@ -7,8 +7,6 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 class CountryServiceSpec extends FlatSpecLike with Matchers {
 
-  behavior of "CountryService"
-
   object MockCountryService extends CountryService[IO](TestWikiPageParser, TestExchangeRateService)
 
   it should "retrieve destination information" in {
