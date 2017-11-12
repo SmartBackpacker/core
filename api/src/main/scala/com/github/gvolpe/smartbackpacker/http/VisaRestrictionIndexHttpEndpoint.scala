@@ -9,17 +9,16 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
-import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.dsl.io._
 
-object VisaRestrictionIndexHttpEndpoint extends VisaRestrictionIndexHttpEndpoint(VisaRestrictionIndexService[IO])
+class VisaRestrictionIndexHttpEndpoint[F[_] : Effect]
+  (visaRestrictionIndexService: VisaRestrictionIndexService[F]) extends BaseHttpEndpoint[F] {
 
-class VisaRestrictionIndexHttpEndpoint(visaRestrictionIndexService: VisaRestrictionIndexService[IO]) extends Http4sClientDsl[IO] {
+  import effectDsl._
 
-  val service: HttpService[IO] = HttpService[IO] {
+  val service: HttpService[F] = HttpService[F] {
     case GET -> Root / "visa-restriction-index" / countryCode =>
       val ioIndex = visaRestrictionIndexService.findIndex(countryCode.as[CountryCode])
-      ioIndex.flatMap {
+      Effect[F].>>=(ioIndex) {
         case Some(index)  => Ok(index.asJson)
         case None         => NotFound(countryCode)
       }.recoverWith {

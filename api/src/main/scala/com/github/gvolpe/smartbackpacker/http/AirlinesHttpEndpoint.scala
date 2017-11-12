@@ -9,19 +9,17 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
-import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.dsl.io._
 
-object AirlinesHttpEndpoint extends AirlinesHttpEndpoint(AirlineService[IO])
+class AirlinesHttpEndpoint[F[_] : Effect](airlineService: AirlineService[F]) extends BaseHttpEndpoint[F] {
 
-class AirlinesHttpEndpoint(airlineService: AirlineService[IO]) extends Http4sClientDsl[IO] {
+  import effectDsl._
 
   object AirlineNameQueryParamMatcher extends QueryParamDecoderMatcher[String]("name")
 
-  val service: HttpService[IO] = HttpService[IO] {
+  val service: HttpService[F] = HttpService[F] {
     case GET -> Root / "airlines" :? AirlineNameQueryParamMatcher(airline) =>
       val policy = airlineService.baggagePolicy(airline.as[AirlineName])
-      policy.flatMap(x => Ok(x.asJson)).recoverWith {
+      Effect[F].>>=(policy)(x => Ok(x.asJson)).recoverWith{
         case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }
   }
