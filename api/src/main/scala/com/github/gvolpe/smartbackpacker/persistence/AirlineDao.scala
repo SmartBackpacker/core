@@ -1,8 +1,7 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.effect.{Async, Sync}
-import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName}
-import com.github.gvolpe.smartbackpacker.persistence.static.AirlinesData
+import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, BaggageAllowance, BaggagePolicy, BaggageSize, CabinBag, SmallBag}
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
@@ -12,9 +11,27 @@ object AirlineDao {
 
 class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
 
+  private val airlines: List[Airline] = List(
+    Airline("Aer Lingus", BaggagePolicy(
+      allowance = List(
+        BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 24)),
+        BaggageAllowance(SmallBag, None, BaggageSize(25, 33, 20))
+      ),
+      extra = None,
+      website = Some("https://www.aerlingus.com/travel-information/baggage-information/cabin-baggage/"))
+    ),
+    Airline("Transavia", BaggagePolicy(
+      allowance = List(
+        BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 25))
+      ),
+      extra = None,
+      website = Some("https://www.transavia.com/en-EU/service/hand-luggage/"))
+    )
+  )
+
   override def findAirline(airlineName: AirlineName): F[Option[Airline]] =
     Sync[F].delay {
-      AirlinesData.airlines.find(_.name == airlineName.value)
+      airlines.find(_.name == airlineName.value)
     }
 
 }

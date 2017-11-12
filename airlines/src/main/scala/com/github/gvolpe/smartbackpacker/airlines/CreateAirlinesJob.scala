@@ -1,10 +1,9 @@
-package com.github.gvolpe.smartbackpacker
+package com.github.gvolpe.smartbackpacker.airlines
 
 import cats.Applicative
 import cats.effect.{Async, IO}
 import cats.instances.list._
 import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy}
-import com.github.gvolpe.smartbackpacker.smartbackpacker._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor

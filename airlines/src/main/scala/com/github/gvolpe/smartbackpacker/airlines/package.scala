@@ -1,8 +1,8 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker
 
 import com.github.gvolpe.smartbackpacker.model.BaggageAllowance
 
-package object static {
+package object airlines {
 
   type CreateBaggageAllowanceDTO = (Int, String, Option[Int], Int, Int, Int)
 

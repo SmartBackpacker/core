@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.persistence.static
+package com.github.gvolpe.smartbackpacker.airlines
 
 import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy, BaggageSize, CabinBag, CheckedBag, SmallBag}
 
