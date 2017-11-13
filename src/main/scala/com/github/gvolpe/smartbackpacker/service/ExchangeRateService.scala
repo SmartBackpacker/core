@@ -2,11 +2,12 @@ package com.github.gvolpe.smartbackpacker.service
 
 import cats.{Applicative, Functor}
 import cats.effect.Effect
+import cats.syntax.applicativeError._
 import com.github.gvolpe.smartbackpacker.model.Currency
 import io.circe.generic.auto._
 import org.http4s.client.blaze._
 import org.http4s.circe._
-import org.http4s.client.Client
+import org.http4s.client.{Client, UnexpectedStatus}
 
 object ExchangeRateService {
   def apply[F[_] : Effect]: ExchangeRateService[F] = new ExchangeRateService[F](PooledHttp1Client[F]())
@@ -35,6 +36,8 @@ abstract class AbstractExchangeRateService[F[_] : Effect] {
       Functor[F].map(retrieveExchangeRate(uri)) { exchangeRate =>
         if (exchangeRate.rates.nonEmpty) exchangeRate
         else exchangeRate.copy(rates = Map(baseCurrency.value -> -1.0))
+      }.recoverWith {
+        case _: UnexpectedStatus => ifEmpty
       }
     }
   }
