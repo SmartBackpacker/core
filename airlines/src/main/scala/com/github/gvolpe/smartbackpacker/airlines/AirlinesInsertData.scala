@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.airlines
 
 import cats.Applicative
-import cats.effect.{Async, IO}
+import cats.effect.{Async, Effect}
 import cats.instances.list._
 import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy}
 import doobie.free.connection.ConnectionIO
@@ -9,15 +9,16 @@ import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 
-object CreateAirlinesJob {
-  new CreateAirlinesJob[IO]().run.unsafeRunSync()
+object AirlinesInsertData {
+  def apply[F[_] : Effect]: AirlinesInsertData[F] =
+    new AirlinesInsertData[F](
+      Transactor.fromDriverManager[F](
+        "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
+      )
+    )
 }
 
-class CreateAirlinesJob[F[_] : Async] {
-
-  private val xa: Transactor.Aux[F, Unit] = Transactor.fromDriverManager[F](
-    "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
-  )
+class AirlinesInsertData[F[_] : Async](xa: Transactor[F]) {
 
   private def insertAirline(name: String): ConnectionIO[Int] = {
     sql"INSERT INTO airline (name) VALUES ($name)"

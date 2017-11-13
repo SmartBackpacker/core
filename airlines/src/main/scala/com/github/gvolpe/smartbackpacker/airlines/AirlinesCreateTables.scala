@@ -1,51 +1,30 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.airlines
 
-import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.model.AirlineName
+import cats.Monad
+import cats.effect.Async
 import doobie.free.connection.ConnectionIO
-import doobie.h2._
 import doobie.implicits._
-import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
+import doobie.util.transactor.Transactor
 
-class PostgresAirlineDaoSpec extends FlatSpecLike with Matchers with PostgreSQLSetup with BeforeAndAfterAll {
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-
-    val program = for {
-      xa  <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
-      _   <- createTables.transact(xa)
-    } yield ()
-
-    program.unsafeRunSync()
-  }
-
-  it should "not find the airline" in {
-
-    val program = for {
-      xa  <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
-      dao = new PostgresAirlineDao[IO](xa)
-      res <- dao.findAirline(new AirlineName("Ryan Air"))
-    } yield {
-      res should be (None)
-    }
-
-    program.unsafeRunSync()
-  }
-
+object AirlinesCreateTables {
+  def apply[F[_] : Async]: AirlinesCreateTables[F] =
+    new AirlinesCreateTables[F](
+      Transactor.fromDriverManager[F](
+        "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
+      )
+    )
 }
 
-trait PostgreSQLSetup {
+class AirlinesCreateTables[F[_] : Monad](xa: Transactor[F]) {
 
-  def createTables: ConnectionIO[Unit] =
+  def run: F[Unit] = createTables.transact(xa)
+
+  private def createTables: ConnectionIO[Unit] =
     for {
       _ <- createAirlineTable
       _ <- createBaggagePolicyTable
       _ <- createBaggageAllowanceTable
     } yield ()
-
-  // TOOD: AirlinesInsertData[F] is not visible from here now
-  //def insertData = ???
 
   private val createAirlineTable: ConnectionIO[Int] =
     sql"""
@@ -77,5 +56,4 @@ trait PostgreSQLSetup {
         depth SMALLINT NOT NULL
       )
       """.update.run
-
 }
