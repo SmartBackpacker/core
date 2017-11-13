@@ -53,11 +53,11 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
 )
 
 lazy val root = project.in(file("."))
-  .aggregate(`smart-backpacker-api`, `smart-backpacker-airlines`)
+  .aggregate(api, airlines)
 
-lazy val `smart-backpacker-api` = project.in(file("api"))
+lazy val api = project.in(file("api"))
   .settings(commonSettings: _*)
 
-lazy val `smart-backpacker-airlines` = project.in(file("airlines"))
+lazy val airlines = project.in(file("airlines"))
   .settings(commonSettings: _*)
-  .dependsOn(`smart-backpacker-api`)
+  .dependsOn(api)
