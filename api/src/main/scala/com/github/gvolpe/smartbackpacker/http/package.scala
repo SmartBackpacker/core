@@ -13,10 +13,6 @@ package object http {
     x => Json.fromString(x.value)
   }
 
-  implicit val countryLanguageEncoder: Encoder[Language] = Encoder.instance {
-    x => Json.fromString(x.value)
-  }
-
   implicit val currencyEncoder: Encoder[Currency] = Encoder.instance {
     x => Json.fromString(x.value)
   }

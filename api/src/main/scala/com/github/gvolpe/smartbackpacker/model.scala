@@ -6,7 +6,6 @@ object model {
 
   class CountryCode(val value: String) extends AnyVal
   class CountryName(val value: String) extends AnyVal
-  class Language(val value: String) extends AnyVal
   class Currency(val value: String) extends AnyVal
   class AirlineName(val value: String) extends AnyVal
 
@@ -124,7 +123,7 @@ object model {
                            extra: Option[String],
                            website: Option[String])
 
-  case class Airline(name: String, baggagePolicy: BaggagePolicy)
+  case class Airline(name: AirlineName, baggagePolicy: BaggagePolicy)
 
   case class AirlineNotFound(airlineName: String) extends Exception(s"Airline not found $airlineName")
 

@@ -19,7 +19,9 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       "-Ypartial-unification"
     )
   )),
-  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*;VisaRestrictionsIndexParser*", //;AirlineDao*;ExchangeRateService*;AirlineService*
+  // TODO: The following objects / classes should be exluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
+  //;.*VisaRestrictionsIndexParser.*";AirlineDao*;ExchangeRateService*;AirlineService*
+  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*",
   libraryDependencies ++= Seq(
     http4sServer,
     http4sClient,

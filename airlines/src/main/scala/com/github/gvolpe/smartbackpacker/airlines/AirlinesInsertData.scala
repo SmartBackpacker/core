@@ -39,7 +39,7 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F]) {
 
   private def program(airline: Airline): ConnectionIO[Unit] =
     for {
-      airlineId <- insertAirline(airline.name)
+      airlineId <- insertAirline(airline.name.value)
       policyId  <- insertBaggagePolicy(airlineId, airline.baggagePolicy)
       _         <- insertManyBaggageAllowance(policyId, airline.baggagePolicy.allowance)
     } yield ()

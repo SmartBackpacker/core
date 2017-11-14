@@ -4,6 +4,7 @@ import cats.effect.Effect
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
+import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model.Currency
 import io.circe.generic.auto._
 import org.http4s.client.blaze._
@@ -25,8 +26,8 @@ class ExchangeRateService[F[_] : Effect](client: Client[F]) extends AbstractExch
 abstract class AbstractExchangeRateService[F[_] : Effect] {
 
   protected val fixerUri: Currency => Currency => String = baseCurrency => foreignCurrency => {
-    //s"http://api.fixer.io/latest?base=${baseCurrency.value}&symbols=${foreignCurrency.value}"
-    s"http://localhost:8081/latest?base=${baseCurrency.value}&symbols=${foreignCurrency.value}"
+    val uri = SBConfiguration.fixerBaseUri.getOrElse("http://localhost:8081")
+    s"$uri/latest?base=${baseCurrency.value}&symbols=${foreignCurrency.value}"
   }
 
   protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO]

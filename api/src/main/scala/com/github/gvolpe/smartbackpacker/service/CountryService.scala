@@ -36,7 +36,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
   }
 
   private def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirementsFor] = {
-    val ifEmpty: F[VisaRequirementsFor] = Sync[F].raiseError(CountryNotFound(to))
+    val ifEmpty = Sync[F].raiseError[VisaRequirementsFor](CountryNotFound(to))
 
     // Some country names have different ways to be spelled. Eg. ["Côte d'Ivoire", "Ivory Coast"]
     def iter(countryNames: List[String]): F[VisaRequirementsFor] = countryNames match {

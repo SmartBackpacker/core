@@ -6,11 +6,28 @@ import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
 import org.http4s.{HttpService, Request, Status, Uri}
+import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
 
 import scala.io.Source
 
-class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers {
+class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers with VisaRestrictionIndexFixture {
+
+  forAll(examples) { (countryCode, expectedStatus, httpService) =>
+    it should s"try to retrieve visa restriction index for $countryCode" in {
+      val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
+
+      val task = httpService(request).value.unsafeRunSync()
+      task should not be None
+      task foreach { response =>
+        response.status should be (expectedStatus)
+      }
+    }
+  }
+
+}
+
+trait VisaRestrictionIndexFixture extends PropertyChecks {
 
   object MockVisaRestrictionIndexParser extends AbstractVisaRestrictionsIndexParser[IO] {
     override val htmlDocument: IO[Document] = IO {
@@ -20,30 +37,23 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers {
     }
   }
 
-  private val httpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
+  object FailedVisaRestrictionIndexParser extends AbstractVisaRestrictionsIndexParser[IO] {
+    override val htmlDocument: IO[Document] = IO.raiseError(new Exception("test"))
+  }
+
+  private val goodHttpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
     new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexParser)
   ).service
 
-  it should "retrieve visa restriction index for Argentina" in {
-    val countryCode = "AR"
-    val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
+  private val badHttpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
+    new VisaRestrictionIndexService[IO](FailedVisaRestrictionIndexParser)
+  ).service
 
-    val task = httpService(request).value.unsafeRunSync()
-    task should not be None
-    task foreach { response =>
-      response.status should be (Status.Ok)
-    }
-  }
-
-  it should "NOT retrieve visa restriction index for a non-existent country" in {
-    val countryCode = "XX"
-    val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
-
-    val task = httpService(request).value.unsafeRunSync()
-    task should not be None
-    task foreach { response =>
-      response.status should be (Status.NotFound)
-    }
-  }
+  val examples = Table(
+    ("countryCode", "expectedStatus", "httpService"),
+    ("AR", Status.Ok, goodHttpService),
+    ("XX", Status.NotFound, goodHttpService),
+    ("IE", Status.BadRequest, badHttpService)
+  )
 
 }

@@ -1,14 +1,14 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.effect.{Async, Sync}
-import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, BaggageAllowance, BaggagePolicy, BaggageSize, CabinBag, SmallBag}
+import com.github.gvolpe.smartbackpacker.model._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
 object AirlineDao {
   def apply[F[_] : Async]: AirlineDao[F] = new PostgresAirlineDao[F](
     Transactor.fromDriverManager[F](
-      "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
+      "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
     )
   )
 }
@@ -16,7 +16,7 @@ object AirlineDao {
 class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
 
   private val airlines: List[Airline] = List(
-    Airline("Aer Lingus", BaggagePolicy(
+    Airline("Aer Lingus".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 24)),
         BaggageAllowance(SmallBag, None, BaggageSize(25, 33, 20))
@@ -24,7 +24,7 @@ class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
       extra = None,
       website = Some("https://www.aerlingus.com/travel-information/baggage-information/cabin-baggage/"))
     ),
-    Airline("Transavia", BaggagePolicy(
+    Airline("Transavia".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 25))
       ),
@@ -35,7 +35,7 @@ class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
 
   override def findAirline(airlineName: AirlineName): F[Option[Airline]] =
     Sync[F].delay {
-      airlines.find(_.name == airlineName.value)
+      airlines.find(_.name.value == airlineName.value)
     }
 
 }

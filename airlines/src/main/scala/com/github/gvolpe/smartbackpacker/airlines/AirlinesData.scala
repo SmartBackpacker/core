@@ -1,13 +1,13 @@
 package com.github.gvolpe.smartbackpacker.airlines
 
-import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy, BaggageSize, CabinBag, CheckedBag, SmallBag}
+import com.github.gvolpe.smartbackpacker.model._
 
 // See: https://wikitravel.org/en/Discount_airlines_in_Europe
 object AirlinesData {
 
   val airlines: List[Airline] = List(
 
-    Airline("Aer Lingus", BaggagePolicy(
+    Airline("Aer Lingus".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 24)),
         BaggageAllowance(SmallBag, None, BaggageSize(25, 33, 20))
@@ -16,7 +16,7 @@ object AirlinesData {
       website = Some("https://www.aerlingus.com/travel-information/baggage-information/cabin-baggage/"))
     ),
 
-    Airline("Air Baltic", BaggagePolicy(
+    Airline("Air Baltic".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 20)),
         BaggageAllowance(SmallBag, None, BaggageSize(30, 40, 10))
@@ -25,7 +25,7 @@ object AirlinesData {
       website = Some("https://www.airbaltic.com/en/hand-baggage"))
     ),
 
-    Airline("Air Berlin", BaggagePolicy(
+    Airline("Air Berlin".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(8), BaggageSize(55, 40, 23)),
         BaggageAllowance(SmallBag, Some(2), BaggageSize(40, 30, 10))
@@ -34,7 +34,7 @@ object AirlinesData {
       website = Some("https://www.airberlin.com/en/site/landingpages/baggage_services.php"))
     ),
 
-    Airline("Air Canada", BaggagePolicy(
+    Airline("Air Canada".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 23))
       ),
@@ -42,7 +42,7 @@ object AirlinesData {
       website = Some("https://www.aircanada.com/ca/en/aco/home/plan/baggage/carry-on.html"))
     ),
 
-    Airline("Air Europa", BaggagePolicy(
+    Airline("Air Europa".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 35, 25)),
         BaggageAllowance(SmallBag, None, BaggageSize(20, 35, 30))
@@ -51,7 +51,7 @@ object AirlinesData {
       website = Some("https://www.aireuropa.com/en/flights/baggage"))
     ),
 
-    Airline("Air France", BaggagePolicy(
+    Airline("Air France".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 35, 25)),
         BaggageAllowance(SmallBag, None, BaggageSize(40, 30, 15))
@@ -60,7 +60,7 @@ object AirlinesData {
       website = Some("https://www.airfrance.fr/FR/en/common/guidevoyageur/pratique/bagages-cabine-airfrance.htm"))
     ),
 
-    Airline("Air Serbia", BaggagePolicy(
+    Airline("Air Serbia".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 20))
       ),
@@ -68,7 +68,7 @@ object AirlinesData {
       website = Some("https://www.airserbia.com/en/hand-baggage"))
     ),
 
-    Airline("Blue Air", BaggagePolicy(
+    Airline("Blue Air".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 20))
       ),
@@ -76,7 +76,7 @@ object AirlinesData {
       website = Some("https://www.blueairweb.com/en/gb/luggage/"))
     ),
 
-    Airline("British Airways", BaggagePolicy(
+    Airline("British Airways".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(23), BaggageSize(56, 45, 25)),
         BaggageAllowance(SmallBag, Some(23), BaggageSize(40, 30, 15))
@@ -85,7 +85,7 @@ object AirlinesData {
       website = Some("https://www.britishairways.com/en-gb/information/baggage-essentials/hand-baggage-allowances"))
     ),
 
-    Airline("Easy Jet", BaggagePolicy(
+    Airline("Easy Jet".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(56, 45, 25))
       ),
@@ -93,7 +93,7 @@ object AirlinesData {
       website = Some("http://www.easyjet.com/en/help/baggage/cabin-bag-and-hold-luggage"))
     ),
 
-    Airline("Emirates", BaggagePolicy(
+    Airline("Emirates".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(7), BaggageSize(55, 38, 20))
       ),
@@ -101,7 +101,7 @@ object AirlinesData {
       website = Some("https://www.emirates.com/english/before-you-fly/baggage/cabin-baggage-rules.aspx"))
     ),
 
-    Airline("Etihad Airways", BaggagePolicy(
+    Airline("Etihad Airways".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CheckedBag, Some(23), BaggageSize(45, 74, 90)),
         BaggageAllowance(CabinBag, Some(7), BaggageSize(50, 40, 25))
@@ -110,7 +110,7 @@ object AirlinesData {
       website = Some("http://www.etihad.com/en-ae/before-you-fly/baggage-information/allowances/"))
     ),
 
-    Airline("FinnAir", BaggagePolicy(
+    Airline("FinnAir".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(56, 45, 25)),
         BaggageAllowance(SmallBag, None, BaggageSize(40, 30, 15))
@@ -119,7 +119,7 @@ object AirlinesData {
       website = Some("https://www.finnair.com/hk/gb/information-services/baggage/carry-on-baggage"))
     ),
 
-    Airline("Iberia", BaggagePolicy(
+    Airline("Iberia".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(56, 45, 25))
       ),
@@ -127,7 +127,7 @@ object AirlinesData {
       website = Some("http://www.iberia.com/gb/luggage/hand-luggage/"))
     ),
 
-    Airline("KLM", BaggagePolicy(
+    Airline("KLM".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 35, 25)),
         BaggageAllowance(SmallBag, None, BaggageSize(40, 30, 15))
@@ -136,7 +136,7 @@ object AirlinesData {
       website = Some("https://www.klm.com/travel/gb_en/prepare_for_travel/baggage/baggage_allowance/index.htm"))
     ),
 
-    Airline("LOT Polish Airlines", BaggagePolicy(
+    Airline("LOT Polish Airlines".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(8), BaggageSize(55, 40, 23)),
         BaggageAllowance(SmallBag, None, BaggageSize(40, 35, 12))
@@ -145,7 +145,7 @@ object AirlinesData {
       website = Some("http://www.lot.com/us/en/carry-on-baggage"))
     ),
 
-    Airline("Lufthansa", BaggagePolicy(
+    Airline("Lufthansa".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(8), BaggageSize(55, 40, 23))
       ),
@@ -153,7 +153,7 @@ object AirlinesData {
       website = Some("http://www.lufthansa.com/us/en/Free-baggage-rules"))
     ),
 
-    Airline("Norwegian", BaggagePolicy(
+    Airline("Norwegian".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 23)),
         BaggageAllowance(SmallBag, None, BaggageSize(25, 33, 20))
@@ -162,7 +162,7 @@ object AirlinesData {
       website = Some("https://www.norwegian.com/uk/travel-info/baggage/hand-baggage/"))
     ),
 
-    Airline("Pegasus Airlines", BaggagePolicy(
+    Airline("Pegasus Airlines".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(8), BaggageSize(55, 40, 20))
       ),
@@ -170,7 +170,7 @@ object AirlinesData {
       website = Some("https://www.flypgs.com/en/travel-services/flight-services/additional-baggage"))
     ),
 
-    Airline("Ryan Air", BaggagePolicy(
+    Airline("Ryan Air".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 20)),
         BaggageAllowance(SmallBag, None, BaggageSize(35, 20, 20))
@@ -179,7 +179,7 @@ object AirlinesData {
       website = Some("https://www.ryanair.com/gb/en/plan-trip/flying-with-us/baggage-policy"))
     ),
 
-    Airline("Transavia", BaggagePolicy(
+    Airline("Transavia".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 25))
       ),
@@ -187,7 +187,7 @@ object AirlinesData {
       website = Some("https://www.transavia.com/en-EU/service/hand-luggage/"))
     ),
 
-    Airline("Turkish Airlines", BaggagePolicy(
+    Airline("Turkish Airlines".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CheckedBag, Some(20), BaggageSize(55, 53, 50)),
         BaggageAllowance(CabinBag, Some(8), BaggageSize(55, 40, 23))
@@ -196,7 +196,7 @@ object AirlinesData {
       website = Some("https://p.turkishairlines.com/en-us/any-questions/carry-on-baggage/index.html"))
     ),
 
-    Airline("United Airlines", BaggagePolicy(
+    Airline("United Airlines".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(56, 35, 22))
       ),
@@ -204,7 +204,7 @@ object AirlinesData {
       website = Some("https://www.united.com/CMS/en-US/travel/Pages/BaggageCarry-On.aspx"))
     ),
 
-    Airline("Wizz Air", BaggagePolicy(
+    Airline("Wizz Air".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 23))
       ),
@@ -212,7 +212,7 @@ object AirlinesData {
       website = Some("https://wizzair.com/en-gb/information-and-services/travel-information/baggage#after-october"))
     ),
 
-    Airline("Wow Air", BaggagePolicy(
+    Airline("Wow Air".as[AirlineName], BaggagePolicy(
       allowance = List(
         BaggageAllowance(SmallBag, Some(10), BaggageSize(42, 32, 25))
       ),

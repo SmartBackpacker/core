@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker
 
-import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy, BaggageSize, BaggageType}
+import com.github.gvolpe.smartbackpacker.model._
 import shapeless._
 
 package object persistence {
@@ -20,7 +20,7 @@ package object persistence {
   implicit class AirlineConversions(airline: AirlineDTO) {
     def toAirline(b: List[AllowanceDTO]): Airline =
       Airline(
-        name = airline(1),
+        name = airline(1).as[AirlineName],
         baggagePolicy = BaggagePolicy(
           allowance = b.map(_.toBaggageAllowance),
           extra = airline(3),
