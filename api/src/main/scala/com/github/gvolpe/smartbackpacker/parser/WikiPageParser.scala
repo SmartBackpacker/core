@@ -1,5 +1,6 @@
 package com.github.gvolpe.smartbackpacker.parser
 
+import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
@@ -30,7 +31,7 @@ class WikiPageParser[F[_] : Sync] extends AbstractWikiPageParser[F] {
 
 }
 
-abstract class AbstractWikiPageParser[F[_] : Sync] {
+abstract class AbstractWikiPageParser[F[_] : Functor] {
 
   def htmlDocument(from: CountryCode): F[Document]
 

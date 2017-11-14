@@ -1,5 +1,6 @@
 package com.github.gvolpe.smartbackpacker.service
 
+import cats.ApplicativeError
 import cats.effect.Effect
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
@@ -23,7 +24,7 @@ class ExchangeRateService[F[_] : Effect](client: Client[F]) extends AbstractExch
 
 }
 
-abstract class AbstractExchangeRateService[F[_] : Effect] {
+abstract class AbstractExchangeRateService[F[_]](implicit E: ApplicativeError[F, Throwable]) {
 
   protected val fixerUri: Currency => Currency => String = baseCurrency => foreignCurrency => {
     val uri = SBConfiguration.fixerBaseUri.getOrElse("http://localhost:8081")

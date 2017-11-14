@@ -1,5 +1,6 @@
 package com.github.gvolpe.smartbackpacker.service
 
+import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
@@ -10,7 +11,7 @@ object VisaRestrictionIndexService {
   def apply[F[_] : Sync]: VisaRestrictionIndexService[F] = new VisaRestrictionIndexService[F](VisaRestrictionsIndexParser[F])
 }
 
-class VisaRestrictionIndexService[F[_] : Sync](visaRestrictionsIndexParser: AbstractVisaRestrictionsIndexParser[F]) {
+class VisaRestrictionIndexService[F[_] : Functor](visaRestrictionsIndexParser: AbstractVisaRestrictionsIndexParser[F]) {
 
   def findIndex(countryCode: CountryCode): F[Option[VisaRestrictionIndex]] = {
     val countryName = SBConfiguration.countryNames(countryCode).headOption.getOrElse("")

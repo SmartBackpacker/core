@@ -1,5 +1,6 @@
 package com.github.gvolpe.smartbackpacker.parser
 
+import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
@@ -24,7 +25,7 @@ class VisaRestrictionsIndexParser[F[_] : Sync] extends AbstractVisaRestrictionsI
 
 }
 
-abstract class AbstractVisaRestrictionsIndexParser[F[_] : Sync] {
+abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
 
   val htmlDocument: F[Document]
 
