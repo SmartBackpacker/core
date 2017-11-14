@@ -1,11 +1,20 @@
 package com.github.gvolpe.smartbackpacker.parser
 
+import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.TestWikiPageParser
 import com.github.gvolpe.smartbackpacker.model._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserFixture {
+
+  it should "NOT find the wiki page for a non-existent country code" in {
+    val ioa = WikiPageParser[IO].visaRequirementsFor("XX".as[CountryCode], "Brazil".as[CountryName])
+
+    intercept[WikiPageNotFound] {
+      ioa.unsafeRunSync()
+    }
+  }
 
   forAll(examples) { (description, from, to, expectedCategory, expectedDescription) =>
     it should description in {

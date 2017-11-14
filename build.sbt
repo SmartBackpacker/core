@@ -19,7 +19,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       "-Ypartial-unification"
     )
   )),
-  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*",
+  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*;VisaRestrictionsIndexParser*", //;AirlineDao*;ExchangeRateService*;AirlineService*
   libraryDependencies ++= Seq(
     http4sServer,
     http4sClient,

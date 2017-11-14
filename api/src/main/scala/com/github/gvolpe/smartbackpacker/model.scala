@@ -128,6 +128,8 @@ object model {
 
   case class AirlineNotFound(airlineName: String) extends Exception(s"Airline not found $airlineName")
 
+  case class WikiPageNotFound(wikiPage: String) extends Exception(s"Wiki Page not found for $wikiPage")
+
   // Visa Restriction Index
   sealed trait VisaRestrictionsIndexValues extends Product with Serializable
   case class Rank(value: Int)               extends VisaRestrictionsIndexValues
