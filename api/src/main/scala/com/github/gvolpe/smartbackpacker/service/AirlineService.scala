@@ -9,9 +9,7 @@ object AirlineService {
   def apply[F[_] : Async]: AirlineService[F] = new AirlineService[F](AirlineDao[F])
 }
 
-class AirlineService[F[_] : Async](airlineDao: AirlineDao[F]) extends AbstractAirlineService[F](airlineDao)
-
-abstract class AbstractAirlineService[F[_] : Async](airlineDao: AirlineDao[F]) {
+class AirlineService[F[_] : Async](airlineDao: AirlineDao[F]) {
 
   def baggagePolicy(airlineName: AirlineName): F[Airline] = {
     val ifEmpty = Sync[F].raiseError[Airline](AirlineNotFound(airlineName.value))

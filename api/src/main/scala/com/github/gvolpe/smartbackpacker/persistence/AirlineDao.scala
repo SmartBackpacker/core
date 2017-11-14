@@ -1,7 +1,10 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
-import cats.effect.{Async, Sync}
+import cats.effect.Async
+import cats.syntax.applicativeError._
 import com.github.gvolpe.smartbackpacker.model._
+import doobie.free.connection.ConnectionIO
+import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
@@ -13,38 +16,7 @@ object AirlineDao {
   )
 }
 
-class InMemoryAirlineDao[F[_] : Async] extends AirlineDao[F] {
-
-  private val airlines: List[Airline] = List(
-    Airline("Aer Lingus".as[AirlineName], BaggagePolicy(
-      allowance = List(
-        BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 24)),
-        BaggageAllowance(SmallBag, None, BaggageSize(25, 33, 20))
-      ),
-      extra = None,
-      website = Some("https://www.aerlingus.com/travel-information/baggage-information/cabin-baggage/"))
-    ),
-    Airline("Transavia".as[AirlineName], BaggagePolicy(
-      allowance = List(
-        BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 25))
-      ),
-      extra = None,
-      website = Some("https://www.transavia.com/en-EU/service/hand-luggage/"))
-    )
-  )
-
-  override def findAirline(airlineName: AirlineName): F[Option[Airline]] =
-    Sync[F].delay {
-      airlines.find(_.name.value == airlineName.value)
-    }
-
-}
-
 class PostgresAirlineDao[F[_] : Async](xa: Transactor[F]) extends AirlineDao[F] {
-
-  import cats.syntax.applicativeError._
-  import doobie.free.connection.ConnectionIO
-  import doobie.implicits._
 
   override def findAirline(airlineName: AirlineName): F[Option[Airline]] = {
     val airlineStatement: ConnectionIO[AirlineDTO] =
@@ -67,8 +39,6 @@ class PostgresAirlineDao[F[_] : Async](xa: Transactor[F]) extends AirlineDao[F] 
 
 }
 
-abstract class AirlineDao[F[_] : Async] {
-
+trait AirlineDao[F[_]] {
   def findAirline(airlineName: AirlineName): F[Option[Airline]]
-
 }
