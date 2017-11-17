@@ -5,7 +5,13 @@ import com.github.gvolpe.smartbackpacker.model._
 // See: https://wikitravel.org/en/Discount_airlines_in_Europe
 object AirlinesData {
 
-  val airlines: List[Airline] = List(
+  val airlines: List[Airline] = List.empty[Airline]
+
+}
+
+trait AirlinesDataV1 {
+
+  val airlinesV1: List[Airline] = List(
 
     Airline("Aer Lingus".as[AirlineName], BaggagePolicy(
       allowance = List(
