@@ -1,8 +1,7 @@
 import Dependencies._
+import sbt.ModuleID
 
 name := "Smart Backpacker API"
-
-enablePlugins(JavaAppPackaging)
 
 lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   inThisBuild(List(
@@ -21,7 +20,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   )),
   // TODO: The following objects / classes should be exluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
   //;.*VisaRestrictionsIndexParser.*";AirlineDao*;ExchangeRateService*;AirlineService*
-  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*",
+  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*;.*AirlinesJob*;.*IOApp*",
   libraryDependencies ++= Seq(
     http4sServer,
     http4sClient,
@@ -54,13 +53,19 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       </developers>
 )
 
+val AirlinesDependencies: Seq[ModuleID] = Seq(
+  fs2Core, fs2IO
+)
+
 lazy val root = project.in(file("."))
   .aggregate(api, airlines)
 
 lazy val api = project.in(file("api"))
   .settings(commonSettings: _*)
+  .enablePlugins(JavaAppPackaging)
 
 lazy val airlines = project.in(file("airlines"))
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= fs2IO)
+  .settings(libraryDependencies ++= AirlinesDependencies)
+  .enablePlugins(JavaAppPackaging)
   .dependsOn(api)

@@ -7,29 +7,32 @@ import com.github.gvolpe.smartbackpacker.airlines.sql.{AirlinesCreateTables, Air
 // See: https://wikitravel.org/en/Discount_airlines_in_Europe
 object AirlinesJob extends IOApp {
 
-  case object AirlineFileNotFound extends Exception("Airlines file not defined")
-  case object AllowanceFileNotFound extends Exception("Allowance file not defined")
+  case object MissingArgument extends Exception("There should be 3 arguments in the following order: `Create tables` {true | false}, `Airline file path` and `Allowance file path`.")
 
-  def readArgs(args: List[String]): IO[(AirlineFile, AllowanceFile)] = {
+  def readArgs(args: List[String]): IO[(Boolean, AirlineFile, AllowanceFile)] = {
+    val ifEmpty = IO.raiseError[String](MissingArgument)
     for {
-      x <- args.headOption.fold(IO.raiseError[String](AirlineFileNotFound))(a => IO(a))
-      y <- args.lastOption.fold(IO.raiseError[String](AllowanceFileNotFound))(a => IO(a))
-    } yield (new AirlineFile(x), new AllowanceFile(y))
+      c <- args.headOption.fold(ifEmpty)(IO(_)).map(_.toBoolean)
+      x <- args.tail.headOption.fold(ifEmpty)(IO(_))
+      y <- args.tail.tail.headOption.fold(ifEmpty)(IO(_))
+    } yield (c, new AirlineFile(x), new AllowanceFile(y))
   }
 
-  def program(airlineFile: AirlineFile, allowanceFile: AllowanceFile): IO[Unit] =
+  def program(createTables: Boolean,
+              airlineFile: AirlineFile,
+              allowanceFile: AllowanceFile): IO[Unit] =
     for {
       _       <- IO { println("Starting job") }
-      _       <- AirlinesCreateTables[IO].run
+      _       <- if (createTables) AirlinesCreateTables[IO].run else IO.unit
       _       <- AirlinesInsertData[IO](airlineFile, allowanceFile).run
       _       <- IO { println("Job finished successfully") }
     } yield ()
 
   override def start(args: List[String]): IO[Unit] =
     for {
-      files   <- readArgs(args)
-      (x, y)  = files
-      _       <- program(x, y)
+      files     <- readArgs(args)
+      (c, x, y) = files
+      _         <- program(c, x, y)
     } yield ()
 
 }
