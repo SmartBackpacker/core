@@ -62,4 +62,5 @@ lazy val api = project.in(file("api"))
 
 lazy val airlines = project.in(file("airlines"))
   .settings(commonSettings: _*)
+  .settings(libraryDependencies ++= fs2IO)
   .dependsOn(api)

@@ -29,7 +29,7 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
 
   val htmlDocument: F[Document]
 
-  def parse: F[List[VisaRestrictionIndex]] = {
+  def parse: F[List[VisaRestrictionIndex]] =
     htmlDocument.map { doc =>
       val wikiTable: List[Element] = doc >> elementList(".sortable")
       val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
@@ -37,7 +37,6 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
         case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionIndex(r, c, pc)
       }.toList
     }
-  }
 
   private val wikiTableExtractor: HtmlExtractor[Element, Iterable[VisaRestrictionsIndexValues]] = _.map { e =>
     Try(e.text.toInt) match {

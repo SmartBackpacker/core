@@ -1,10 +1,14 @@
 import sbt._
 
 object Dependencies {
+  lazy val Fs2Version     = "0.10.0-M8"
   lazy val Http4sVersion  = "0.18.0-M5"
   lazy val CirceVersion   = "0.9.0-M2"
   lazy val DoobieVersion  = "0.5.0-M9"
   lazy val H2Version      = "1.4.196"
+
+  lazy val fs2Core        = "co.fs2"            %% "fs2-core"                     % Fs2Version
+  lazy val fs2IO          = "co.fs2"            %% "fs2-io"                       % Fs2Version
 
   lazy val http4sServer   = "org.http4s"        %% "http4s-blaze-server"          % Http4sVersion
   lazy val http4sClient   = "org.http4s"        %% "http4s-blaze-client"          % Http4sVersion

@@ -1,8 +1,8 @@
-package com.github.gvolpe.smartbackpacker
+package com.github.gvolpe.smartbackpacker.airlines
 
 import com.github.gvolpe.smartbackpacker.model.BaggageAllowance
 
-package object airlines {
+package object sql {
 
   type CreateBaggageAllowanceDTO = (Int, String, Option[Int], Int, Int, Int)
 
