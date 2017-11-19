@@ -12,6 +12,11 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
+object DestinationInfoHttpEndpoint {
+  def apply[F[_] : Effect]: DestinationInfoHttpEndpoint[F] =
+    new DestinationInfoHttpEndpoint[F](CountryService[F])
+}
+
 class DestinationInfoHttpEndpoint[F[_] : Effect](countryService: CountryService[F]) extends Http4sDsl[F] {
 
   object BaseCurrencyQueryParamMatcher extends QueryParamDecoderMatcher[String]("baseCurrency")

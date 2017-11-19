@@ -12,6 +12,11 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
+object VisaRestrictionIndexHttpEndpoint {
+  def apply[F[_] : Effect]: VisaRestrictionIndexHttpEndpoint[F] =
+    new VisaRestrictionIndexHttpEndpoint[F](VisaRestrictionIndexService[F])
+}
+
 class VisaRestrictionIndexHttpEndpoint[F[_] : Effect]
   (visaRestrictionIndexService: VisaRestrictionIndexService[F]) extends Http4sDsl[F] {
 
