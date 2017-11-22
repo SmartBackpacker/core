@@ -29,7 +29,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
     }
 
   private def validateCountries(from: CountryCode, to: CountryCode): F[(CountryCode, CountryCode)] = {
-    if (from != to) (from, to).pure
+    if (from != to) (from, to).pure[F]
     else Sync[F].raiseError(CountriesMustBeDifferent)
   }
 
@@ -43,7 +43,7 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
       case (country :: xs)  =>
         wikiPageParser.visaRequirementsFor(from, country.as[CountryName]).>>= { result =>
           if (result.visaCategory == UnknownVisaCategory) iter(xs)
-          else Sync[F].delay(result)
+          else result.pure[F]
         }
       case Nil              => ifEmpty
     }

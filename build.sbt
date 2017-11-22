@@ -1,13 +1,13 @@
 import Dependencies._
 import sbt.ModuleID
 
-name := "Smart Backpacker API"
+name := "Smart Backpacker Backend"
 
 lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   inThisBuild(List(
     organization := "com.github.gvolpe",
     scalaVersion := "2.12.3",
-    version      := "0.2.1",
+    version      := "0.3.0",
     scalacOptions := Seq(
       "-deprecation",
       "-encoding",
@@ -58,7 +58,7 @@ val AirlinesDependencies: Seq[ModuleID] = Seq(
 )
 
 lazy val root = project.in(file("."))
-  .aggregate(api, airlines)
+  .aggregate(api, airlines, scraper)
 
 lazy val api = project.in(file("api"))
   .settings(commonSettings: _*)
@@ -67,5 +67,10 @@ lazy val api = project.in(file("api"))
 lazy val airlines = project.in(file("airlines"))
   .settings(commonSettings: _*)
   .settings(libraryDependencies ++= AirlinesDependencies)
+  .enablePlugins(JavaAppPackaging)
+  .dependsOn(api)
+
+lazy val scraper = project.in(file("scraper"))
+  .settings(commonSettings: _*)
   .enablePlugins(JavaAppPackaging)
   .dependsOn(api)
