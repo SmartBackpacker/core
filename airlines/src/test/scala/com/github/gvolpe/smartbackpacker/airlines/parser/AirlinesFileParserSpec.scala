@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.airlines.parser
 
 import cats.effect.IO
+import com.github.gvolpe.smartbackpacker.airlines.IOAssertion
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class AirlinesFileParserSpec extends FlatSpecLike with Matchers {
@@ -10,14 +11,14 @@ class AirlinesFileParserSpec extends FlatSpecLike with Matchers {
     new AllowanceFile(getClass.getResource("/allowance-file-sample").getPath)
   )
 
-  it should "parse the airlines and allowance files" in {
+  it should "parse the airlines and allowance files" in IOAssertion {
     val result = for {
       a <- parser.airlines
     } yield {
       a.name.value              should not be empty
       a.baggagePolicy.allowance should not be empty
     }
-    result.run.unsafeRunSync()
+    result.run
   }
 
 }

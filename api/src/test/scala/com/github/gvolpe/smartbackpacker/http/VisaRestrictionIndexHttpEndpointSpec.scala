@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
+import com.github.gvolpe.smartbackpacker.IOAssertion
 import com.github.gvolpe.smartbackpacker.parser.AbstractVisaRestrictionsIndexParser
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
@@ -14,13 +15,13 @@ import scala.io.Source
 class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers with VisaRestrictionIndexFixture {
 
   forAll(examples) { (countryCode, expectedStatus, httpService) =>
-    it should s"try to retrieve visa restriction index for $countryCode" in {
+    it should s"try to retrieve visa restriction index for $countryCode" in IOAssertion {
       val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
 
-      val task = httpService(request).value.unsafeRunSync()
-      task should not be None
-      task foreach { response =>
-        response.status should be (expectedStatus)
+      httpService(request).value.map { task =>
+        task.fold(fail("Empty response")){ response =>
+          response.status should be (expectedStatus)
+        }
       }
     }
   }

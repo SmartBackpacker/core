@@ -2,6 +2,7 @@ package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.Applicative
 import cats.effect.IO
+import com.github.gvolpe.smartbackpacker.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
 import doobie.free.connection.ConnectionIO
 import doobie.h2._
@@ -12,11 +13,13 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
 class PostgresAirlineDaoSpec extends FlatSpecLike with Matchers with PostgreSQLSetup with BeforeAndAfterAll {
 
+  private val h2Transactor = H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+
   override def beforeAll(): Unit = {
     super.beforeAll()
 
     val program = for {
-      xa  <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+      xa  <- h2Transactor
       _   <- createTables.transact(xa)
       _   <- insertData(xa)
     } yield ()
@@ -24,10 +27,9 @@ class PostgresAirlineDaoSpec extends FlatSpecLike with Matchers with PostgreSQLS
     program.unsafeRunSync()
   }
 
-  it should "find and NOT find the airline" in {
-
-    val program = for {
-      xa  <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+  it should "find and NOT find the airline" in IOAssertion {
+    for {
+      xa  <- h2Transactor
       dao = new PostgresAirlineDao[IO](xa)
       rs1 <- dao.findAirline(new AirlineName("Aer Lingus"))
       rs2 <- dao.findAirline(new AirlineName("Ryan Air"))
@@ -35,8 +37,6 @@ class PostgresAirlineDaoSpec extends FlatSpecLike with Matchers with PostgreSQLS
       rs1 should be (Some(airlines.head))
       rs2 should be (None)
     }
-
-    program.unsafeRunSync()
   }
 
 }

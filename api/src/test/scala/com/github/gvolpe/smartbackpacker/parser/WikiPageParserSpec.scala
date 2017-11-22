@@ -1,86 +1,80 @@
 package com.github.gvolpe.smartbackpacker.parser
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.TestWikiPageParser
+import com.github.gvolpe.smartbackpacker.{IOAssertion, TestWikiPageParser}
 import com.github.gvolpe.smartbackpacker.model._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserFixture {
 
-  it should "NOT find the wiki page for a non-existent country code" in {
-    val ioa = WikiPageParser[IO].visaRequirementsFor("XX".as[CountryCode], "Brazil".as[CountryName])
-
-    intercept[WikiPageNotFound] {
-      ioa.unsafeRunSync()
+  it should "NOT find the wiki page for a non-existent country code" in IOAssertion {
+    WikiPageParser[IO].visaRequirementsFor("XX".as[CountryCode], "Brazil".as[CountryName]).attempt.map { result =>
+      result should be (Left(WikiPageNotFound("XX")))
     }
   }
 
   forAll(examples) { (description, from, to, expectedCategory, expectedDescription) =>
-    it should description in {
-      val requirements = TestWikiPageParser.visaRequirementsFor(from.as[CountryCode], to.as[CountryName]).unsafeRunSync()
-      requirements.visaCategory  should be (expectedCategory)
-      requirements.description   should be (expectedDescription)
-    }
-  }
-
-  forAll(countries) { to =>
-    it should s"parse the visa requirements for AR -> $to" in {
-      if (to != "Argentina" && to != "France") { // it's France and territories for AR
-        val requirements = TestWikiPageParser.visaRequirementsFor("AR".as[CountryCode], to.as[CountryName]).unsafeRunSync()
-        requirements.visaCategory should not be UnknownVisaCategory
-        requirements.description  should not be empty
+    it should description in IOAssertion {
+      TestWikiPageParser.visaRequirementsFor(from.as[CountryCode], to.as[CountryName]).map { req =>
+        req.visaCategory should be (expectedCategory)
+        req.description  should be (expectedDescription)
       }
     }
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for GB -> $to" in {
-      if (to != "United Kingdom") {
-        val requirements = TestWikiPageParser.visaRequirementsFor("GB".as[CountryCode], to.as[CountryName]).unsafeRunSync()
-        requirements.visaCategory should not be UnknownVisaCategory
-        requirements.description  should not be empty
+    it should s"parse the visa requirements for AR -> $to" in IOAssertion.when(to != "Argentina" && to != "France") { // it's France and territories for AR
+      TestWikiPageParser.visaRequirementsFor("AR".as[CountryCode], to.as[CountryName]).map { req =>
+        req.visaCategory should not be UnknownVisaCategory
+        req.description  should not be empty
       }
     }
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for IE -> $to" in {
-      if (to != "Ireland") {
-        val requirements = TestWikiPageParser.visaRequirementsFor("IE".as[CountryCode], to.as[CountryName]).unsafeRunSync()
-        requirements.visaCategory should not be UnknownVisaCategory
-        requirements.description  should not be empty
+    it should s"parse the visa requirements for GB -> $to" in IOAssertion.when(to != "United Kingdom") {
+      TestWikiPageParser.visaRequirementsFor("GB".as[CountryCode], to.as[CountryName]).map { req =>
+        req.visaCategory should not be UnknownVisaCategory
+        req.description  should not be empty
       }
     }
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for KR -> $to" in {
-      if (to != "South Korea" && to != "France") { // it's France and territories for KR
-        val requirements = TestWikiPageParser.visaRequirementsFor("KR".as[CountryCode], to.as[CountryName]).unsafeRunSync()
-        requirements.visaCategory should not be UnknownVisaCategory
-        requirements.description  should not be empty
+    it should s"parse the visa requirements for IE -> $to" in IOAssertion.when(to != "Ireland") {
+      TestWikiPageParser.visaRequirementsFor("IE".as[CountryCode], to.as[CountryName]).map { req =>
+        req.visaCategory should not be UnknownVisaCategory
+        req.description  should not be empty
       }
     }
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for CA -> $to" in {
-      if (to != "Canada" && to != "France" && to != "Australia"
-          && to != "Denmark" && to != "Netherlands" && to != "United Kingdom") { // it's France and territories, etc
-        val requirements = TestWikiPageParser.visaRequirementsFor("CA".as[CountryCode], to.as[CountryName]).unsafeRunSync()
-        requirements.visaCategory should not be UnknownVisaCategory
-        requirements.description  should not be empty
+    it should s"parse the visa requirements for KR -> $to" in IOAssertion.when(to != "South Korea" && to != "France") { // it's France and territories for KR
+      TestWikiPageParser.visaRequirementsFor("KR".as[CountryCode], to.as[CountryName]).map { req =>
+        req.visaCategory should not be UnknownVisaCategory
+        req.description  should not be empty
       }
     }
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for RU -> $to" in {
-      if (to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
-        val requirements = TestWikiPageParser.visaRequirementsFor("RU".as[CountryCode], to.as[CountryName]).unsafeRunSync()
-        requirements.visaCategory should not be UnknownVisaCategory
-        requirements.description  should not be empty
+    it should s"parse the visa requirements for CA -> $to" in IOAssertion.when(
+      to != "Canada" && to != "France" && to != "Australia" // it's France and territories, etc
+      && to != "Denmark" && to != "Netherlands" && to != "United Kingdom") {
+        TestWikiPageParser.visaRequirementsFor("CA".as[CountryCode], to.as[CountryName]).map { req =>
+          req.visaCategory should not be UnknownVisaCategory
+          req.description  should not be empty
+        }
+    }
+  }
+
+  forAll(countries) { to =>
+    it should s"parse the visa requirements for RU -> $to" in IOAssertion.when(to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
+      TestWikiPageParser.visaRequirementsFor("RU".as[CountryCode], to.as[CountryName]).map { req =>
+        req.visaCategory should not be UnknownVisaCategory
+        req.description  should not be empty
       }
     }
   }
