@@ -1,7 +1,9 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.effect.Async
+import cats.syntax.applicative._
 import cats.syntax.applicativeError._
+import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.model._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -33,7 +35,7 @@ class PostgresAirlineDao[F[_] : Async](xa: Transactor[F]) extends AirlineDao[F] 
     } yield a.toAirline(b)
 
     program.map(Option.apply).transact(xa).recoverWith {
-      case UnexpectedEnd => Async[F].delay(None)
+      case UnexpectedEnd => none[Airline].pure[F]
     }
   }
 

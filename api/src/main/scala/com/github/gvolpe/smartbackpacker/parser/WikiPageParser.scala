@@ -17,12 +17,12 @@ object WikiPageParser {
   def apply[F[_]: Sync]: WikiPageParser[F] = new WikiPageParser[F]
 }
 
-class WikiPageParser[F[_] : Sync] extends AbstractWikiPageParser[F] {
+class WikiPageParser[F[_]](implicit F: Sync[F]) extends AbstractWikiPageParser[F] {
 
   override def htmlDocument(from: CountryCode): F[Document] = {
-    val ifEmpty: F[Document] = Sync[F].raiseError(WikiPageNotFound(from.value))
+    val ifEmpty: F[Document] = F.raiseError(WikiPageNotFound(from.value))
     SBConfiguration.wikiPage(from).fold(ifEmpty) { wikiPage =>
-      Sync[F].delay {
+      F.delay {
         val browser = new JsoupBrowser()
         browser.get(wikiPage)
       }

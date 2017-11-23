@@ -5,6 +5,7 @@ import cats.effect.Effect
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
+import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model.Currency
 import io.circe.generic.auto._
@@ -46,8 +47,8 @@ abstract class AbstractExchangeRateService[F[_]](implicit E: ApplicativeError[F,
   }
 
   private def validateCurrencies(baseCurrency: Currency, foreignCurrency: Currency): Option[String] = {
-    if (baseCurrency == foreignCurrency) None
-    else Some(fixerUri(baseCurrency)(foreignCurrency))
+    if (baseCurrency == foreignCurrency) none[String]
+    else fixerUri(baseCurrency)(foreignCurrency).some
   }
 
 }
