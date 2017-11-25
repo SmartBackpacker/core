@@ -6,16 +6,12 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.parser.{AbstractWikiPageParser, WikiPageParser}
-
-object CountryService {
-  def apply[F[_] : Effect]: CountryService[F] = new CountryService[F](WikiPageParser[F], ExchangeRateService[F])
-}
+import com.github.gvolpe.smartbackpacker.parser.AbstractWikiPageParser
 
 class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], exchangeRateService: AbstractExchangeRateService[F]) {
 
   def destinationInformation(from: CountryCode, to: CountryCode, baseCurrency: Currency): F[DestinationInfo] =
-    validateCountries(from, to).>>= { _ =>
+    validateCountries(from, to).flatMap { _ =>
       val foreignCurrency = SBConfiguration.countryCurrency(to).getOrElse("EUR").as[Currency]
 
       (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN { (vr, er) =>

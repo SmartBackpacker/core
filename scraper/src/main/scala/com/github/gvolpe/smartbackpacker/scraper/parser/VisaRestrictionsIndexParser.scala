@@ -1,9 +1,10 @@
-package com.github.gvolpe.smartbackpacker.parser
+package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.model.VisaRestrictionsRaking
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL._
@@ -29,12 +30,14 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
 
   val htmlDocument: F[Document]
 
-  def parse: F[List[VisaRestrictionIndex]] =
+  def parse: F[List[VisaRestrictionsRaking]] =
     htmlDocument.map { doc =>
       val wikiTable: List[Element] = doc >> elementList(".sortable")
       val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
+
+      // TODO: At the moment there's no way to get this magic number `104` configurable
       result.grouped(3).take(104).map {
-        case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionIndex(r, c, pc)
+        case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionsRaking(r, c, pc)
       }.toList
     }
 

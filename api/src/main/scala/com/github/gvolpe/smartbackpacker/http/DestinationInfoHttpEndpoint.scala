@@ -12,11 +12,6 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-object DestinationInfoHttpEndpoint {
-  def apply[F[_] : Effect]: DestinationInfoHttpEndpoint[F] =
-    new DestinationInfoHttpEndpoint[F](CountryService[F])
-}
-
 class DestinationInfoHttpEndpoint[F[_] : Effect](countryService: CountryService[F]) extends Http4sDsl[F] {
 
   object BaseCurrencyQueryParamMatcher extends QueryParamDecoderMatcher[String]("baseCurrency")
@@ -24,7 +19,7 @@ class DestinationInfoHttpEndpoint[F[_] : Effect](countryService: CountryService[
   val service: HttpService[F] = HttpService[F] {
     case GET -> Root / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) =>
       val info = countryService.destinationInformation(from.as[CountryCode], to.as[CountryCode], baseCurrency.as[Currency])
-      info.>>=(x => Ok(x.asJson)).recoverWith {
+      info.flatMap(x => Ok(x.asJson)).recoverWith {
         case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }
   }

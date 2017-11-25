@@ -12,10 +12,6 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-object AirlinesHttpEndpoint {
-  def apply[F[_] : Effect]: AirlinesHttpEndpoint[F] = new AirlinesHttpEndpoint[F](AirlineService[F])
-}
-
 class AirlinesHttpEndpoint[F[_] : Effect](airlineService: AirlineService[F]) extends Http4sDsl[F] {
 
   object AirlineNameQueryParamMatcher extends QueryParamDecoderMatcher[String]("name")

@@ -1,16 +1,13 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.IOAssertion
-import com.github.gvolpe.smartbackpacker.parser.AbstractVisaRestrictionsIndexParser
+import com.github.gvolpe.smartbackpacker.model.VisaRestrictionsIndex
+import com.github.gvolpe.smartbackpacker.persistence.VisaRestrictionsIndexDao
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
-import net.ruippeixotog.scalascraper.browser.JsoupBrowser
-import net.ruippeixotog.scalascraper.model.Document
+import com.github.gvolpe.smartbackpacker.{IOAssertion, model}
 import org.http4s.{HttpService, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
-
-import scala.io.Source
 
 class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers with VisaRestrictionIndexFixture {
 
@@ -30,24 +27,25 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers wi
 
 trait VisaRestrictionIndexFixture extends PropertyChecks {
 
-  object MockVisaRestrictionIndexParser extends AbstractVisaRestrictionsIndexParser[IO] {
-    override val htmlDocument: IO[Document] = IO {
-      val browser = JsoupBrowser()
-      val fileContent = Source.fromResource(s"visaRestrictionsWikiPageTest.html").mkString
-      browser.parseString(fileContent).asInstanceOf[Document]
-    }
+  object MockVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
+    override def findIndex(countryCode: model.CountryCode): IO[Option[model.VisaRestrictionsIndex]] =
+      IO {
+        if (countryCode.value == "AR") Some(VisaRestrictionsIndex(0,0,0))
+        else None
+      }
   }
 
-  object FailedVisaRestrictionIndexParser extends AbstractVisaRestrictionsIndexParser[IO] {
-    override val htmlDocument: IO[Document] = IO.raiseError(new Exception("test"))
+  object FailedVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
+    override def findIndex(countryCode: model.CountryCode): IO[Option[model.VisaRestrictionsIndex]] =
+      IO.raiseError(new Exception("test"))
   }
 
   private val goodHttpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
-    new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexParser)
+    new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexDao)
   ).service
 
   private val badHttpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
-    new VisaRestrictionIndexService[IO](FailedVisaRestrictionIndexParser)
+    new VisaRestrictionIndexService[IO](FailedVisaRestrictionIndexDao)
   ).service
 
   val examples = Table(

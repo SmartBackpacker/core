@@ -135,6 +135,6 @@ object model {
   case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
   case class PlacesCount(value: Int)        extends VisaRestrictionsIndexValues
 
-  case class VisaRestrictionIndex(rank: Int, countries: List[String], count: Int)
+  case class VisaRestrictionsIndex(rank: Int, count: Int, sharing: Int)
 
 }

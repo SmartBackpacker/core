@@ -11,14 +11,14 @@ class ConversionsSpec extends ConversionsArbitraries with FlatSpecLike with Matc
 
   forAll { (ba: BaggageAllowance) =>
     it should s"convert an AllowanceDto to $ba" in {
-      val dto: AllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
+      val dto: BaggageAllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
       dto.toBaggageAllowance should be (ba)
     }
   }
 
   forAll { (ba: BaggageAllowance, dto: AirlineDTO) =>
     it should s"convert a $dto to Airline" in {
-      val allowanceDto: AllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
+      val allowanceDto: BaggageAllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
 
       val expected: Airline = Airline(
         name = new AirlineName(dto(1)),
