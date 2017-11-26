@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.effect.IO
+import com.github.gvolpe.smartbackpacker.scraper.IOAssertion
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -17,6 +18,12 @@ class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
       browser.parseString(fileContent).asInstanceOf[Document]
     }
 
+  }
+
+  it should "parse visa restrictions index wiki page" in IOAssertion {
+    MockParser.parse.map { result =>
+      result should have size MockParser.CountriesOnIndex
+    }
   }
 
 }

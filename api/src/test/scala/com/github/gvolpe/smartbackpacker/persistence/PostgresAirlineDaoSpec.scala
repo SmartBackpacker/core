@@ -11,20 +11,14 @@ import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class PostgresAirlineDaoSpec extends FlatSpecLike with Matchers with PostgreSQLSetup with BeforeAndAfterAll {
+class PostgresAirlineDaoSpec extends PostgreSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
-  private val h2Transactor = H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+  override val h2Transactor: IO[H2Transactor[IO]] =
+    H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-
-    val program = for {
-      xa  <- h2Transactor
-      _   <- createTables.transact(xa)
-      _   <- insertData(xa)
-    } yield ()
-
-    program.unsafeRunSync()
+    setup.unsafeRunSync()
   }
 
   it should "find and NOT find the airline" in IOAssertion {
@@ -44,6 +38,15 @@ class PostgresAirlineDaoSpec extends FlatSpecLike with Matchers with PostgreSQLS
 trait PostgreSQLSetup {
 
   import cats.instances.list._
+
+  def h2Transactor: IO[H2Transactor[IO]]
+
+  lazy val setup: IO[Unit] =
+    for {
+      xa  <- h2Transactor
+      _   <- createTables.transact(xa)
+      _   <- insertData(xa)
+    } yield ()
 
   protected val airlines: List[Airline] = List(
     Airline("Aer Lingus".as[AirlineName], BaggagePolicy(

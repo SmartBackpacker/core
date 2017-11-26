@@ -4,7 +4,7 @@ import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.scraper.model.VisaRestrictionsRaking
+import com.github.gvolpe.smartbackpacker.scraper.model.VisaRestrictionsRanking
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL._
@@ -12,10 +12,6 @@ import net.ruippeixotog.scalascraper.model.{Document, Element}
 import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
 import scala.util.{Failure, Success, Try}
-
-object VisaRestrictionsIndexParser {
-  def apply[F[_] : Sync]: VisaRestrictionsIndexParser[F] = new VisaRestrictionsIndexParser[F]()
-}
 
 class VisaRestrictionsIndexParser[F[_] : Sync] extends AbstractVisaRestrictionsIndexParser[F] {
 
@@ -28,16 +24,16 @@ class VisaRestrictionsIndexParser[F[_] : Sync] extends AbstractVisaRestrictionsI
 
 abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
 
-  val htmlDocument: F[Document]
+  val CountriesOnIndex: Int = 104 // Number of countries that are part of the ranking
 
-  def parse: F[List[VisaRestrictionsRaking]] =
+  def htmlDocument: F[Document]
+
+  def parse: F[List[VisaRestrictionsRanking]] =
     htmlDocument.map { doc =>
       val wikiTable: List[Element] = doc >> elementList(".sortable")
       val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
-
-      // TODO: At the moment there's no way to get this magic number `104` configurable
-      result.grouped(3).take(104).map {
-        case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionsRaking(r, c, pc)
+      result.grouped(3).take(CountriesOnIndex).map {
+        case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionsRanking(r, c, pc)
       }.toList
     }
 
