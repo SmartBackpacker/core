@@ -60,8 +60,12 @@ val AirlinesDependencies: Seq[ModuleID] = Seq(
 lazy val root = project.in(file("."))
   .aggregate(api, airlines, scraper)
 
+lazy val common = project.in(file("common"))
+  .settings(commonSettings: _*)
+
 lazy val api = project.in(file("api"))
   .settings(commonSettings: _*)
+  .dependsOn(common)
   .enablePlugins(JavaAppPackaging)
 
 lazy val airlines = project.in(file("airlines"))

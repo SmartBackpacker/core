@@ -1,7 +1,8 @@
 package com.github.gvolpe.smartbackpacker.service
 
+import com.github.gvolpe.smartbackpacker.TestExchangeRateService
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.{IOAssertion, TestExchangeRateService}
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class ExchangeServiceSpec extends FlatSpecLike with Matchers {

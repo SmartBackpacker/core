@@ -1,12 +1,13 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.{IOAssertion, TestExchangeRateService, TestWikiPageParser}
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.http.ResponseBodyUtils._
 import com.github.gvolpe.smartbackpacker.service.CountryService
+import com.github.gvolpe.smartbackpacker.{TestExchangeRateService, TestWikiPageParser}
 import org.http4s.{HttpService, Query, Request, Status, Uri}
-import org.scalatest.{FlatSpecLike, Matchers}
-import ResponseBodyUtils._
 import org.scalatest.prop.PropertyChecks
+import org.scalatest.{FlatSpecLike, Matchers}
 
 class DestinationInfoHttpEndpointSpec extends FlatSpecLike with Matchers with DestinationInfoHttpEndpointFixture {
 

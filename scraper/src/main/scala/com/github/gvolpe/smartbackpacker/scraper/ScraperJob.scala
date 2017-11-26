@@ -13,4 +13,6 @@ object ScraperJob extends App {
   // - Create CountryDao and VisaRestrictionIndexDao
   // - Modify CountryService and VisaRestrictionIndexService to use the DAOs instead of the Parsers.
 
+
+
 }

@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker
+package com.github.gvolpe.smartbackpacker.common
 
 import cats.effect.IO
 

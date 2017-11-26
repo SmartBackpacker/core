@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.http.ResponseBodyUtils._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.persistence.AirlineDao

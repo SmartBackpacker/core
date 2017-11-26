@@ -1,8 +1,8 @@
 package com.github.gvolpe.smartbackpacker.airlines.sql
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.airlines.IOAssertion
 import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import doobie.h2.H2Transactor
 import org.scalatest.{FlatSpecLike, Matchers}
 

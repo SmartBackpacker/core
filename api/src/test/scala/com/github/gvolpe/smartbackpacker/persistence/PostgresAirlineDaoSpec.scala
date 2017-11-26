@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.persistence
 
 import cats.Applicative
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
 import doobie.free.connection.ConnectionIO
 import doobie.h2._

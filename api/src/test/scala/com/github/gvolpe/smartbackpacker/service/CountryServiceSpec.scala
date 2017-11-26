@@ -1,7 +1,8 @@
 package com.github.gvolpe.smartbackpacker.service
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.{TestWikiPageParser, _}
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker._
 import com.github.gvolpe.smartbackpacker.model._
 import org.scalatest.{FlatSpecLike, Matchers}
 

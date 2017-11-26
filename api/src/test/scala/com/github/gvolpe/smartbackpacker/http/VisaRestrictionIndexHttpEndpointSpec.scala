@@ -1,10 +1,10 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.model.VisaRestrictionsIndex
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.model.{CountryCode, VisaRestrictionsIndex}
 import com.github.gvolpe.smartbackpacker.persistence.VisaRestrictionsIndexDao
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
-import com.github.gvolpe.smartbackpacker.{IOAssertion, model}
 import org.http4s.{HttpService, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -28,7 +28,7 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers wi
 trait VisaRestrictionIndexFixture extends PropertyChecks {
 
   object MockVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
-    override def findIndex(countryCode: model.CountryCode): IO[Option[model.VisaRestrictionsIndex]] =
+    override def findIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
       IO {
         if (countryCode.value == "AR") Some(VisaRestrictionsIndex(0,0,0))
         else None
@@ -36,7 +36,7 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
   }
 
   object FailedVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
-    override def findIndex(countryCode: model.CountryCode): IO[Option[model.VisaRestrictionsIndex]] =
+    override def findIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
       IO.raiseError(new Exception("test"))
   }
 

@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.scraper.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
 import org.scalatest.{FlatSpecLike, Matchers}

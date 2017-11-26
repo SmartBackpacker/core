@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker.airlines.parser
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.airlines.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class AirlinesFileParserSpec extends FlatSpecLike with Matchers {
