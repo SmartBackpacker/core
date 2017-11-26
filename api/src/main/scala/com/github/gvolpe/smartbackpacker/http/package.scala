@@ -5,6 +5,8 @@ import io.circe.{Encoder, Json}
 
 package object http {
 
+  val ApiVersion = "v1"
+
   implicit val countryCodeEncoder: Encoder[CountryCode] = Encoder.instance {
     x => Json.fromString(x.value)
   }

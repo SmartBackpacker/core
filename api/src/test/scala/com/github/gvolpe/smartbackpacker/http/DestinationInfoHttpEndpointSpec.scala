@@ -13,7 +13,7 @@ class DestinationInfoHttpEndpointSpec extends FlatSpecLike with Matchers with De
 
   forAll(examples) { (from, to, expectedStatus, expectedCountry, expectedVisa) =>
     it should s"retrieve visa requirements from $from to $to" in IOAssertion {
-      val request = Request[IO](uri = Uri(path = s"/traveling/$from/to/$to", query = Query(("baseCurrency", Some("EUR")))))
+      val request = Request[IO](uri = Uri(path = s"/$ApiVersion/traveling/$from/to/$to", query = Query(("baseCurrency", Some("EUR")))))
 
       httpService(request).value.map { task =>
         task.fold(fail("Empty response")){ response =>

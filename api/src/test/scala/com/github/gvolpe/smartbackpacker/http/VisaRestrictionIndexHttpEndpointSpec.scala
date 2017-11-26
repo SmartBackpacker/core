@@ -13,7 +13,7 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers wi
 
   forAll(examples) { (countryCode, expectedStatus, httpService) =>
     it should s"try to retrieve visa restriction index for $countryCode" in IOAssertion {
-      val request = Request[IO](uri = Uri(path = s"/visa-restriction-index/$countryCode"))
+      val request = Request[IO](uri = Uri(path = s"/$ApiVersion/ranking/$countryCode"))
 
       httpService(request).value.map { task =>
         task.fold(fail("Empty response")){ response =>

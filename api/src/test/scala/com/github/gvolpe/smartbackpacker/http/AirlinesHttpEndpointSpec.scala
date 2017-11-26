@@ -14,7 +14,7 @@ class AirlinesHttpEndpointSpec extends FlatSpecLike with Matchers with AirlinesH
 
   forAll(examples) { (airline, expectedStatus, expectedBody) =>
     it should s"find the airline $airline" in IOAssertion {
-      val request = Request[IO](uri = Uri(path = s"/airlines", query = Query(("name", Some(airline)))))
+      val request = Request[IO](uri = Uri(path = s"/$ApiVersion/airlines", query = Query(("name", Some(airline)))))
 
       httpService(request).value.map { task =>
         task.fold(fail("Empty response")){ response =>
