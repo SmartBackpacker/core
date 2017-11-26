@@ -22,7 +22,9 @@ class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
 
   it should "parse visa restrictions index wiki page" in IOAssertion {
     MockParser.parse.map { result =>
-      result should have size MockParser.CountriesOnIndex
+      result should not be empty
+      // Not all the countries are part of the ranking
+      result should have size 191 // SBConfiguration.countriesCode().size == 199
     }
   }
 

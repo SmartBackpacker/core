@@ -25,4 +25,19 @@ class SafeConfigReader(config: Config) {
     safeRead[java.util.List[String]](config.getStringList)(key).toList.flatMap(_.asScala)
   }
 
+  def objectKeyList(key: String): List[String] = {
+    import scala.collection.JavaConverters._
+    Try {
+      config.getAnyRef(key)
+        .asInstanceOf[java.util.Map[String, java.util.List[String]]]
+        .asScala.keys.toList
+    } match {
+      case Failure(error) =>
+        log.warn(s"Key $key not found: ${error.getMessage}.")
+        List.empty[String]
+      case Success(values) =>
+        values
+    }
+  }
+
 }

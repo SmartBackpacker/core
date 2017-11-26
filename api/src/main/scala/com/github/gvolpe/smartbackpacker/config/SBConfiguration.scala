@@ -16,6 +16,10 @@ object SBConfiguration {
     safeConfig.string(s"visa-requirements.page.${countryCode.value}")
   }
 
+  def countriesCode(): List[String] = {
+    safeConfig.objectKeyList(s"countries.name").sorted
+  }
+
   def countryNames(countryCode: CountryCode): List[String] = {
     safeConfig.list(s"countries.name.${countryCode.value}")
   }

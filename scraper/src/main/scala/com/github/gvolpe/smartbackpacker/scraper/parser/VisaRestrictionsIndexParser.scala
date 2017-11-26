@@ -3,6 +3,7 @@ package com.github.gvolpe.smartbackpacker.scraper.parser
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
+import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.model.VisaRestrictionsRanking
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
@@ -28,13 +29,29 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
 
   def htmlDocument: F[Document]
 
-  def parse: F[List[VisaRestrictionsRanking]] =
+  def parse: F[List[(CountryCode, VisaRestrictionsIndex)]] =
     htmlDocument.map { doc =>
       val wikiTable: List[Element] = doc >> elementList(".sortable")
       val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
-      result.grouped(3).take(CountriesOnIndex).map {
+
+      val ranking = result.grouped(3).take(CountriesOnIndex).map {
         case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionsRanking(r, c, pc)
       }.toList
+
+      for {
+        code    <- SBConfiguration.countriesCode()
+        names   = SBConfiguration.countryNames(new CountryCode(code))
+        index   <- ranking
+        country <- index.countries
+        if names.contains(country)
+      } yield {
+        val visaIndex = VisaRestrictionsIndex(
+          rank = index.rank,
+          count = index.count,
+          sharing = index.countries.size
+        )
+        (new CountryCode(code), visaIndex)
+      }
     }
 
   private val wikiTableExtractor: HtmlExtractor[Element, Iterable[VisaRestrictionsIndexValues]] = _.map { e =>
