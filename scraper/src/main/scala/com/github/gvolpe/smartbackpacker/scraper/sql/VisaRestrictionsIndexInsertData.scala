@@ -8,15 +8,6 @@ import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 
-object VisaRestrictionsIndexInsertData {
-  def apply[F[_] : Async]: VisaRestrictionsIndexInsertData[F] =
-    new VisaRestrictionsIndexInsertData[F](
-      Transactor.fromDriverManager[F](
-        "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
-      )
-    )
-}
-
 class VisaRestrictionsIndexInsertData[F[_] : Async](xa: Transactor[F]) {
 
   type CreateVisaIndexDTO = (String, Int, Int, Int)

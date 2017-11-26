@@ -1,19 +1,9 @@
 package com.github.gvolpe.smartbackpacker.airlines.sql
 
 import cats.Monad
-import cats.effect.Async
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
-
-object AirlinesCreateTables {
-  def apply[F[_] : Async]: AirlinesCreateTables[F] =
-    new AirlinesCreateTables[F](
-      Transactor.fromDriverManager[F](
-        "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
-      )
-    )
-}
 
 class AirlinesCreateTables[F[_] : Monad](xa: Transactor[F]) {
 

@@ -1,27 +1,17 @@
 package com.github.gvolpe.smartbackpacker.airlines.sql
 
 import cats.Applicative
-import cats.effect.{Async, Effect}
+import cats.effect.Async
 import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
+import com.github.gvolpe.smartbackpacker.airlines.parser.AirlinesFileParser
 import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
-
-object AirlinesInsertData {
-  def apply[F[_] : Effect](airlineFile: AirlineFile, allowanceFile: AllowanceFile): AirlinesInsertData[F] =
-    new AirlinesInsertData[F](
-      Transactor.fromDriverManager[F](
-        "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", "postgres"
-      ),
-      AirlinesFileParser[F](airlineFile, allowanceFile)
-    )
-}
 
 class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: AirlinesFileParser[F]) {
 

@@ -1,9 +1,10 @@
 package com.github.gvolpe.smartbackpacker.airlines
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AllowanceFile}
+import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
 import com.github.gvolpe.smartbackpacker.airlines.sql.{AirlinesCreateTables, AirlinesInsertData}
 import com.github.gvolpe.smartbackpacker.common.IOApp
+import doobie.util.transactor.Transactor
 
 // See: https://wikitravel.org/en/Discount_airlines_in_Europe
 object AirlinesJob extends IOApp {
@@ -19,13 +20,18 @@ object AirlinesJob extends IOApp {
     } yield (c, new AirlineFile(x), new AllowanceFile(y))
   }
 
+  private val xa = Transactor.fromDriverManager[IO](
+    "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
+  )
+
   def program(createTables: Boolean,
               airlineFile: AirlineFile,
               allowanceFile: AllowanceFile): IO[Unit] =
     for {
       _       <- IO { println("Starting job") }
-      _       <- if (createTables) AirlinesCreateTables[IO].run else IO.unit
-      _       <- AirlinesInsertData[IO](airlineFile, allowanceFile).run
+      _       <- if (createTables) new AirlinesCreateTables[IO](xa).run else IO.unit
+      parser  = AirlinesFileParser[IO](airlineFile, allowanceFile)
+      _       <- new AirlinesInsertData[IO](xa, parser).run
       _       <- IO { println("Job finished successfully") }
     } yield ()
 
