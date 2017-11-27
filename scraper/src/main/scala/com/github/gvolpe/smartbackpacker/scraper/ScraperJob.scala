@@ -25,6 +25,7 @@ object ScraperJob extends IOApp {
   private val indexParser = new VisaRestrictionsIndexParser[IO]
   private val insertData  = new VisaRestrictionsIndexInsertData[IO](xa)
 
+  // TODO: See how to improve throughput by running different countries in parallel (specially for visa requirements)
   val visaIndexProgram: IO[Unit] =
     for {
       _       <- IO { println("Starting visa index scraping job") }

@@ -19,8 +19,8 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
     )
   )),
   // TODO: The following objects / classes should be exluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
-  //;.*VisaRestrictionsIndexParser.*";AirlineDao*;ExchangeRateService*;AirlineService*
-  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\.persistence\\.static.*;.*Server*;.*AirlinesJob*;.*IOApp*",
+  //;.*ExchangeRateService*
+  coverageExcludedPackages := ".*Server*;.*Bindings*;.*IOApp*;.*IOAssertion*;.*AirlinesJob*;.*ScraperJob*",
   libraryDependencies ++= Seq(
     http4sServer,
     http4sClient,

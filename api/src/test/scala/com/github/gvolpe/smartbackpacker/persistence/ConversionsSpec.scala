@@ -1,23 +1,23 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
-import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, BaggageAllowance, BaggagePolicy, BaggageSize, BaggageType, CabinBag, CheckedBag, SmallBag}
-import org.scalacheck._
+import com.github.gvolpe.smartbackpacker.model._
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck._
+import org.scalatest.FunSuite
 import org.scalatest.prop.PropertyChecks
-import org.scalatest.{FlatSpecLike, Matchers}
 import shapeless._
 
-class ConversionsSpec extends ConversionsArbitraries with FlatSpecLike with Matchers with PropertyChecks {
+class ConversionsSpec extends FunSuite with ConversionsArbitraries with PropertyChecks {
 
   forAll { (ba: BaggageAllowance) =>
-    it should s"convert an AllowanceDto to $ba" in {
+    test(s"convert an AllowanceDto to $ba") {
       val dto: BaggageAllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
-      dto.toBaggageAllowance should be (ba)
+      assert(dto.toBaggageAllowance == ba)
     }
   }
 
   forAll { (ba: BaggageAllowance, dto: AirlineDTO) =>
-    it should s"convert a $dto to Airline" in {
+    test(s"convert a $dto to Airline") {
       val allowanceDto: BaggageAllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
 
       val expected: Airline = Airline(
@@ -29,7 +29,21 @@ class ConversionsSpec extends ConversionsArbitraries with FlatSpecLike with Matc
         )
       )
 
-      dto.toAirline(List(allowanceDto)) should be (expected)
+      assert(dto.toAirline(List(allowanceDto)) == expected)
+    }
+  }
+
+  forAll { (dto: RestrictionsIndexDTO) =>
+    test(s"convert a $dto to VisaRestrictionsIndex") {
+      val expected = VisaRestrictionsIndex(rank = dto(0), count = dto(1), sharing = dto(2))
+      assert(dto.toVisaRestrictionsIndex == expected)
+    }
+  }
+
+  forAll { (index: VisaRestrictionsIndex) =>
+    test(s"convert a RestrictionsIndexDTO to $index") {
+      val dto = index.rank :: index.count :: index.sharing :: HNil
+      assert(dto.toVisaRestrictionsIndex == index)
     }
   }
 
@@ -63,9 +77,23 @@ trait ConversionsArbitraries {
       name  <- Gen.alphaStr
       extra <- Gen.option(Gen.alphaStr)
       web   <- Gen.option(Gen.alphaStr)
-    } yield {
-      id :: name :: id :: extra :: web :: HNil
-    }
+    } yield id :: name :: id :: extra :: web :: HNil
+  }
+
+  implicit val restrictionsIndexDTO: Arbitrary[RestrictionsIndexDTO] = Arbitrary[RestrictionsIndexDTO] {
+    for {
+      r <- Gen.posNum[Int]
+      c <- Gen.posNum[Int]
+      s <- Gen.posNum[Int]
+    } yield r :: c :: s :: HNil
+  }
+
+  implicit val visaRestrictionsIndex: Arbitrary[VisaRestrictionsIndex] = Arbitrary[VisaRestrictionsIndex] {
+    for {
+      r <- Gen.posNum[Int]
+      c <- Gen.posNum[Int]
+      s <- Gen.posNum[Int]
+    } yield VisaRestrictionsIndex(r, c, s)
   }
 
 }
