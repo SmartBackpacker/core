@@ -74,6 +74,13 @@ object model {
     }
   }
 
+  case class Country(code: CountryCode, name: CountryName)
+
+  case class VisaRequirementsData(from: Country,
+                                  to: Country,
+                                  visaCategory: VisaCategory,
+                                  description: String)
+
   case class VisaRequirementsFor(country: String,
                                  visaCategory: VisaCategory,
                                  description: String)

@@ -21,10 +21,11 @@ class PostgresAirlineDao[F[_] : Async](xa: Transactor[F]) extends AirlineDao[F] 
       sql"SELECT baggage_type, kgs, height, width, depth FROM baggage_allowance WHERE policy_id=$policyId"
         .query[BaggageAllowanceDTO].list
 
-    val program: ConnectionIO[Airline] = for {
-      a <- airlineStatement
-      b <- baggageAllowanceStatement(a.head)
-    } yield a.toAirline(b)
+    val program: ConnectionIO[Airline] =
+      for {
+        a <- airlineStatement
+        b <- baggageAllowanceStatement(a.head)
+      } yield a.toAirline(b)
 
     program.map(Option.apply).transact(xa).recoverWith {
       case UnexpectedEnd => none[Airline].pure[F]

@@ -1,23 +1,18 @@
--- TODO: To be completed
-
-CREATE TABLE visa_requirements (
+CREATE TABLE countries (
   id SERIAL PRIMARY KEY,
+  code VARCHAR (2) NOT NULL UNIQUE,
   name VARCHAR (100) NOT NULL UNIQUE
 );
 
-CREATE TABLE baggage_policy (
-  policy_id SERIAL PRIMARY KEY,
-  airline_id INT REFERENCES airline (airline_id),
-  extra VARCHAR (500),
-  website VARCHAR (500)
+CREATE TABLE visa_category (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR (200)
 );
 
-CREATE TABLE baggage_allowance (
-  allowance_id SERIAL PRIMARY KEY,
-  policy_id INT REFERENCES baggage_policy (policy_id),
-  baggage_type VARCHAR (25) NOT NULL,
-  kgs SMALLINT,
-  height SMALLINT NOT NULL,
-  width SMALLINT NOT NULL,
-  depth SMALLINT NOT NULL
+CREATE TABLE visa_requirements (
+  from_country INT REFERENCES countries (id) NOT NULL,
+  to_country INT REFERENCES countries (id) NOT NULL,
+  visa_category INT REFERENCES visa_category (id) NOT NULL,
+  description VARCHAR (500),
+  PRIMARY KEY (from_country, to_country)
 );

@@ -9,6 +9,9 @@ package object persistence {
   type BaggageAllowanceDTO  = String :: Option[Int] :: Int :: Int :: Int :: HNil
   type RestrictionsIndexDTO = Int :: Int :: Int :: HNil
 
+  type CountryDTO           = Int :: String :: String :: HNil
+  type VisaRequirementsDTO  = String :: String :: HNil
+
   implicit class BaggageAllowanceConversions(allowance: BaggageAllowanceDTO) {
     def toBaggageAllowance: BaggageAllowance =
       BaggageAllowance(
@@ -36,6 +39,16 @@ package object persistence {
         rank = index.head,
         count = index.tail.head,
         sharing = index.last
+      )
+  }
+
+  implicit class VisaRequirementsConversions(dto: VisaRequirementsDTO) {
+    def toVisaRequirementsData(fromDto: CountryDTO, toDto: CountryDTO): VisaRequirementsData =
+      VisaRequirementsData(
+        from          = Country(new CountryCode(fromDto(1)), new CountryName(fromDto.last)),
+        to            = Country(new CountryCode(toDto(1)), new CountryName(toDto.last)),
+        visaCategory  = VisaCategory.parse(dto.head),
+        description   = dto.last
       )
   }
 
