@@ -11,7 +11,7 @@ import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class PostgresAirlineDaoSpec extends PostgreSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
+class PostgresAirlineDaoSpec extends AirlineSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
     H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
@@ -35,7 +35,7 @@ class PostgresAirlineDaoSpec extends PostgreSQLSetup with FlatSpecLike with Matc
 
 }
 
-trait PostgreSQLSetup {
+trait AirlineSQLSetup {
 
   import cats.instances.list._
 

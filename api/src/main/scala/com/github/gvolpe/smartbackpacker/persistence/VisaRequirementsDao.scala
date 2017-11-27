@@ -14,15 +14,15 @@ class PostgresVisaRequirementsDao[F[_] : Async](xa: Transactor[F]) extends VisaR
 
   override def find(from: CountryCode, to: CountryCode): F[Option[VisaRequirementsData]] = {
     val fromStatement: ConnectionIO[CountryDTO] =
-      sql"SELECT * FROM countries WHERE code = '${from.value}'"
+      sql"SELECT * FROM countries WHERE code = ${from.value}"
         .query[CountryDTO].unique
 
     val toStatement: ConnectionIO[CountryDTO] =
-      sql"SELECT * FROM countries WHERE code = '${to.value}'"
+      sql"SELECT * FROM countries WHERE code = ${to.value}"
         .query[CountryDTO].unique
 
     def visaRequirementsStatement(idFrom: Int, idTo: Int): ConnectionIO[VisaRequirementsDTO] =
-      sql"SELECT vc.name AS category, vr.description FROM visa_requirements AS vr INNER JOIN visa_category AS vc ON vr.visa_category = vc.id WHERE from_country = $idFrom AND to_country = $idTo"
+      sql"SELECT vc.name AS category, vr.description FROM visa_requirements AS vr INNER JOIN visa_category AS vc ON vr.visa_category = vc.id WHERE vr.from_country = $idFrom AND vr.to_country = $idTo"
         .query[VisaRequirementsDTO].unique
 
     val program: ConnectionIO[VisaRequirementsData] =

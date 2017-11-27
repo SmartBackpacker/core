@@ -9,7 +9,7 @@ import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class PostgresVisaRestrictionsIndexDaoSpec extends PostgreSQLSetupVisa with FlatSpecLike with Matchers with BeforeAndAfterAll {
+class PostgresVisaRestrictionsIndexDaoSpec extends VisaRestrictionsIndexSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
     H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
@@ -30,7 +30,7 @@ class PostgresVisaRestrictionsIndexDaoSpec extends PostgreSQLSetupVisa with Flat
 
 }
 
-trait PostgreSQLSetupVisa {
+trait VisaRestrictionsIndexSQLSetup {
 
   def h2Transactor: IO[H2Transactor[IO]]
 
