@@ -19,6 +19,14 @@ It's the main back-end application exposing the Http Rest API and handling the d
 
 It contains the [PostgreSQL](https://www.postgresql.org/) setup scripts for the airline tables and the job to insert new airline's data.
 
+#### Common
+
+At the moment it just contains some utils for `cats.effect.IO`.
+
+#### Scraper
+
+It has all the wiki page parsers and scrapers, SQL scripts for table creation and all the jobs to insert parsed data into the DB.
+
 ## LICENSE
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with

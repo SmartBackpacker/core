@@ -14,17 +14,6 @@ import org.joda.time.format.DateTimeFormat
 
 object ScraperJob extends IOApp {
 
-  // Scheduler.oncePerMonth(runJob)
-
-  // TODO
-  // - Create Table `visa_requirements`.
-  // - Run WikiPageParser once a week for every country and persist the results to PostgreSQL.
-  // - Same for VisaRestrictionsIndexParser.
-  // - Make sure to have at least the DB backup of a month (4 backups) for resiliency.
-  // - Run the parsers in parallel to maximize throughput.
-  // - Create CountryDao and VisaRestrictionIndexDao
-  // - Modify CountryService and VisaRestrictionIndexService to use the DAOs instead of the Parsers.
-
   private val xa = Transactor.fromDriverManager[IO](
     "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
   )
@@ -38,7 +27,6 @@ object ScraperJob extends IOApp {
   private val countryInsertData           = new CountryInsertData[IO](xa)
   private val visaCategoryInsertData      = new VisaCategoryInsertData[IO](xa)
 
-  // TODO: See how to improve throughput by running different countries in parallel (specially for visa requirements)
   val visaIndexProgram: IO[Unit] =
     for {
       _       <- IO { println("Starting visa index scraping job") }
@@ -74,17 +62,26 @@ object ScraperJob extends IOApp {
     Applicative[IO].traverse(codes)(c => visaRequirementsProgramFor(c)).map(_ => ())
   }
 
-  // TODO: Make optional (by main args) to run only index, only visa requirements or both.
+  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `loadVisaCategories` or `startScraping`")
+
+  def readArgs(args: List[String]): IO[Unit] = {
+    val ifEmpty = IO.raiseError[Unit](MissingArgument)
+    args.headOption.fold(ifEmpty) {
+      case "loadCountries"      => countriesProgram
+      case "loadVisaCategories" => visaCategoriesProgram
+      case "startScraping"      => visaRequirementsProgram
+      case _                    => ifEmpty
+    }
+  }
+
   override def start(args: List[String]): IO[Unit] = {
     lazy val fmt    = DateTimeFormat.forPattern("H:m:s.S")
     lazy val start  = Instant.now()
     for {
-    //      _ <- countriesProgram
-    //      _ <- visaCategoriesProgram
-      _ <- IO { println(s"Starting scraping job at ${start.toString(fmt)}")}
-      _ <- visaRequirementsProgram
+      _ <- IO { println(s"Starting job at ${start.toString(fmt)}")}
+      _ <- readArgs(args)
       f = Instant.now()
-      _ <- IO { println(s"Finished scraping job at ${f.toString(fmt)}. Duration ${Seconds.secondsBetween(start, f).getSeconds} seconds")}
+      _ <- IO { println(s"Finished job at ${f.toString(fmt)}. Duration ${Seconds.secondsBetween(start, f).getSeconds} seconds")}
     } yield ()
   }
 
