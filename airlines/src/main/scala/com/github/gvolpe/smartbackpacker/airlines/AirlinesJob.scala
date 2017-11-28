@@ -20,9 +20,15 @@ object AirlinesJob extends IOApp {
     } yield (c, new AirlineFile(x), new AllowanceFile(y))
   }
 
-  private val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
-  )
+  private val devDbUrl = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+  private val dbDriver = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
+
+  private val xa = {
+    if (devDbUrl.nonEmpty) Transactor.fromDriverManager[IO](dbDriver, devDbUrl)
+    else Transactor.fromDriverManager[IO](
+      dbDriver, "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
+    )
+  }
 
   def program(createTables: Boolean,
               airlineFile: AirlineFile,

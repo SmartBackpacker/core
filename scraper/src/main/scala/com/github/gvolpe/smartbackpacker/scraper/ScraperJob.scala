@@ -14,9 +14,15 @@ import org.joda.time.format.DateTimeFormat
 
 object ScraperJob extends IOApp {
 
-  private val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
-  )
+  private val devDbUrl = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+  private val dbDriver = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
+
+  private val xa = {
+    if (devDbUrl.nonEmpty) Transactor.fromDriverManager[IO](dbDriver, devDbUrl)
+    else Transactor.fromDriverManager[IO](
+      dbDriver, "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
+    )
+  }
 
   private val visaRequirementsParser      = new VisaRequirementsParser[IO]()
   private val visaRequirementsInsertData  = new VisaRequirementsInsertData[IO](xa, visaRequirementsParser)
@@ -78,10 +84,10 @@ object ScraperJob extends IOApp {
     lazy val fmt    = DateTimeFormat.forPattern("H:m:s.S")
     lazy val start  = Instant.now()
     for {
-      _ <- IO { println(s"Starting job at ${start.toString(fmt)}")}
+      _ <- IO { println(s"Starting job at ${start.toString(fmt)}") }
       _ <- readArgs(args)
       f = Instant.now()
-      _ <- IO { println(s"Finished job at ${f.toString(fmt)}. Duration ${Seconds.secondsBetween(start, f).getSeconds} seconds")}
+      _ <- IO { println(s"Finished job at ${f.toString(fmt)}. Duration ${Seconds.secondsBetween(start, f).getSeconds} seconds") }
     } yield ()
   }
 

@@ -8,9 +8,17 @@ import doobie.util.transactor.Transactor
 // It wires all the instances together
 class Bindings[F[_] : Effect] {
 
-  def xa: Transactor[F] = Transactor.fromDriverManager[F](
-    "org.postgresql.Driver", "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
-  )
+  private val devDbUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+
+  private val dbDriver  = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
+  private val dbUrl     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
+  private val dbUser    = sys.env.getOrElse("SB_DB_USER", "postgres")
+  private val dbPass    = sys.env.getOrElse("SB_DB_PASSWORD", "")
+
+  def xa: Transactor[F] = {
+    if (devDbUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbUrl)
+    else Transactor.fromDriverManager[F](dbDriver, dbUrl, dbUser, dbPass)
+  }
 
   lazy val visaRestrictionsIndexDao: VisaRestrictionsIndexDao[F] =
     new PostgresVisaRestrictionsIndexDao[F](xa)

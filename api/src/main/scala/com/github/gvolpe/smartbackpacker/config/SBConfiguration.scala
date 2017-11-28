@@ -9,7 +9,7 @@ object SBConfiguration {
   private lazy val safeConfig     = new SafeConfigReader(configuration)
 
   def fixerBaseUri: Option[String] = {
-    safeConfig.string("fixer.uri")
+    sys.env.get("FIXER_URL").orElse(safeConfig.string("fixer.uri"))
   }
 
   def wikiPage(countryCode: CountryCode): Option[String] = {
