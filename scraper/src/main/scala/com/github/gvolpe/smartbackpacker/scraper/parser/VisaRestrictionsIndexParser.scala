@@ -40,7 +40,7 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
 
       for {
         code    <- SBConfiguration.countriesCode()
-        names   = SBConfiguration.countryNames(new CountryCode(code))
+        names   = SBConfiguration.countryNames(code)
         index   <- ranking
         country <- index.countries
         if names.contains(country)
@@ -50,7 +50,7 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
           count = index.count,
           sharing = index.countries.size
         )
-        (new CountryCode(code), visaIndex)
+        (code, visaIndex)
       }
     }
 

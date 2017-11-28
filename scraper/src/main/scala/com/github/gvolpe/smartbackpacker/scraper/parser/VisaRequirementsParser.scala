@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.parser
+package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.Functor
 import cats.effect.Sync
@@ -13,11 +13,7 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
 import scala.util.{Failure, Success, Try}
 
-object WikiPageParser {
-  def apply[F[_]: Sync]: WikiPageParser[F] = new WikiPageParser[F]
-}
-
-class WikiPageParser[F[_]](implicit F: Sync[F]) extends AbstractWikiPageParser[F] {
+class VisaRequirementsParser[F[_]](implicit F: Sync[F]) extends AbstractVisaRequirementsParser[F] {
 
   override def htmlDocument(from: CountryCode): F[Document] = {
     val ifEmpty: F[Document] = F.raiseError(WikiPageNotFound(from.value))
@@ -31,15 +27,21 @@ class WikiPageParser[F[_]](implicit F: Sync[F]) extends AbstractWikiPageParser[F
 
 }
 
-abstract class AbstractWikiPageParser[F[_] : Functor] {
+abstract class AbstractVisaRequirementsParser[F[_] : Functor] {
 
   def htmlDocument(from: CountryCode): F[Document]
 
-  def visaRequirementsFor(from: CountryCode, to: CountryName): F[VisaRequirementsForDELETEME] =
-    parseVisaRequirements(from).map { requirements =>
-      requirements.find(_.country == to.value)
-        .getOrElse(VisaRequirementsForDELETEME(to.value, UnknownVisaCategory, "No information available"))
-    }
+  def visaRequirementsFor(from: CountryCode): F[List[VisaRequirementsFor]] = {
+    parseVisaRequirements(from).map { _.map { vr =>
+      // If we can't find the code we just same the country name instead to easily trace the data
+      val ifEmpty = VisaRequirementsFor(from, vr.to.value.as[CountryCode], vr.visaCategory, vr.description)
+      countryCodeFor(vr.to).fold(ifEmpty)(VisaRequirementsFor(from, _, vr.visaCategory, vr.description))
+    }}
+  }
+
+  private def countryCodeFor(name: CountryName): Option[CountryCode] = {
+    SBConfiguration.countriesWithNames().find(_.names.map(_.value).contains(name.value)).map(_.code)
+  }
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns
   private val wikiTableExtractor: HtmlExtractor[Element, Iterable[String]] = _.flatMap { e =>
@@ -62,33 +64,33 @@ abstract class AbstractWikiPageParser[F[_] : Functor] {
     }
   }
 
-  private val normalTableMapper: List[String] => VisaRequirementsForDELETEME = {
+  private val normalTableMapper: List[String] => VisaRequirementsParsing = {
     case (c :: v :: d :: x :: Nil) =>
       val extra = if (x == "X" || x == "√") "" else x
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(extra))
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(extra))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, "")
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, UnknownVisaCategory, "")
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsForDELETEME("Not Found", UnknownVisaCategory, "")
+      VisaRequirementsParsing("Not Found".as[CountryName], UnknownVisaCategory, "")
   }
 
-  private val colspanTableMapper: List[String] => VisaRequirementsForDELETEME = {
+  private val colspanTableMapper: List[String] => VisaRequirementsParsing = {
     case (c :: v :: d :: x :: _ :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: x :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, v.asVisaCategory, "")
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsForDELETEME(c.noWhiteSpaces, UnknownVisaCategory, "")
+      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsForDELETEME("Not Found", UnknownVisaCategory, "")
+      VisaRequirementsParsing("Not Found".as[CountryName], UnknownVisaCategory, "")
   }
 
   private val parseColumns: Element => List[String] = e => {
@@ -116,7 +118,7 @@ abstract class AbstractWikiPageParser[F[_] : Functor] {
 
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
   // TODO: This will require add more visa categories (See Polish page)
-  private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsForDELETEME]] =
+  private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsParsing]] =
     htmlDocument(from).map { doc =>
       // Get first of all sortable tables
       val wikiTables = (doc >> elementList(".sortable")).headOption
@@ -132,6 +134,7 @@ abstract class AbstractWikiPageParser[F[_] : Functor] {
       // Group it per country using the corresponding mapper
       val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
       val result = info.grouped(tableSize.getOrElse(3)).map(mapper).toList
+
       result
     }
 

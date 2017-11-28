@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker.config
 
-import com.github.gvolpe.smartbackpacker.model.CountryCode
+import com.github.gvolpe.smartbackpacker.model._
 import com.typesafe.config.ConfigFactory
 
 object SBConfiguration {
@@ -16,8 +16,20 @@ object SBConfiguration {
     safeConfig.string(s"visa-requirements.page.${countryCode.value}")
   }
 
-  def countriesCode(): List[String] = {
-    safeConfig.objectKeyList(s"countries.name").sorted
+  def countries(): List[Country] = {
+    safeConfig.objectMap("countries.name").map(kv =>
+      (kv._1.as[CountryCode], kv._2.headOption.getOrElse("Empty").as[CountryName])
+    ).toList.map(kv => Country(kv._1, kv._2)).sortBy(_.code.value)
+  }
+
+  def countriesWithNames(): List[CountryWithNames] = {
+    safeConfig.objectMap("countries.name").map(kv =>
+      (kv._1.as[CountryCode], kv._2.map(_.as[CountryName]))
+    ).toList.map(kv => CountryWithNames(kv._1, kv._2)).sortBy(_.code.value)
+  }
+
+  def countriesCode(): List[CountryCode] = {
+    safeConfig.objectKeyList("countries.name").sorted.map(_.as[CountryCode])
   }
 
   def countryNames(countryCode: CountryCode): List[String] = {

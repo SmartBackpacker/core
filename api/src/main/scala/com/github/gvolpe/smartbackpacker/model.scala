@@ -75,15 +75,25 @@ object model {
   }
 
   case class Country(code: CountryCode, name: CountryName)
+  case class CountryWithNames(code: CountryCode, names: List[CountryName])
 
   case class VisaRequirementsData(from: Country,
                                   to: Country,
                                   visaCategory: VisaCategory,
                                   description: String)
 
-  case class VisaRequirementsFor(country: String,
+  case class VisaRequirementsParsing(to: CountryName,
+                                     visaCategory: VisaCategory,
+                                     description: String)
+
+  case class VisaRequirementsFor(from: CountryCode,
+                                 to: CountryCode,
                                  visaCategory: VisaCategory,
                                  description: String)
+
+  case class VisaRequirementsForDELETEME(country: String,
+                                         visaCategory: VisaCategory,
+                                         description: String)
 
   case class VisaRequirements(visaCategory: VisaCategory,
                               description: String)

@@ -29,11 +29,11 @@ class CountryService[F[_] : Effect](wikiPageParser: AbstractWikiPageParser[F], e
     else Sync[F].raiseError(CountriesMustBeDifferent)
   }
 
-  private def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirementsFor] = {
-    val ifEmpty = Sync[F].raiseError[VisaRequirementsFor](CountryNotFound(to))
+  private def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirementsForDELETEME] = {
+    val ifEmpty = Sync[F].raiseError[VisaRequirementsForDELETEME](CountryNotFound(to))
 
     // Some country names have different ways to be spelled. Eg. ["Côte d'Ivoire", "Ivory Coast"]
-    def iter(countryNames: List[String]): F[VisaRequirementsFor] = countryNames match {
+    def iter(countryNames: List[String]): F[VisaRequirementsForDELETEME] = countryNames match {
       case (country :: Nil) =>
         wikiPageParser.visaRequirementsFor(from, country.as[CountryName])
       case (country :: xs)  =>

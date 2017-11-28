@@ -13,6 +13,6 @@ CREATE TABLE visa_requirements (
   from_country INT REFERENCES countries (id) NOT NULL,
   to_country INT REFERENCES countries (id) NOT NULL,
   visa_category INT REFERENCES visa_category (id) NOT NULL,
-  description VARCHAR (500),
+  description VARCHAR (2000),
   PRIMARY KEY (from_country, to_country)
 );
