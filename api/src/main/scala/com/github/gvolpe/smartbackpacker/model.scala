@@ -102,10 +102,6 @@ object model {
                                  visaCategory: VisaCategory,
                                  description: String)
 
-  case class VisaRequirementsForDELETEME(country: String,
-                                         visaCategory: VisaCategory,
-                                         description: String)
-
   case class VisaRequirements(visaCategory: VisaCategory,
                               description: String)
 
@@ -117,12 +113,6 @@ object model {
                              countryCode: CountryCode,
                              visaRequirements: VisaRequirements,
                              exchangeRate: ExchangeRate)
-
-  case class AirlineReview(name: String,
-                           rating: Double,
-                           address: String,
-                           website: String,
-                           logo: String)
 
   case class CountryNotFound(countryCode: CountryCode) extends Exception(s"Country code not found $countryCode")
 
