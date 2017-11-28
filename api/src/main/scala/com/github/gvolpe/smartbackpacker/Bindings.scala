@@ -1,12 +1,11 @@
 package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
-import com.github.gvolpe.smartbackpacker.parser.WikiPageParser
-import com.github.gvolpe.smartbackpacker.persistence.{AirlineDao, PostgresAirlineDao, PostgresVisaRestrictionsIndexDao, VisaRestrictionsIndexDao}
+import com.github.gvolpe.smartbackpacker.persistence.{AirlineDao, PostgresAirlineDao, PostgresVisaRequirementsDao, PostgresVisaRestrictionsIndexDao, VisaRequirementsDao, VisaRestrictionsIndexDao}
 import com.github.gvolpe.smartbackpacker.service.{AirlineService, CountryService, ExchangeRateService, VisaRestrictionIndexService}
 import doobie.util.transactor.Transactor
 
-// Binds the instances to wire all together
+// It wires all the instances together
 class Bindings[F[_] : Effect] {
 
   def xa: Transactor[F] = Transactor.fromDriverManager[F](
@@ -25,7 +24,10 @@ class Bindings[F[_] : Effect] {
   lazy val airlineService: AirlineService[F] =
     new AirlineService[F](airlineDao)
 
+  lazy val visaRequirementsDao: VisaRequirementsDao[F] =
+    new PostgresVisaRequirementsDao[F](xa)
+
   lazy val countryService: CountryService[F] =
-    new CountryService[F](WikiPageParser[F], ExchangeRateService[F])
+    new CountryService[F](visaRequirementsDao, ExchangeRateService[F])
 
 }

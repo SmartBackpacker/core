@@ -1,10 +1,12 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
+import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.http.ResponseBodyUtils._
-import com.github.gvolpe.smartbackpacker.service.CountryService
-import com.github.gvolpe.smartbackpacker.{TestExchangeRateService, TestWikiPageParser}
+import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.persistence.VisaRequirementsDao
+import com.github.gvolpe.smartbackpacker.service.{AbstractExchangeRateService, CountryService, CurrencyExchangeDTO}
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -34,12 +36,30 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val examples = Table(
     ("from", "code", "expectedStatus","expectedCountry", "expectedVisa"),
     ("AR", "GB", Status.Ok, "United Kingdom", "VisaNotRequired"),
-    ("CA", "SO", Status.Ok, "Somalia", "VisaRequired"),
     ("AR", "KO", Status.BadRequest, "Country code not found", "")
   )
 
+  object MockVisaRequirementsDao extends VisaRequirementsDao[IO] {
+    override def find(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
+      if (to.value == "KO") none[VisaRequirementsData]
+      else
+      VisaRequirementsData(
+        from = Country("AR".as[CountryCode], "Argentina".as[CountryName]),
+        to   = Country("GB".as[CountryCode], "United Kingdom".as[CountryName]),
+        visaCategory = VisaNotRequired,
+        description = "90 days within any 180 day period"
+      ).some
+    }
+  }
+
+  object TestExchangeRateService extends AbstractExchangeRateService[IO] {
+    override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
+      CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
+    }
+  }
+
   val httpService: HttpService[IO] = new DestinationInfoHttpEndpoint(
-    new CountryService[IO](TestWikiPageParser, TestExchangeRateService)
+    new CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService)
   ).service
 
 }

@@ -1,61 +1,82 @@
-package com.github.gvolpe.smartbackpacker.parser
+package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.TestWikiPageParser
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
+import net.ruippeixotog.scalascraper.browser.JsoupBrowser
+import net.ruippeixotog.scalascraper.model.Document
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
 
-class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserFixture {
+import scala.io.Source
+
+class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaRequirementsParserFixture {
+
+  object TestWikiPageParser extends AbstractVisaRequirementsParser[IO] {
+    override def htmlDocument(from: CountryCode): IO[Document] = IO {
+      val browser = JsoupBrowser()
+      val fileContent = Source.fromResource(s"wikiPageTest-${from.value}.html").mkString
+      browser.parseString(fileContent).asInstanceOf[Document]
+    }
+  }
 
   it should "NOT find the wiki page for a non-existent country code" in IOAssertion {
-    WikiPageParser[IO].visaRequirementsFor("XX".as[CountryCode], "Brazil".as[CountryName]).attempt.map { result =>
-      result should be (Left(WikiPageNotFound("XX")))
+    TestWikiPageParser.visaRequirementsFor("XX".as[CountryCode]).attempt.map { result =>
+      assert(result.isLeft)
     }
   }
 
   forAll(examples) { (description, from, to, expectedCategory, expectedDescription) =>
     it should description in IOAssertion {
-      TestWikiPageParser.visaRequirementsFor(from.as[CountryCode], to.as[CountryName]).map { req =>
-        req.visaCategory should be (expectedCategory)
-        req.description  should be (expectedDescription)
+      TestWikiPageParser.visaRequirementsFor(from.as[CountryCode]).map { list =>
+        list.filter(_.to.value == to).foreach { req =>
+          req.visaCategory should be (expectedCategory)
+          req.description  should be (expectedDescription)
+        }
       }
     }
   }
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for AR -> $to" in IOAssertion.when(to != "Argentina" && to != "France") { // it's France and territories for AR
-      TestWikiPageParser.visaRequirementsFor("AR".as[CountryCode], to.as[CountryName]).map { req =>
-        req.visaCategory should not be UnknownVisaCategory
-        req.description  should not be empty
+      TestWikiPageParser.visaRequirementsFor("AR".as[CountryCode]).map { list =>
+        list.foreach { req =>
+          req.visaCategory should not be UnknownVisaCategory
+          req.description  should not be empty
+        }
       }
     }
   }
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for GB -> $to" in IOAssertion.when(to != "United Kingdom") {
-      TestWikiPageParser.visaRequirementsFor("GB".as[CountryCode], to.as[CountryName]).map { req =>
-        req.visaCategory should not be UnknownVisaCategory
-        req.description  should not be empty
+      TestWikiPageParser.visaRequirementsFor("GB".as[CountryCode]).map { list =>
+        list.foreach { req =>
+          req.visaCategory should not be UnknownVisaCategory
+          req.description  should not be empty
+        }
       }
     }
   }
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for IE -> $to" in IOAssertion.when(to != "Ireland") {
-      TestWikiPageParser.visaRequirementsFor("IE".as[CountryCode], to.as[CountryName]).map { req =>
-        req.visaCategory should not be UnknownVisaCategory
-        req.description  should not be empty
+      TestWikiPageParser.visaRequirementsFor("IE".as[CountryCode]).map { list =>
+        list.foreach { req =>
+          req.visaCategory should not be UnknownVisaCategory
+          req.description  should not be empty
+        }
       }
     }
   }
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for KR -> $to" in IOAssertion.when(to != "South Korea" && to != "France") { // it's France and territories for KR
-      TestWikiPageParser.visaRequirementsFor("KR".as[CountryCode], to.as[CountryName]).map { req =>
-        req.visaCategory should not be UnknownVisaCategory
-        req.description  should not be empty
+      TestWikiPageParser.visaRequirementsFor("KR".as[CountryCode]).map { list =>
+        list.foreach { req =>
+          req.visaCategory should not be UnknownVisaCategory
+          req.description  should not be empty
+        }
       }
     }
   }
@@ -64,25 +85,29 @@ class WikiPageParserSpec extends FlatSpecLike with Matchers with WikiPageParserF
     it should s"parse the visa requirements for CA -> $to" in IOAssertion.when(
       to != "Canada" && to != "France" && to != "Australia" // it's France and territories, etc
       && to != "Denmark" && to != "Netherlands" && to != "United Kingdom") {
-        TestWikiPageParser.visaRequirementsFor("CA".as[CountryCode], to.as[CountryName]).map { req =>
-          req.visaCategory should not be UnknownVisaCategory
-          req.description  should not be empty
+        TestWikiPageParser.visaRequirementsFor("CA".as[CountryCode]).map { list =>
+          list.foreach { req =>
+            req.visaCategory should not be UnknownVisaCategory
+            req.description  should not be empty
+          }
         }
     }
   }
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for RU -> $to" in IOAssertion.when(to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
-      TestWikiPageParser.visaRequirementsFor("RU".as[CountryCode], to.as[CountryName]).map { req =>
-        req.visaCategory should not be UnknownVisaCategory
-        req.description  should not be empty
+      TestWikiPageParser.visaRequirementsFor("RU".as[CountryCode]).map { list =>
+        list.foreach { req =>
+          req.visaCategory should not be UnknownVisaCategory
+          req.description  should not be empty
+        }
       }
     }
   }
 
 }
 
-trait WikiPageParserFixture extends PropertyChecks {
+trait VisaRequirementsParserFixture extends PropertyChecks {
 
   val examples = Table(
     ("description", "from", "to", "expectedCategory", "expectedDescription"),

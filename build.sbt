@@ -18,8 +18,8 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       "-Ypartial-unification"
     )
   )),
-  // TODO: The following objects / classes should be exluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
-  //;.*ExchangeRateService*
+  // TODO: The following objects / classes should be excluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
+  //;.*ExchangeRateService*, VisaRequirementsParser, VisaRestrictionsIndexParser
   coverageExcludedPackages := ".*Server*;.*Bindings*;.*IOApp*;.*IOAssertion*;.*AirlinesJob*;.*ScraperJob*",
   libraryDependencies ++= Seq(
     http4sServer,

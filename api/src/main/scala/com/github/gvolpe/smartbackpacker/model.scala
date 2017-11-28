@@ -48,6 +48,17 @@ object model {
         else UnknownVisaCategory
       case _ => UnknownVisaCategory
     }
+
+    def fromName(name: String): VisaCategory = {
+      List(
+        VisaNotRequired, VisaWaiverProgram, AdmissionRefused, TravelBanned,
+        VisaRequired, VisaDeFactoRequired, ElectronicVisa, ElectronicVisitor,
+        ElectronicTravelAuthority, FreeVisaOnArrival, VisaOnArrival,
+        ElectronicVisaPlusVisaOnArrival, OnlineReciprocityFee,
+        MainlandTravelPermit, HomeReturnPermitOnly
+      ).find(_.toString == name).getOrElse(UnknownVisaCategory)
+    }
+
   }
 
   implicit class ValueClasses(value: String) {

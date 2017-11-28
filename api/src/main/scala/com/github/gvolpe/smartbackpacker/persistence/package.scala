@@ -47,7 +47,7 @@ package object persistence {
       VisaRequirementsData(
         from          = Country(new CountryCode(fromDto(1)), new CountryName(fromDto.last)),
         to            = Country(new CountryCode(toDto(1)), new CountryName(toDto.last)),
-        visaCategory  = VisaCategory.parse(dto.head),
+        visaCategory  = VisaCategory.fromName(dto.head),
         description   = dto.last
       )
   }
