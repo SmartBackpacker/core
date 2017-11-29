@@ -18,6 +18,9 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       "-Ypartial-unification"
     )
   )),
+  resolvers += Resolver.sonatypeRepo("releases"),
+  resolvers += "jmcardon at bintray" at "https://dl.bintray.com/jmcardon/tsec",
+  addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.4" cross CrossVersion.binary),
   // TODO: The following objects / classes should be excluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
   //;.*ExchangeRateService*, VisaRequirementsParser, VisaRestrictionsIndexParser
   coverageExcludedPackages := ".*Server*;.*Bindings*;.*IOApp*;.*IOAssertion*;.*AirlinesJob*;.*ScraperJob*",
@@ -26,6 +29,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
     http4sClient,
     http4sDsl,
     http4sCirce,
+    tsecJwtMac,
     circe,
     circeGeneric,
     h2,

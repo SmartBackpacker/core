@@ -15,8 +15,8 @@ import org.http4s.dsl.Http4sDsl
 class VisaRestrictionIndexHttpEndpoint[F[_] : Effect]
   (visaRestrictionIndexService: VisaRestrictionIndexService[F]) extends Http4sDsl[F] {
 
-  val service: HttpService[F] = HttpService[F] {
-    case GET -> Root / ApiVersion / "ranking" / countryCode =>
+  val service: AuthedService[String, F] = AuthedService {
+    case GET -> Root / ApiVersion / "ranking" / countryCode as _ =>
       val ioIndex = visaRestrictionIndexService.findIndex(countryCode.as[CountryCode])
       ioIndex.flatMap {
         case Some(index)  => Ok(index.asJson)

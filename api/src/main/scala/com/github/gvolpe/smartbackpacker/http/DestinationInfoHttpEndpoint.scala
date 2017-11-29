@@ -16,8 +16,8 @@ class DestinationInfoHttpEndpoint[F[_] : Effect](countryService: CountryService[
 
   object BaseCurrencyQueryParamMatcher extends QueryParamDecoderMatcher[String]("baseCurrency")
 
-  val service: HttpService[F] = HttpService[F] {
-    case GET -> Root / ApiVersion / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) =>
+  val service: AuthedService[String, F] = AuthedService {
+    case GET -> Root / ApiVersion / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) as _ =>
       val info = countryService.destinationInformation(from.as[CountryCode], to.as[CountryCode], baseCurrency.as[Currency])
       info.flatMap(x => Ok(x.asJson)).recoverWith {
         case e: Exception => BadRequest(Json.fromString(e.getMessage))

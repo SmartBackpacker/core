@@ -16,8 +16,8 @@ class AirlinesHttpEndpoint[F[_] : Effect](airlineService: AirlineService[F]) ext
 
   object AirlineNameQueryParamMatcher extends QueryParamDecoderMatcher[String]("name")
 
-  val service: HttpService[F] = HttpService[F] {
-    case GET -> Root / ApiVersion / "airlines" :? AirlineNameQueryParamMatcher(airline) =>
+  val service: AuthedService[String, F] = AuthedService {
+    case GET -> Root / ApiVersion / "airlines" :? AirlineNameQueryParamMatcher(airline) as _ =>
       val policy = airlineService.baggagePolicy(airline.as[AirlineName])
       policy.>>=(x => Ok(x.asJson)).recoverWith {
         case e: Exception => BadRequest(Json.fromString(e.getMessage))
