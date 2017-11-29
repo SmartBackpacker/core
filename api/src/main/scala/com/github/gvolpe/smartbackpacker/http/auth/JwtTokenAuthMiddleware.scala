@@ -1,10 +1,12 @@
 package com.github.gvolpe.smartbackpacker.http.auth
 
-import cats.Applicative
 import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
+import cats.syntax.applicative._
+import cats.syntax.applicativeError._
+import cats.syntax.either._
 import cats.syntax.functor._
-import com.github.gvolpe.smartbackpacker.http.auth.config.AuthConfig
+import com.github.gvolpe.smartbackpacker.http.auth.JwtTokenAuthMiddleware.AuthConfig
 import org.http4s.Credentials.Token
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{AuthScheme, AuthedService, Request}
@@ -14,38 +16,60 @@ import tsec.jws.mac._
 import tsec.mac.imports._
 import tsec.mac.imports.JCAMacPure._
 
+object JwtTokenAuthMiddleware {
+  def apply[F[_] : Sync]: F[AuthMiddleware[F, String]] = new Middleware[F].middleware
+
+  case class AuthConfig(jwtKey: MacSigningKey[HMACSHA256])
+}
+
+class Middleware[F[_]](implicit F: Sync[F]) {
+
+  private val ApiToken = sys.env.get("SB_API_TOKEN")
+
+  private val ifEmpty = F.raiseError[AuthMiddleware[F, String]](new Exception("Api Token not found"))
+
+  private def generateJwtKey(token: String): F[MacSigningKey[HMACSHA256]] = {
+    F.catchNonFatal(HMACSHA256.buildKeyUnsafe(token.getBytes))
+  }
+
+  val middleware: F[AuthMiddleware[F, String]] = ApiToken.fold(ifEmpty) { token =>
+    generateJwtKey(token).map { jwtKey =>
+      val config = AuthConfig(jwtKey)
+      new JwtTokenAuthMiddleware[F](config).middleware
+    }
+  }
+}
+
 class JwtTokenAuthMiddleware[F[_] : Sync](config: AuthConfig) extends Http4sDsl[F] {
 
   private val onFailure: AuthedService[String, F] =
     Kleisli(req => OptionT.liftF(Forbidden(req.authInfo)))
 
-  def middleware: AuthMiddleware[F, String] =
-    AuthMiddleware(JwtTokenAuthMiddleware.authUser(config.jwtKey), onFailure)
-
-}
-
-object JwtTokenAuthMiddleware {
-
-  def bearerTokenFromRequest[F[_]: Applicative](request: Request[F]): OptionT[F, String] =
+  private def bearerTokenFromRequest(request: Request[F]): OptionT[F, String] =
     OptionT.fromOption[F] {
       request.headers.get(Authorization).collect {
         case Authorization(Token(AuthScheme.Bearer, token)) => token
       }
     }
 
-  def verifyToken[F[_]: Sync](request: Request[F],
-                              jwtKey: MacSigningKey[HMACSHA256]): OptionT[F, String] =
+  private def verifyToken(request: Request[F],
+                          jwtKey: MacSigningKey[HMACSHA256]): OptionT[F, String] =
     for {
-      token       <- bearerTokenFromRequest[F](request)
+      token       <- bearerTokenFromRequest(request)
       verified    <- OptionT.liftF(JWTMacM.verifyAndParse[F, HMACSHA256](token, jwtKey))
       accessToken <- OptionT.fromOption[F](verified.body.subject)
     } yield accessToken
 
-  def authUser[F[_]: Sync](jwtKey: MacSigningKey[HMACSHA256]): Kleisli[F, Request[F], Either[String, String]] =
+  private def authUser(jwtKey: MacSigningKey[HMACSHA256]): Kleisli[F, Request[F], Either[String, String]] =
     Kleisli { request =>
       verifyToken(request, jwtKey).value.map { option =>
         Either.cond[String, String](option.isDefined, option.get, "Unable to authorize token")
+      }.recoverWith {
+        case MacVerificationError(msg) => msg.asLeft[String].pure[F]
       }
     }
+
+  def middleware: AuthMiddleware[F, String] =
+    AuthMiddleware(authUser(config.jwtKey), onFailure)
 
 }

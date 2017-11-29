@@ -1,1 +1,1 @@
-web: api/target/universal/stage/bin/api
+web: api/target/universal/stage/bin/server
