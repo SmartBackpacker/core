@@ -3,7 +3,7 @@ package com.github.gvolpe.smartbackpacker.http
 import cats.effect.IO
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
-import com.github.gvolpe.smartbackpacker.http.ResponseBodyUtils._
+import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.persistence.VisaRequirementsDao
 import com.github.gvolpe.smartbackpacker.service.{AbstractExchangeRateService, CountryService, CurrencyExchangeDTO}
@@ -58,8 +58,11 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     }
   }
 
-  val httpService: HttpService[IO] = new DestinationInfoHttpEndpoint(
-    new CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService)
-  ).service
+  val httpService: HttpService[IO] =
+    middleware(
+      new DestinationInfoHttpEndpoint(
+        new CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService)
+      ).service
+    )
 
 }

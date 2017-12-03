@@ -27,6 +27,8 @@ class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers wi
 
 trait VisaRestrictionIndexFixture extends PropertyChecks {
 
+  import Http4sUtils._
+
   object MockVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
     override def findIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
       IO {
@@ -40,13 +42,19 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
       IO.raiseError(new Exception("test"))
   }
 
-  private val goodHttpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
-    new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexDao)
-  ).service
+  private val goodHttpService: HttpService[IO] =
+    middleware(
+      new VisaRestrictionIndexHttpEndpoint(
+        new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexDao)
+      ).service
+    )
 
-  private val badHttpService: HttpService[IO] = new VisaRestrictionIndexHttpEndpoint(
-    new VisaRestrictionIndexService[IO](FailedVisaRestrictionIndexDao)
-  ).service
+  private val badHttpService: HttpService[IO] =
+    middleware(
+      new VisaRestrictionIndexHttpEndpoint(
+        new VisaRestrictionIndexService[IO](FailedVisaRestrictionIndexDao)
+      ).service
+    )
 
   val examples = Table(
     ("countryCode", "expectedStatus", "httpService"),

@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
-import com.github.gvolpe.smartbackpacker.http.ResponseBodyUtils._
+import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.persistence.AirlineDao
 import com.github.gvolpe.smartbackpacker.service.AirlineService
@@ -54,9 +54,11 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
   }
 
   val httpService: HttpService[IO] =
-    new AirlinesHttpEndpoint(
-      new AirlineService[IO](testAirlineDao)
-    ).service
+    middleware(
+      new AirlinesHttpEndpoint(
+        new AirlineService[IO](testAirlineDao)
+      ).service
+    )
 
   val examples = Table(
     ("airline", "expectedStatus", "expectedBody"),
