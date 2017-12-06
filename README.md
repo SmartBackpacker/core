@@ -10,7 +10,7 @@ Smart Backpacker
 
 #### Api
 
-It's the main back-end application exposing the Http Rest API and handling the database connection.
+It's the main back-end application exposing the Http Rest API. It also contains a token generator.
 
 - Dependencies
     - [Fixer.io](http://fixer.io/) running on [localhost:8081](http://localhost:8081) using `docker-compose`. See the source code [here](https://github.com/hakanensari/fixer).
