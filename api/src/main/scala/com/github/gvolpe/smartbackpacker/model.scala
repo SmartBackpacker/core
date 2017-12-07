@@ -123,11 +123,8 @@ object model {
   case object CheckedBag  extends BaggageType
 
   object BaggageType {
-    def fromString(value: String): Option[BaggageType] = value match {
-      case "SmallBag"   => Some(SmallBag)
-      case "CabinBag"   => Some(CabinBag)
-      case "CheckedBag" => Some(CheckedBag)
-      case _            => None
+    def fromString(value: String): Option[BaggageType] = {
+      List(SmallBag, CabinBag, CheckedBag).find(_.toString == value)
     }
   }
 

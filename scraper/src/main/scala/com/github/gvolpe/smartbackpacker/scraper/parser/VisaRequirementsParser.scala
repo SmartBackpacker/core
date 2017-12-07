@@ -3,8 +3,8 @@ package com.github.gvolpe.smartbackpacker.scraper.parser
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
-import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL._
@@ -17,7 +17,7 @@ class VisaRequirementsParser[F[_]](implicit F: Sync[F]) extends AbstractVisaRequ
 
   override def htmlDocument(from: CountryCode): F[Document] = {
     val ifEmpty: F[Document] = F.raiseError(WikiPageNotFound(from.value))
-    SBConfiguration.wikiPage(from).fold(ifEmpty) { wikiPage =>
+    ScraperConfiguration.wikiPage(from).fold(ifEmpty) { wikiPage =>
       F.delay {
         val browser = new JsoupBrowser()
         browser.get(wikiPage)
@@ -40,7 +40,7 @@ abstract class AbstractVisaRequirementsParser[F[_] : Functor] {
   }
 
   private def countryCodeFor(name: CountryName): Option[CountryCode] = {
-    SBConfiguration.countriesWithNames().find(_.names.map(_.value).contains(name.value)).map(_.code)
+    ScraperConfiguration.countriesWithNames().find(_.names.map(_.value).contains(name.value)).map(_.code)
   }
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns

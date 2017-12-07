@@ -3,8 +3,8 @@ package com.github.gvolpe.smartbackpacker.scraper.parser
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
-import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.model.VisaRestrictionsRanking
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
@@ -39,8 +39,8 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
       }.toList
 
       for {
-        code    <- SBConfiguration.countriesCode()
-        names   = SBConfiguration.countryNames(code)
+        code    <- ScraperConfiguration.countriesCode()
+        names   = ScraperConfiguration.countryNames(code)
         index   <- ranking
         country <- index.countries
         if names.contains(country)

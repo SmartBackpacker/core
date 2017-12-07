@@ -4,8 +4,8 @@ import cats.Applicative
 import cats.effect.IO
 import cats.instances.list._
 import com.github.gvolpe.smartbackpacker.common.IOApp
-import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.parser.{VisaRequirementsParser, VisaRestrictionsIndexParser}
 import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
 import doobie.util.transactor.Transactor
@@ -14,14 +14,16 @@ import org.joda.time.format.DateTimeFormat
 
 object ScraperJob extends IOApp {
 
-  private val devDbUrl = sys.env.getOrElse("JDBC_DATABASE_URL", "")
-  private val dbDriver = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
+  private val devDbUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+
+  private val dbDriver  = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
+  private val dbUrl     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
+  private val dbUser    = sys.env.getOrElse("SB_DB_USER", "postgres")
+  private val dbPass    = sys.env.getOrElse("SB_DB_PASSWORD", "")
 
   private val xa = {
     if (devDbUrl.nonEmpty) Transactor.fromDriverManager[IO](dbDriver, devDbUrl)
-    else Transactor.fromDriverManager[IO](
-      dbDriver, "jdbc:postgresql:sb", "postgres", sys.env.getOrElse("SB_DB_PASSWORD", "")
-    )
+    else Transactor.fromDriverManager[IO](dbDriver, dbUrl, dbUser, dbPass)
   }
 
   private val visaRequirementsParser      = new VisaRequirementsParser[IO]()
@@ -64,7 +66,7 @@ object ScraperJob extends IOApp {
     } yield ()
 
   val visaRequirementsProgram: IO[Unit] = {
-    val codes  = SBConfiguration.countriesCode()
+    val codes  = ScraperConfiguration.countriesCode()
     Applicative[IO].traverse(codes)(c => visaRequirementsProgramFor(c)).map(_ => ())
   }
 

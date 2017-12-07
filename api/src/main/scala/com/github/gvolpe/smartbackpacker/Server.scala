@@ -10,7 +10,7 @@ import org.http4s.util.{ExitCode, StreamApp}
 
 object Server extends HttpServer[IO]
 
-class HttpServer[F[_]](implicit F : Effect[F]) extends StreamApp[F] {
+class HttpServer[F[_] : Effect] extends StreamApp[F] {
 
   private val ctx = new Bindings[F]
 
