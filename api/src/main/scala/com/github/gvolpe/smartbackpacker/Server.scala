@@ -4,9 +4,9 @@ import cats.effect.{Effect, IO}
 import cats.syntax.semigroupk._
 import com.github.gvolpe.smartbackpacker.http._
 import com.github.gvolpe.smartbackpacker.http.auth.JwtTokenAuthMiddleware
-import fs2.{Scheduler, Stream}
+import fs2.StreamApp.ExitCode
+import fs2.{Scheduler, Stream, StreamApp}
 import org.http4s.server.blaze.BlazeBuilder
-import org.http4s.util.{ExitCode, StreamApp}
 
 object Server extends HttpServer[IO]
 

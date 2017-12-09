@@ -40,7 +40,7 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: Airlin
     } yield ()
 
   def run: F[Unit] = {
-    airlinesParser.airlines.runLogSync.flatMap { airlines =>
+    airlinesParser.airlines.runLog.flatMap { airlines =>
       Applicative[F].traverse(airlines)(a => program(a).transact(xa)).map(_ => ())
     }
   }

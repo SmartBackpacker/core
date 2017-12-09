@@ -41,7 +41,7 @@ class AirlinesFileParser[F[_] : Sync](airlineFile: AirlineFile, allowanceFile: A
   }
 
   private val allowanceGroupedByName: Stream[F, List[(String, BaggageAllowance)]] =
-    allowance.groupBy(_._1).map(_._2.toList)
+    allowance.groupAdjacentBy(_._1).map(_._2.force.toList)
 
   val airlines: Stream[F, Airline] = parseAirline flatMap {
     case Some(dto) =>
