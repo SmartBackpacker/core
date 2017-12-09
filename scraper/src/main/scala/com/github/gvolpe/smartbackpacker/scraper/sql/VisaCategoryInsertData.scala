@@ -12,7 +12,7 @@ import scala.reflect.runtime.{universe => ru}
 
 class VisaCategoryInsertData[F[_] : Async](xa : Transactor[F]) {
 
-  private def insertVisaCategoriesBulk(categories: List[String])  = {
+  private def insertVisaCategoriesBulk(categories: List[String]) = {
     val sql = "INSERT INTO visa_category (name) VALUES (?)"
     Update[String](sql).updateMany(categories)
   }

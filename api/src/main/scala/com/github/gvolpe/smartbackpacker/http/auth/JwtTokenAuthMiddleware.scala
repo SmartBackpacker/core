@@ -17,14 +17,13 @@ import tsec.mac.imports._
 import tsec.mac.imports.JCAMacPure._
 
 object JwtTokenAuthMiddleware {
-  def apply[F[_] : Sync]: F[AuthMiddleware[F, String]] = new Middleware[F].middleware
+  def apply[F[_] : Sync](apiToken: Option[String]): F[AuthMiddleware[F, String]] =
+    new Middleware[F](apiToken).middleware
 
   case class AuthConfig(jwtKey: MacSigningKey[HMACSHA256])
 }
 
-class Middleware[F[_]](implicit F: Sync[F]) {
-
-  private val ApiToken = sys.env.get("SB_API_TOKEN")
+class Middleware[F[_]](apiToken: Option[String])(implicit F: Sync[F]) {
 
   private val ifEmpty = F.raiseError[AuthMiddleware[F, String]](new Exception("Api Token not found"))
 
@@ -32,7 +31,7 @@ class Middleware[F[_]](implicit F: Sync[F]) {
     F.catchNonFatal(HMACSHA256.buildKeyUnsafe(token.getBytes))
   }
 
-  val middleware: F[AuthMiddleware[F, String]] = ApiToken.fold(ifEmpty) { token =>
+  val middleware: F[AuthMiddleware[F, String]] = apiToken.fold(ifEmpty) { token =>
     generateJwtKey(token).map { jwtKey =>
       val config = AuthConfig(jwtKey)
       new JwtTokenAuthMiddleware[F](config).middleware

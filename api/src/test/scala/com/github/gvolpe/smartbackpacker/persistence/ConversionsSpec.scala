@@ -47,6 +47,15 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
     }
   }
 
+  forAll { (data: VisaRequirementsData) =>
+    test(s"convert VisaRequirementsDTO into a $data") {
+      val dto   = data.visaCategory.toString :: data.description :: HNil
+      val from  = 1 :: data.from.code.value :: data.from.name.value :: HNil
+      val to    = 1 :: data.to.code.value :: data.to.name.value :: HNil
+      assert(dto.toVisaRequirementsData(from, to) == data)
+    }
+  }
+
 }
 
 trait ConversionsArbitraries {
@@ -94,6 +103,33 @@ trait ConversionsArbitraries {
       c <- Gen.posNum[Int]
       s <- Gen.posNum[Int]
     } yield VisaRestrictionsIndex(r, c, s)
+  }
+
+  implicit val country: Arbitrary[Country] = Arbitrary[Country] {
+    for {
+      c <- Gen.alphaUpperStr
+      n <- Gen.alphaStr
+    } yield Country(new CountryCode(c), new CountryName(n))
+  }
+
+  implicit val visaCategory: Arbitrary[VisaCategory] = Arbitrary[VisaCategory] {
+    val list = List(
+      VisaNotRequired, VisaWaiverProgram, AdmissionRefused, TravelBanned,
+      VisaRequired, VisaDeFactoRequired, ElectronicVisa, ElectronicVisitor,
+      ElectronicTravelAuthority, FreeVisaOnArrival, VisaOnArrival,
+      ElectronicVisaPlusVisaOnArrival, OnlineReciprocityFee,
+      MainlandTravelPermit, HomeReturnPermitOnly
+    )
+    Gen.oneOf(list)
+  }
+
+  implicit val visaRequirementsData: Arbitrary[VisaRequirementsData] = Arbitrary[VisaRequirementsData] {
+    for {
+      from <- arbitrary[Country]
+      to   <- arbitrary[Country]
+      cat  <- arbitrary[VisaCategory]
+      desc <- Gen.alphaStr
+    } yield VisaRequirementsData(from, to, cat, desc)
   }
 
 }

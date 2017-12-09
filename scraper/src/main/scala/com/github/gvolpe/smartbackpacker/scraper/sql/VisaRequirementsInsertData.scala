@@ -8,13 +8,13 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.scraper.parser.VisaRequirementsParser
+import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractVisaRequirementsParser
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 
 class VisaRequirementsInsertData[F[_]](xa: Transactor[F],
-                                       visaRequirementsParser: VisaRequirementsParser[F])
+                                       visaRequirementsParser: AbstractVisaRequirementsParser[F])
                                       (implicit F: Async[F]) {
 
   private def insertVisaRequirementsBulk(list: List[VisaRequirementsFor]) = {

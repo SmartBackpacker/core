@@ -18,12 +18,13 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       "-Ypartial-unification"
     )
   )),
+  parallelExecution in Test := true,
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += "jmcardon at bintray" at "https://dl.bintray.com/jmcardon/tsec",
   addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.4" cross CrossVersion.binary),
   // TODO: The following objects / classes should be excluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
   //;.*ExchangeRateService*, VisaRequirementsParser, VisaRestrictionsIndexParser
-  coverageExcludedPackages := ".*Server*;.*Bindings*;.*IOApp*;.*IOAssertion*;.*AirlinesJob*;.*ScraperJob*",
+  coverageExcludedPackages := ".*Server*;.*Bindings*;.*IOApp*;.*IOAssertion*;.*AirlinesJob*;.*ScraperJob*;.*ApiTokenGenerator*;.*TokenGeneration*;.*VisaRequirementsInsertData*;.*JwtTokenAuthMiddleware*",
   libraryDependencies ++= Seq(
     http4sServer,
     http4sClient,

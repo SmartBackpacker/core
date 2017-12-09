@@ -7,21 +7,23 @@ import doobie.h2.H2Transactor
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
-import org.scalatest.{FlatSpecLike, Matchers}
+import org.scalatest.FunSuite
 
-class VisaRestrictionsIndexDaoSpec extends VisaRestrictionsIndexDaoFixture with FlatSpecLike with Matchers {
+class VisaRestrictionsIndexInsertDataSpec extends FunSuite with VisaRestrictionsIndexFixture {
 
-  it should "create table and insert data" in IOAssertion {
-    for {
-      xa <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
-      _  <- createVisaIndexTable(xa)
-      _  <- new VisaRestrictionsIndexInsertData[IO](xa).run(countries)
-    } yield ()
+  test("create table visa_restrictions_index and insert data") {
+    IOAssertion {
+      for {
+        xa <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+        _  <- createVisaIndexTable(xa)
+        _  <- new VisaRestrictionsIndexInsertData[IO](xa).run(countries)
+      } yield ()
+    }
   }
 
 }
 
-trait VisaRestrictionsIndexDaoFixture {
+trait VisaRestrictionsIndexFixture {
 
   val countries = List(
     (new CountryCode("AR"), VisaRestrictionsIndex(1,176,1)),
