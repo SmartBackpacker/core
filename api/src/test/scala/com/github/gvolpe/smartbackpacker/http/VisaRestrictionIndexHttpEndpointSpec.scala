@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
-import com.github.gvolpe.smartbackpacker.model.{CountryCode, VisaRestrictionsIndex}
+import com.github.gvolpe.smartbackpacker.model.{Count, CountryCode, Ranking, Sharing, VisaRestrictionsIndex}
 import com.github.gvolpe.smartbackpacker.persistence.VisaRestrictionsIndexDao
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
 import org.http4s.{HttpService, Request, Status, Uri}
@@ -32,35 +32,22 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
   object MockVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
     override def findIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
       IO {
-        if (countryCode.value == "AR") Some(VisaRestrictionsIndex(0,0,0))
+        if (countryCode.value == "AR") Some(VisaRestrictionsIndex(new Ranking(0), new Count(0), new Sharing(0)))
         else None
       }
   }
 
-  object FailedVisaRestrictionIndexDao extends VisaRestrictionsIndexDao[IO] {
-    override def findIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
-      IO.raiseError(new Exception("test"))
-  }
-
-  private val goodHttpService: HttpService[IO] =
+  private val httpService: HttpService[IO] =
     middleware(
       new VisaRestrictionIndexHttpEndpoint(
         new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexDao)
       ).service
     )
 
-  private val badHttpService: HttpService[IO] =
-    middleware(
-      new VisaRestrictionIndexHttpEndpoint(
-        new VisaRestrictionIndexService[IO](FailedVisaRestrictionIndexDao)
-      ).service
-    )
-
   val examples = Table(
     ("countryCode", "expectedStatus", "httpService"),
-    ("AR", Status.Ok, goodHttpService),
-    ("XX", Status.NotFound, goodHttpService),
-    ("IE", Status.BadRequest, badHttpService)
+    ("AR", Status.Ok, httpService),
+    ("XX", Status.NotFound, httpService)
   )
 
 }

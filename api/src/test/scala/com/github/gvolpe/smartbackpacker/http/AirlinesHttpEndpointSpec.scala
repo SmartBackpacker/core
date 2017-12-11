@@ -64,7 +64,7 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
     ("airline", "expectedStatus", "expectedBody"),
     ("Aer Lingus", Status.Ok, "baggagePolicy"),
     ("Transavia", Status.Ok, "baggagePolicy"),
-    ("Ryan Air", Status.BadRequest, "Airline not found")
+    ("Ryan Air", Status.NotFound, "Airline not found")
   )
 
 }

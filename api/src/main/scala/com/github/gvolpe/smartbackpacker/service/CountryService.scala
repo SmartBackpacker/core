@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker.service
 
-import cats.effect.Sync
+import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
@@ -10,7 +10,7 @@ import com.github.gvolpe.smartbackpacker.persistence.VisaRequirementsDao
 
 class CountryService[F[_]](visaRequirementsDao: VisaRequirementsDao[F],
                            exchangeRateService: AbstractExchangeRateService[F])
-                          (implicit F: Sync[F]) {
+                          (implicit F: MonadError[F, Throwable]) {
 
   def destinationInformation(from: CountryCode, to: CountryCode, baseCurrency: Currency): F[DestinationInfo] =
     validateCountries(from, to) flatMap { _ =>

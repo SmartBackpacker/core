@@ -46,9 +46,9 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
         if names.contains(country)
       } yield {
         val visaIndex = VisaRestrictionsIndex(
-          rank = index.rank,
-          count = index.count,
-          sharing = index.countries.size
+          rank = new Ranking(index.rank),
+          count = new Count(index.count),
+          sharing = new Sharing(index.countries.size)
         )
         (code, visaIndex)
       }

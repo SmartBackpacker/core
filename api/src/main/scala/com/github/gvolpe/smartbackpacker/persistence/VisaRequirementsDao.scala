@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker.persistence
 
-import cats.effect.Async
+import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.option.none
@@ -10,7 +10,8 @@ import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
-class PostgresVisaRequirementsDao[F[_] : Async](xa: Transactor[F]) extends VisaRequirementsDao[F] {
+class PostgresVisaRequirementsDao[F[_]](xa: Transactor[F])
+                                       (implicit F: MonadError[F, Throwable]) extends VisaRequirementsDao[F] {
 
   override def find(from: CountryCode, to: CountryCode): F[Option[VisaRequirementsData]] = {
     val fromStatement: ConnectionIO[CountryDTO] =

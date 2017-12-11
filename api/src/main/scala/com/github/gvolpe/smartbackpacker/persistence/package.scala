@@ -36,9 +36,9 @@ package object persistence {
   implicit class RestrictionsIndexConversions(index: RestrictionsIndexDTO) {
     def toVisaRestrictionsIndex: VisaRestrictionsIndex =
       VisaRestrictionsIndex(
-        rank = index.head,
-        count = index.tail.head,
-        sharing = index.last
+        rank = new Ranking(index.head),
+        count = new Count(index.tail.head),
+        sharing = new Sharing(index.last)
       )
   }
 

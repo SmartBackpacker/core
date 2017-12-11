@@ -2,7 +2,7 @@ package com.github.gvolpe.smartbackpacker.scraper.sql
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
-import com.github.gvolpe.smartbackpacker.model.{CountryCode, VisaRestrictionsIndex}
+import com.github.gvolpe.smartbackpacker.model.{Count, CountryCode, Ranking, Sharing, VisaRestrictionsIndex}
 import doobie.h2.H2Transactor
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -26,9 +26,9 @@ class VisaRestrictionsIndexInsertDataSpec extends FunSuite with VisaRestrictions
 trait VisaRestrictionsIndexFixture {
 
   val countries = List(
-    (new CountryCode("AR"), VisaRestrictionsIndex(1,176,1)),
-    (new CountryCode("DE"), VisaRestrictionsIndex(2,175,1)),
-    (new CountryCode("JP"), VisaRestrictionsIndex(3,173,2))
+    (new CountryCode("AR"), VisaRestrictionsIndex(new Ranking(1), new Count(176), new Sharing(1))),
+    (new CountryCode("DE"), VisaRestrictionsIndex(new Ranking(2), new Count(175), new Sharing(1))),
+    (new CountryCode("JP"), VisaRestrictionsIndex(new Ranking(3), new Count(173), new Sharing(2)))
   )
 
   private def createVisaIndexTableStatement: Update0 =

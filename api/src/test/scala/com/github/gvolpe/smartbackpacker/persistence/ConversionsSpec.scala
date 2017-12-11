@@ -35,14 +35,14 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
 
   forAll { (dto: RestrictionsIndexDTO) =>
     test(s"convert a $dto to VisaRestrictionsIndex") {
-      val expected = VisaRestrictionsIndex(rank = dto(0), count = dto(1), sharing = dto(2))
+      val expected = VisaRestrictionsIndex(new Ranking(dto(0)), new Count(dto(1)), new Sharing(dto(2)))
       assert(dto.toVisaRestrictionsIndex == expected)
     }
   }
 
   forAll { (index: VisaRestrictionsIndex) =>
     test(s"convert a RestrictionsIndexDTO to $index") {
-      val dto = index.rank :: index.count :: index.sharing :: HNil
+      val dto = index.rank.value :: index.count.value :: index.sharing.value :: HNil
       assert(dto.toVisaRestrictionsIndex == index)
     }
   }
@@ -102,7 +102,7 @@ trait ConversionsArbitraries {
       r <- Gen.posNum[Int]
       c <- Gen.posNum[Int]
       s <- Gen.posNum[Int]
-    } yield VisaRestrictionsIndex(r, c, s)
+    } yield VisaRestrictionsIndex(new Ranking(r), new Count(c), new Sharing(s))
   }
 
   implicit val country: Arbitrary[Country] = Arbitrary[Country] {

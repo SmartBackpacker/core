@@ -1,12 +1,12 @@
 package com.github.gvolpe.smartbackpacker.service
 
-import cats.effect.{Async, Sync}
+import cats.effect.Sync
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
-import com.github.gvolpe.smartbackpacker.persistence.AirlineDao
 import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, AirlineNotFound}
+import com.github.gvolpe.smartbackpacker.persistence.AirlineDao
 
-class AirlineService[F[_] : Async](airlineDao: AirlineDao[F]) {
+class AirlineService[F[_] : Sync](airlineDao: AirlineDao[F]) {
 
   def baggagePolicy(airlineName: AirlineName): F[Airline] = {
     val ifEmpty = Sync[F].raiseError[Airline](AirlineNotFound(airlineName.value))

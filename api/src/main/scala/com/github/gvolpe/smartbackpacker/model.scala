@@ -150,6 +150,10 @@ object model {
   case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
   case class PlacesCount(value: Int)        extends VisaRestrictionsIndexValues
 
-  case class VisaRestrictionsIndex(rank: Int, count: Int, sharing: Int)
+  class Ranking(val value: Int) extends AnyVal
+  class Count(val value: Int) extends AnyVal
+  class Sharing(val value: Int) extends AnyVal
+
+  case class VisaRestrictionsIndex(rank: Ranking, count: Count, sharing: Sharing)
 
 }

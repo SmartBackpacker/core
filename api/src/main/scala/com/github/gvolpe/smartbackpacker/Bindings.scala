@@ -20,7 +20,7 @@ class Bindings[F[_] : Effect] {
     else Transactor.fromDriverManager[F](dbDriver, dbUrl, dbUser, dbPass)
   }
 
-  lazy val ApiToken = sys.env.get("SB_API_TOKEN")
+  lazy val ApiToken: Option[String] = sys.env.get("SB_API_TOKEN")
 
   lazy val visaRestrictionsIndexDao: VisaRestrictionsIndexDao[F] =
     new PostgresVisaRestrictionsIndexDao[F](xa)

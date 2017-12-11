@@ -36,7 +36,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val examples = Table(
     ("from", "code", "expectedStatus","expectedCountry", "expectedVisa"),
     ("AR", "GB", Status.Ok, "United Kingdom", "VisaNotRequired"),
-    ("AR", "KO", Status.BadRequest, "Country code not found", "")
+    ("AR", "KO", Status.NotFound, "Country not found", "")
   )
 
   object MockVisaRequirementsDao extends VisaRequirementsDao[IO] {

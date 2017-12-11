@@ -14,7 +14,9 @@ class VisaRestrictionsIndexInsertData[F[_] : Async](xa: Transactor[F]) {
 
   private def insertVisaIndexBulk(list: List[(CountryCode, VisaRestrictionsIndex)]) = {
     val sql = "INSERT INTO visa_restrictions_index (country_code, rank, acc, sharing) VALUES (?, ?, ?, ?)"
-    val dtoList: List[CreateVisaIndexDTO] = list.map { case (code, index) => (code.value, index.rank, index.count, index.sharing) }
+    val dtoList: List[CreateVisaIndexDTO] = list.map { case (code, index) =>
+      (code.value, index.rank.value, index.count.value, index.sharing.value)
+    }
     Update[CreateVisaIndexDTO](sql).updateMany(dtoList)
   }
 

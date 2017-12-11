@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker.http
 
-import cats.effect._
+import cats.MonadError
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import com.github.gvolpe.smartbackpacker.model._
@@ -12,7 +12,8 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class AirlinesHttpEndpoint[F[_] : Effect](airlineService: AirlineService[F]) extends Http4sDsl[F] {
+class AirlinesHttpEndpoint[F[_]](airlineService: AirlineService[F])
+                                (implicit F: MonadError[F, Throwable]) extends Http4sDsl[F] {
 
   object AirlineNameQueryParamMatcher extends QueryParamDecoderMatcher[String]("name")
 
@@ -20,7 +21,7 @@ class AirlinesHttpEndpoint[F[_] : Effect](airlineService: AirlineService[F]) ext
     case GET -> Root / ApiVersion / "airlines" :? AirlineNameQueryParamMatcher(airline) as _ =>
       val policy = airlineService.baggagePolicy(airline.as[AirlineName])
       policy.flatMap(x => Ok(x.asJson)).recoverWith {
-        case e: Exception => BadRequest(Json.fromString(e.getMessage))
+        case AirlineNotFound(a) => NotFound(Json.fromString(s"Airline not found $a"))
       }
   }
 

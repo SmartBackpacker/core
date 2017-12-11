@@ -1,11 +1,9 @@
 package com.github.gvolpe.smartbackpacker.http
 
 import cats.effect._
-import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
-import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
@@ -21,8 +19,6 @@ class VisaRestrictionIndexHttpEndpoint[F[_] : Effect]
       ioIndex.flatMap {
         case Some(index)  => Ok(index.asJson)
         case None         => NotFound(countryCode)
-      }.recoverWith {
-        case e: Exception => BadRequest(Json.fromString(e.getMessage))
       }
   }
 
