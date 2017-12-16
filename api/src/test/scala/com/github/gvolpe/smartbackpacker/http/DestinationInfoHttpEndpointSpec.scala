@@ -36,7 +36,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val examples = Table(
     ("from", "code", "expectedStatus","expectedCountry", "expectedVisa"),
     ("AR", "GB", Status.Ok, "United Kingdom", "VisaNotRequired"),
-    ("AR", "KO", Status.NotFound, "Country not found", "")
+    ("AR", "KO", Status.NotFound, "Country not found", """{"code":"100","error":"Country not found KO"}""")
   )
 
   object MockVisaRequirementsDao extends VisaRequirementsDao[IO] {
@@ -61,7 +61,8 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new DestinationInfoHttpEndpoint(
-        new CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService)
+        new CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService),
+        new HttpErrorHandler[IO]
       ).service
     )
 

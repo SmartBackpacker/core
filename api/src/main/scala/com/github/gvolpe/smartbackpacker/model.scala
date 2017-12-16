@@ -140,8 +140,6 @@ object model {
 
   case class Airline(name: AirlineName, baggagePolicy: BaggagePolicy)
 
-  case class AirlineNotFound(airlineName: String) extends Exception(s"Airline not found $airlineName")
-
   case class WikiPageNotFound(wikiPage: String) extends Exception(s"Wiki Page not found for $wikiPage")
 
   // Visa Restriction Index

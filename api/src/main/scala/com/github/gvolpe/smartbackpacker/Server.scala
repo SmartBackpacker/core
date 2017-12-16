@@ -15,10 +15,10 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
   private val ctx = new Bindings[F]
 
   private val destinationInfoHttpEndpoint =
-    new DestinationInfoHttpEndpoint[F](ctx.countryService).service
+    new DestinationInfoHttpEndpoint[F](ctx.countryService, ctx.httpErrorHandler).service
 
   private val airlinesHttpEndpoint =
-    new AirlinesHttpEndpoint[F](ctx.airlineService).service
+    new AirlinesHttpEndpoint[F](ctx.airlineService, ctx.httpErrorHandler).service
 
   private val visaRestrictionIndexHttpEndpoint =
     new VisaRestrictionIndexHttpEndpoint[F](ctx.visaRestrictionsIndexService).service

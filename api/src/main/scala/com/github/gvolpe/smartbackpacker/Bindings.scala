@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
+import com.github.gvolpe.smartbackpacker.http.HttpErrorHandler
 import com.github.gvolpe.smartbackpacker.persistence.{AirlineDao, PostgresAirlineDao, PostgresVisaRequirementsDao, PostgresVisaRestrictionsIndexDao, VisaRequirementsDao, VisaRestrictionsIndexDao}
 import com.github.gvolpe.smartbackpacker.service.{AirlineService, CountryService, ExchangeRateService, VisaRestrictionIndexService}
 import doobie.util.transactor.Transactor
@@ -19,6 +20,8 @@ class Bindings[F[_] : Effect] {
     if (devDbUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbUrl)
     else Transactor.fromDriverManager[F](dbDriver, dbUrl, dbUser, dbPass)
   }
+
+  lazy val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
 
   lazy val ApiToken: Option[String] = sys.env.get("SB_API_TOKEN")
 

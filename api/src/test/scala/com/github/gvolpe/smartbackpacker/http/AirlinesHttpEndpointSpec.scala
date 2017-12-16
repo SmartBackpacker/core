@@ -56,7 +56,8 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new AirlinesHttpEndpoint(
-        new AirlineService[IO](testAirlineDao)
+        new AirlineService[IO](testAirlineDao),
+        new HttpErrorHandler[IO]
       ).service
     )
 
@@ -64,7 +65,7 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
     ("airline", "expectedStatus", "expectedBody"),
     ("Aer Lingus", Status.Ok, "baggagePolicy"),
     ("Transavia", Status.Ok, "baggagePolicy"),
-    ("Ryan Air", Status.NotFound, "Airline not found")
+    ("Ryan Air", Status.NotFound, """{"code":"100","error":"Airline not found Ryan Air"}""")
   )
 
 }

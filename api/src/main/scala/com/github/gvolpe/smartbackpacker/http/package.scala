@@ -7,6 +7,20 @@ package object http {
 
   val ApiVersion = "v1"
 
+  class ApiErrorCode(val value: Int) extends AnyVal
+
+  object ApiErrorCode {
+    val ENTITY_NOT_FOUND = new ApiErrorCode(100)
+    val SAME_COUNTRIES_SEARCH = new ApiErrorCode(101)
+  }
+
+  case class ApiError(code: ApiErrorCode, error: String)
+
+  // --- Json encoders ---
+  implicit val apiErrorCodeEncoder: Encoder[ApiErrorCode] = Encoder.instance {
+    x => Json.fromString(x.value.toString)
+  }
+
   implicit val countryCodeEncoder: Encoder[CountryCode] = Encoder.instance {
     x => Json.fromString(x.value)
   }
