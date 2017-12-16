@@ -4,10 +4,18 @@ import scala.reflect.ClassTag
 
 object model {
 
-  class CountryCode(val value: String) extends AnyVal
-  class CountryName(val value: String) extends AnyVal
-  class Currency(val value: String) extends AnyVal
-  class AirlineName(val value: String) extends AnyVal
+  class CountryCode(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class CountryName(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class Currency(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class AirlineName(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
 
   sealed trait VisaCategory extends Product with Serializable
   case object VisaNotRequired                 extends VisaCategory
@@ -148,10 +156,44 @@ object model {
   case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
   case class PlacesCount(value: Int)        extends VisaRestrictionsIndexValues
 
-  class Ranking(val value: Int) extends AnyVal
-  class Count(val value: Int) extends AnyVal
-  class Sharing(val value: Int) extends AnyVal
+  class Ranking(val value: Int) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class Count(val value: Int) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class Sharing(val value: Int) extends AnyVal {
+    override def toString: String = value.toString
+  }
 
   case class VisaRestrictionsIndex(rank: Ranking, count: Count, sharing: Sharing)
+
+  // Health Information
+  class Disease(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class WebLink(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  class AlertLevel(val value: String) extends AnyVal {
+    override def toString: String = value.toString
+  }
+
+  sealed trait DiseaseCategory extends Product with Serializable
+  case object AvoidNonSterileEquipment extends DiseaseCategory
+  case object TakeAntimalarialMeds extends DiseaseCategory
+  case object GetVaccinated extends DiseaseCategory
+  case object AvoidSharingBodyFluids extends DiseaseCategory
+  case object ReduceExposureToGerms extends DiseaseCategory
+  case object EatAndDrinkSafely extends DiseaseCategory
+  case object PreventBugBites extends DiseaseCategory
+  case object KeepAwayFromAnimals extends DiseaseCategory
+  case object UnknownDiseaseCategory extends DiseaseCategory
+
+  case class Vaccine(disease: Disease, description: String, diseaseCategories: List[DiseaseCategory])
+  case class Vaccinations(recommendations: List[Vaccine], optional: List[Vaccine])
+  case class HealthAlert(title: String, link: WebLink, description: String)
+  case class HealthNotices(alertLevel: AlertLevel, alert: List[HealthAlert])
+  case class Health(vaccinations: Vaccinations, notices: HealthNotices)
 
 }

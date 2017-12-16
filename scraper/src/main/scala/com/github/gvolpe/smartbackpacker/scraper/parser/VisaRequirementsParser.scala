@@ -51,8 +51,7 @@ abstract class AbstractVisaRequirementsParser[F[_] : Functor] {
 
     Try(e.attr("colspan")) match {
       case Success(cs) if cs == "2" => Seq(text, "")
-      case Success(_)               => Seq(text)
-      case Failure(_)               => Seq(text)
+      case _                        => Seq(text)
     }
   }
 

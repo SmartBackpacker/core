@@ -13,6 +13,10 @@ object ScraperConfiguration {
     safeConfig.string(s"visa-requirements.page.${countryCode.value}")
   }
 
+  def healthPage(countryCode: CountryCode): Option[String] = {
+    safeConfig.string(s"health.page.${countryCode.value}")
+  }
+
   def countries(): List[Country] = {
     safeConfig.objectMap("countries.name").map(kv =>
       (kv._1.as[CountryCode], kv._2.headOption.getOrElse("Empty").as[CountryName])
