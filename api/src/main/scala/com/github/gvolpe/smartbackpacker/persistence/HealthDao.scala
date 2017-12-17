@@ -15,25 +15,25 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
                              (implicit F: MonadError[F, Throwable]) extends HealthDao[F] {
 
   override def findHealthInfo(from: CountryCode): F[Option[Health]] = {
-    private val recommendationsStatement: ConnectionIO[VaccineDTO] =
+    val recommendationsStatement: ConnectionIO[List[VaccineDTO]] =
       sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_code = ${from.value}"
         .query[VaccineDTO].list
 
-    private val optionalStatement: ConnectionIO[VaccineDTO] =
+    val optionalStatement: ConnectionIO[List[VaccineDTO]] =
       sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_code = ${from.value}"
         .query[VaccineDTO].list
 
-    private val healthNoticesStatement: ConnectionIO[HealthNoticeDTO] =
+    val healthNoticesStatement: ConnectionIO[List[HealthNoticeDTO]] =
       sql"SELECT ha.title, ha.weblink, ha.description FROM health_notice AS hn INNER JOIN health_alert AS ha ON hn.alert_id = ha.id WHERE hn.country_code = ${from.value}"
         .query[HealthNoticeDTO].list
 
-    private val healthAlertStatement: ConnectionIO[HealthAlertDTO] =
+    val healthAlertStatement: ConnectionIO[HealthAlertDTO] =
       sql"SELECT alert_level FROM health_alert_level WHERE country_code = ${from.value}"
         .query[HealthAlertDTO].unique
 
-    val program: ConnectionIO[Vaccine] =
+    val program: ConnectionIO[Health] =
       for {
-        r <- c
+        r <- recommendationsStatement
         o <- optionalStatement
         n <- healthNoticesStatement
         a <- healthAlertStatement
@@ -41,11 +41,10 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
         val recommendations = r.map(_.toVaccine)
         val optional        = o.map(_.toVaccine)
         val vaccinations    = Vaccinations(recommendations, optional)
-        val healthNotices   = n.map(_toHealthNotice(a.as[AlertLevel]))
-        Health(vaccinations, healthNotices)
+        val alertLevel      = a.toAlertLevel
+        val healthNotices   = n.map(_.toHealthAlert(alertLevel))
+        Health(vaccinations, HealthNotices(alertLevel, healthNotices))
       }
-
-      vaccinations.map(_.toVaccine)
 
     program.map(Option.apply).transact(xa).recoverWith {
       case UnexpectedEnd => none[Health].pure[F]
@@ -54,6 +53,6 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
 
 }
 
-class HealthDao[F[_]] {
+trait HealthDao[F[_]] {
   def findHealthInfo(countryCode: CountryCode): F[Option[Health]]
 }

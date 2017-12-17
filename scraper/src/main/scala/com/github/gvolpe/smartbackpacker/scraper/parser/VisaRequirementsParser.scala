@@ -4,6 +4,7 @@ import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._

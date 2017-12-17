@@ -101,15 +101,6 @@ object model {
                                   visaCategory: VisaCategory,
                                   description: String)
 
-  case class VisaRequirementsParsing(to: CountryName,
-                                     visaCategory: VisaCategory,
-                                     description: String)
-
-  case class VisaRequirementsFor(from: CountryCode,
-                                 to: CountryCode,
-                                 visaCategory: VisaCategory,
-                                 description: String)
-
   case class VisaRequirements(visaCategory: VisaCategory,
                               description: String)
 
@@ -121,8 +112,6 @@ object model {
                              countryCode: CountryCode,
                              visaRequirements: VisaRequirements,
                              exchangeRate: ExchangeRate)
-
-  case class CountryNotFound(countryCode: CountryCode) extends Exception(s"Country code not found $countryCode")
 
   // Airlines
   sealed trait BaggageType extends Product with Serializable
@@ -147,8 +136,6 @@ object model {
                            website: Option[String])
 
   case class Airline(name: AirlineName, baggagePolicy: BaggagePolicy)
-
-  case class WikiPageNotFound(wikiPage: String) extends Exception(s"Wiki Page not found for $wikiPage")
 
   // Visa Restriction Index
   sealed trait VisaRestrictionsIndexValues extends Product with Serializable
@@ -185,8 +172,8 @@ object model {
   case object GetVaccinated extends DiseaseCategory
   case object AvoidSharingBodyFluids extends DiseaseCategory
   case object ReduceExposureToGerms extends DiseaseCategory
-  case object EatAndDrinkSafely extends DiseaseCategory
   case object PreventBugBites extends DiseaseCategory
+  case object EatAndDrinkSafely extends DiseaseCategory
   case object KeepAwayFromAnimals extends DiseaseCategory
   case object UnknownDiseaseCategory extends DiseaseCategory
 

@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker.scraper
 
-import com.github.gvolpe.smartbackpacker.model.VisaRequirementsFor
+import com.github.gvolpe.smartbackpacker.scraper.model.VisaRequirementsFor
 
 package object sql {
 

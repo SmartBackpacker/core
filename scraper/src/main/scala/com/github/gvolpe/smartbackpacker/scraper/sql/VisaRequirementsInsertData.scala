@@ -8,6 +8,7 @@ import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.model._
 import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractVisaRequirementsParser
 import doobie.implicits._
 import doobie.util.transactor.Transactor

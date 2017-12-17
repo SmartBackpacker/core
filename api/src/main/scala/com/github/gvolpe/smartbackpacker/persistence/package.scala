@@ -13,6 +13,8 @@ package object persistence {
   type VisaRequirementsDTO  = String :: String :: HNil
 
   type VaccineDTO           = String :: String :: String :: HNil
+  type HealthNoticeDTO      = String :: String :: String :: HNil
+  type HealthAlertDTO       = String :: HNil
 
   implicit class BaggageAllowanceConversions(allowance: BaggageAllowanceDTO) {
     def toBaggageAllowance: BaggageAllowance =
@@ -61,9 +63,23 @@ package object persistence {
 
     def toVaccine: Vaccine =
       Vaccine(
-        disease = dto.head.as[DiseaseName],
-        description = dto.tail.head = parseDiseaseCategories(dto.last)
+        disease = dto.head.as[Disease],
+        description = dto.tail.head,
+        diseaseCategories = parseDiseaseCategories(dto.last)
       )
+  }
+
+  implicit class HealthNoticeConversions(dto: HealthNoticeDTO) {
+    def toHealthAlert(alertLevel: AlertLevel): HealthAlert =
+      HealthAlert(
+        title = dto.head,
+        link = dto.tail.head.as[WebLink],
+        description = dto.last
+      )
+  }
+
+  implicit class HealthAlertConversions(dto: HealthAlertDTO) {
+    def toAlertLevel: AlertLevel = dto.head.as[AlertLevel]
   }
 
 }

@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.scraper.sql
 
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.model.VisaRequirementsFor
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck._
 import org.scalatest.FunSuite

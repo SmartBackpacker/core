@@ -16,7 +16,7 @@ import scala.util.{Success, Try}
 class HealthInfoParser[F[_]](implicit F: Sync[F]) extends AbstractHealthInfoParser[F] {
 
   override def htmlDocument(from: CountryCode): F[Document] = {
-    val ifEmpty = F.raiseError[Document](WikiPageNotFound(from.value))
+    val ifEmpty = F.raiseError[Document](HealthPageNotFound(from.value))
     ScraperConfiguration.healthPage(from).fold(ifEmpty) { healthPage =>
       F.delay {
         val browser = new JsoupBrowser()
@@ -80,8 +80,8 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
             case Success(y) if y == "tooltip-11"  => GetVaccinated
             case Success(y) if y == "tooltip-9"   => AvoidSharingBodyFluids
             case Success(y) if y == "tooltip-8"   => ReduceExposureToGerms
-            case Success(y) if y == "tooltip-3"   => EatAndDrinkSafely
             case Success(y) if y == "tooltip-4"   => PreventBugBites
+            case Success(y) if y == "tooltip-3"   => EatAndDrinkSafely
             case Success(y) if y == "tooltip-1"   => KeepAwayFromAnimals
             case _                                => UnknownDiseaseCategory
           }
