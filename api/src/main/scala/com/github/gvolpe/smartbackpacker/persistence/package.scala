@@ -12,6 +12,8 @@ package object persistence {
   type CountryDTO           = Int :: String :: String :: HNil
   type VisaRequirementsDTO  = String :: String :: HNil
 
+  type VaccineDTO           = String :: String :: String :: HNil
+
   implicit class BaggageAllowanceConversions(allowance: BaggageAllowanceDTO) {
     def toBaggageAllowance: BaggageAllowance =
       BaggageAllowance(
@@ -49,6 +51,18 @@ package object persistence {
         to            = Country(new CountryCode(toDto(1)), new CountryName(toDto.last)),
         visaCategory  = VisaCategory.fromName(dto.head),
         description   = dto.last
+      )
+  }
+
+  implicit class VaccineConversions(dto: VaccineDTO) {
+    private def parseDiseaseCategories(value: String): List[DiseaseCategory] = {
+      value.split(',').toList.map(DiseaseCategory.fromString)
+    }
+
+    def toVaccine: Vaccine =
+      Vaccine(
+        disease = dto.head.as[DiseaseName],
+        description = dto.tail.head = parseDiseaseCategories(dto.last)
       )
   }
 

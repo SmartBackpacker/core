@@ -190,6 +190,15 @@ object model {
   case object KeepAwayFromAnimals extends DiseaseCategory
   case object UnknownDiseaseCategory extends DiseaseCategory
 
+  object DiseaseCategory {
+    def fromString(value: String): DiseaseCategory =
+      List(
+        AvoidNonSterileEquipment, TakeAntimalarialMeds, GetVaccinated,
+        AvoidSharingBodyFluids, ReduceExposureToGerms, EatAndDrinkSafely,
+        PreventBugBites, KeepAwayFromAnimals
+      ).find(_.toString == value).getOrElse(UnknownDiseaseCategory)
+  }
+
   case class Vaccine(disease: Disease, description: String, diseaseCategories: List[DiseaseCategory])
   case class Vaccinations(recommendations: List[Vaccine], optional: List[Vaccine])
   case class HealthAlert(title: String, link: WebLink, description: String)
