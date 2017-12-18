@@ -6,8 +6,8 @@ import cats.instances.list._
 import com.github.gvolpe.smartbackpacker.common.IOApp
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
-import com.github.gvolpe.smartbackpacker.scraper.parser.{VisaRequirementsParser, VisaRestrictionsIndexParser}
-import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
+import com.github.gvolpe.smartbackpacker.scraper.parser.{HealthInfoParser, VisaRequirementsParser, VisaRestrictionsIndexParser}
+import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, HealthInfoInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
 import doobie.util.transactor.Transactor
 import org.joda.time.{Instant, Seconds}
 import org.joda.time.format.DateTimeFormat
@@ -34,6 +34,9 @@ object ScraperJob extends IOApp {
 
   private val countryInsertData           = new CountryInsertData[IO](xa)
   private val visaCategoryInsertData      = new VisaCategoryInsertData[IO](xa)
+
+  private val healthInfoParser            = new HealthInfoParser[IO]
+  private val healthInfoInsertData        = new HealthInfoInsertData[IO](xa, healthInfoParser)
 
   val visaIndexProgram: IO[Unit] =
     for {
@@ -66,18 +69,32 @@ object ScraperJob extends IOApp {
     } yield ()
 
   val visaRequirementsProgram: IO[Unit] = {
-    val codes  = ScraperConfiguration.countriesCode()
+    val codes = ScraperConfiguration.countriesCode()
     Applicative[IO].traverse(codes)(c => visaRequirementsProgramFor(c)).map(_ => ())
   }
 
-  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `loadVisaCategories` or `startScraping`")
+  def healthInfoProgramFor(cc: CountryCode): IO[Unit] =
+    for {
+      _ <- IO { println("Starting health info inserting data job") }
+      _ <- healthInfoInsertData.run(cc)
+      _ <- IO { println("Health info inserting data job DONE") }
+    } yield ()
+
+  val healthInfoProgram: IO[Unit] = {
+    //val codes = ScraperConfiguration.countriesCode()
+    val codes = List(new CountryCode("AR"))
+    Applicative[IO].traverse(codes)(c => healthInfoProgramFor(c)).map(_ => ())
+  }
+
+  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `loadVisaCategories`, `visaRequirement` or `healthInfo`")
 
   def readArgs(args: List[String]): IO[Unit] = {
     val ifEmpty = IO.raiseError[Unit](MissingArgument)
     args.headOption.fold(ifEmpty) {
       case "loadCountries"      => countriesProgram
       case "loadVisaCategories" => visaCategoriesProgram
-      case "startScraping"      => visaRequirementsProgram
+      case "visaRequirements"   => visaRequirementsProgram
+      case "healthInfo"         => healthInfoProgram
       case _                    => ifEmpty
     }
   }

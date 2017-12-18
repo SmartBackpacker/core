@@ -6,15 +6,15 @@ CREATE TABLE vaccine (
 );
 
 CREATE TABLE vaccine_recommendations (
-  country_code VARCHAR (2),
+  country_id INT REFERENCES countries (id) NOT NULL,
   vaccine_id INT REFERENCES vaccine (id) NOT NULL,
-  PRIMARY KEY (country_code, vaccine_id)
+  PRIMARY KEY (country_id, vaccine_id)
 );
 
 CREATE TABLE vaccine_optional (
-  country_code VARCHAR (2),
+  country_id INT REFERENCES countries (id) NOT NULL,
   vaccine_id INT REFERENCES vaccine (id) NOT NULL,
-  PRIMARY KEY (country_code, vaccine_id)
+  PRIMARY KEY (country_id, vaccine_id)
 );
 
 CREATE TABLE health_alert (
@@ -25,12 +25,12 @@ CREATE TABLE health_alert (
 );
 
 CREATE TABLE health_notice (
-  country_code VARCHAR (2),
+  country_id INT REFERENCES countries (id) NOT NULL,
   alert_id INT REFERENCES health_alert (id),
-  PRIMARY KEY (country_code, alert_id)
+  PRIMARY KEY (country_id, alert_id)
 );
 
 CREATE TABlE health_alert_level (
-  country_code VARCHAR (2) PRIMARY KEY,
+  country_id INT REFERENCES countries (id) PRIMARY KEY,
   alert_level VARCHAR (500) NOT NULL
 );

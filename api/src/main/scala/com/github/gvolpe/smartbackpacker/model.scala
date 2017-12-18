@@ -189,7 +189,7 @@ object model {
   case class Vaccine(disease: Disease, description: String, diseaseCategories: List[DiseaseCategory])
   case class Vaccinations(recommendations: List[Vaccine], optional: List[Vaccine])
   case class HealthAlert(title: String, link: WebLink, description: String)
-  case class HealthNotices(alertLevel: AlertLevel, alert: List[HealthAlert])
+  case class HealthNotices(alertLevel: AlertLevel, alerts: List[HealthAlert])
   case class Health(vaccinations: Vaccinations, notices: HealthNotices)
 
 }

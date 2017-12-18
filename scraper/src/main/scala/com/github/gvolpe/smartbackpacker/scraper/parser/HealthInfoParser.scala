@@ -124,7 +124,7 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
         vaccinations = Vaccinations(recommendedVaccines, optionalVaccines),
         notices = HealthNotices(
           alertLevel = alertLevel.as[AlertLevel],
-          alert = alerts
+          alerts = alerts
         )
       )
     }
