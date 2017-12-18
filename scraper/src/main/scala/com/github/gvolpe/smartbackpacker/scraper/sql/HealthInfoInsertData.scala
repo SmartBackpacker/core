@@ -23,6 +23,11 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
       .update.withUniqueGeneratedKeys("id")
   }
 
+  private def insertVaccineMandatory(countryId: Int, vaccineId: Int): ConnectionIO[Int] = {
+    sql"INSERT INTO vaccine_mandatory (country_id, vaccine_id) VALUES ($countryId, $vaccineId)"
+      .update.run
+  }
+
   private def insertVaccineRecommendation(countryId: Int, vaccineId: Int): ConnectionIO[Int] = {
     sql"INSERT INTO vaccine_recommendations (country_id, vaccine_id) VALUES ($countryId, $vaccineId)"
       .update.run
@@ -42,6 +47,10 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
       } yield ()
     }
     result.map(_ => vaccines.size)
+  }
+
+  private def insertVaccineMandatoryBulk(countryId: Int, vaccines: List[Vaccine]): F[Int] = {
+    insertVaccinationsBulk(countryId, vaccines)(insertVaccineMandatory)
   }
 
   private def insertVaccineRecommendationsBulk(countryId: Int, vaccines: List[Vaccine]): F[Int] = {
@@ -95,9 +104,10 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
       health <- healthInfoParser.parse(cc)
       _      <- F.delay(println(s"${cc.value} >> Starting data insertion into DB"))
       cid    <- findCountryId(cc).transact(xa)
+      rs0    <- insertVaccineMandatoryBulk(cid, health.vaccinations.mandatory)
       rs1    <- insertVaccineRecommendationsBulk(cid, health.vaccinations.recommendations)
       rs2    <- insertVaccineOptionalBulk(cid, health.vaccinations.optional)
-      _      <- F.delay(println(s"${cc.value} >> Created $rs1 records for recommendations and $rs2 for optional"))
+      _      <- F.delay(println(s"${cc.value} >> Created $rs0 records for mandatory, $rs1 for recommendations and $rs2 for optional"))
       _      <- insertAlertLevel(cid, health.notices.alertLevel).transact(xa)
       rs3    <- insertHealthAlertsBulk(cid, health.notices.alerts)
       _      <- F.delay(println(s"${cc.value} >> Created $rs3 records for health alerts"))

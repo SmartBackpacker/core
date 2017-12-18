@@ -15,12 +15,14 @@ import scala.util.{Success, Try}
 
 class HealthInfoParser[F[_]](implicit F: Sync[F]) extends AbstractHealthInfoParser[F] {
 
+  private val baseUrl = "https://wwwnc.cdc.gov/travel/destinations/traveler/none"
+
   override def htmlDocument(from: CountryCode): F[Document] = {
     val ifEmpty = F.raiseError[Document](HealthPageNotFound(from.value))
     ScraperConfiguration.healthPage(from).fold(ifEmpty) { healthPage =>
       F.delay {
         val browser = new JsoupBrowser()
-        browser.get(healthPage)
+        browser.get(s"$baseUrl/$healthPage")
       }
     }
   }
@@ -65,7 +67,8 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
         val value = e >> text
         if (value.contains("Most travelers")) Seq(MostTravelers)
         else if (value.contains("Some travelers")) Seq(SomeTravelers)
-        else Seq(AllTravelers)
+        else if (value.contains("All travelers")) Seq(AllTravelers)
+        else Seq(EmptyRow)
       case Success(x) if x == "traveler-disease" =>
         val value = e >> text
         Seq(DiseaseName(removeBracketsAndWebLink(value)))
@@ -98,18 +101,21 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
       val vaccinesTable: List[Element] = doc >> elementList("#dest-vm-a tbody")
       val rows = vaccinesTable.flatMap(_ >> elementList("tr"))
       val cols = rows.flatMap(_ >> extractor("td", healthTableExtractor))
-      // Remove AllTravelers section and Span the remaining two different sections in two lists
-      val (most, some) = cols.dropWhile(_ != MostTravelers).span(_ != SomeTravelers)
 
-      // Drop category
-      val recommendations = most.tail
-      val optional = some.tail
+      // Span the three different sections all, most and some
+      val (all, mostAndSome)  = cols.filter(_ == EmptyRow).span(_ != MostTravelers)
+      val (most, some)        = mostAndSome.span(_ != SomeTravelers)
 
-      val recommendedVaccines: List[Vaccine] = recommendations.grouped(3).toList.map {
+      // Drop category and group per disease
+      val mandatory: List[Vaccine] = all.tail.grouped(3).toList.collect {
+        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) if n != "Routine vaccines" => Vaccine(n.as[Disease], d, c)
+      }
+
+      val recommended: List[Vaccine] = most.tail.grouped(3).toList.collect {
         case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(n.as[Disease], d, c)
       }
 
-      val optionalVaccines: List[Vaccine] = optional.grouped(3).toList.map {
+      val optional: List[Vaccine] = some.tail.grouped(3).toList.collect {
         case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(n.as[Disease], d, c)
       }
 
@@ -121,7 +127,7 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
       val alerts: List[HealthAlert] = section.flatMap(_ >> extractor("ul", travelNoticeExtractor))
 
       Health(
-        vaccinations = Vaccinations(recommendedVaccines, optionalVaccines),
+        vaccinations = Vaccinations(mandatory, recommended, optional),
         notices = HealthNotices(
           alertLevel = alertLevel.as[AlertLevel],
           alerts = alerts

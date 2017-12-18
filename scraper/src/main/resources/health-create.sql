@@ -5,6 +5,12 @@ CREATE TABLE vaccine (
   categories VARCHAR (1000)
 );
 
+CREATE TABLE vaccine_mandatory (
+  country_id INT REFERENCES countries (id) NOT NULL,
+  vaccine_id INT REFERENCES vaccine (id) NOT NULL,
+  PRIMARY KEY (country_id, vaccine_id)
+);
+
 CREATE TABLE vaccine_recommendations (
   country_id INT REFERENCES countries (id) NOT NULL,
   vaccine_id INT REFERENCES vaccine (id) NOT NULL,

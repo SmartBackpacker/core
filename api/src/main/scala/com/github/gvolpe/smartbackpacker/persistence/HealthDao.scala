@@ -19,12 +19,16 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
         .query[Int].unique
     }
 
+    def mandatoryStatement(countryId: Int): ConnectionIO[List[VaccineDTO]] =
+      sql"SELECT v.disease, v.description, v.categories FROM vaccine_mandatory AS vm INNER JOIN vaccine AS v ON vm.vaccine_id=v.id WHERE vm.country_id = $countryId"
+        .query[VaccineDTO].list
+
     def recommendationsStatement(countryId: Int): ConnectionIO[List[VaccineDTO]] =
       sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_id = $countryId"
         .query[VaccineDTO].list
 
     def  optionalStatement(countryId: Int): ConnectionIO[List[VaccineDTO]] =
-      sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_id = $countryId"
+      sql"SELECT v.disease, v.description, v.categories FROM vaccine_optional AS vo INNER JOIN vaccine AS v ON vo.vaccine_id=v.id WHERE vo.country_id = $countryId"
         .query[VaccineDTO].list
 
     def healthNoticesStatement(countryId: Int): ConnectionIO[List[HealthNoticeDTO]] =
@@ -38,14 +42,16 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
     val program: ConnectionIO[Health] =
       for {
         c <- findCountryId
+        m <- mandatoryStatement(c)
         r <- recommendationsStatement(c)
         o <- optionalStatement(c)
         n <- healthNoticesStatement(c)
         a <- healthAlertStatement(c)
       } yield {
+        val mandatory       = m.map(_.toVaccine)
         val recommendations = r.map(_.toVaccine)
         val optional        = o.map(_.toVaccine)
-        val vaccinations    = Vaccinations(recommendations, optional)
+        val vaccinations    = Vaccinations(mandatory, recommendations, optional)
         val alertLevel      = a.toAlertLevel
         val healthNotices   = n.map(_.toHealthAlert(alertLevel))
         Health(vaccinations, HealthNotices(alertLevel, healthNotices))
