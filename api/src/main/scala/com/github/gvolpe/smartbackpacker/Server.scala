@@ -23,8 +23,11 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
   private val visaRestrictionIndexHttpEndpoint =
     new VisaRestrictionIndexHttpEndpoint[F](ctx.visaRestrictionsIndexService).service
 
+  private val healthInfoHttpEndpoint =
+    new HealthInfoHttpEndpoint[F](ctx.healthService).service
+
   private val httpEndpoints =
-    destinationInfoHttpEndpoint <+> airlinesHttpEndpoint <+> visaRestrictionIndexHttpEndpoint
+    destinationInfoHttpEndpoint <+> airlinesHttpEndpoint <+> visaRestrictionIndexHttpEndpoint <+> healthInfoHttpEndpoint
 
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
     Scheduler(corePoolSize = 2) flatMap { implicit scheduler =>

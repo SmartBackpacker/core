@@ -44,11 +44,11 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
     result.map(_ => vaccines.size)
   }
 
-  private def insertVaccineRecommendationsBulk(countryId: Int, vaccines: List[Vaccine]): F[Unit] = {
+  private def insertVaccineRecommendationsBulk(countryId: Int, vaccines: List[Vaccine]): F[Int] = {
     insertVaccinationsBulk(countryId, vaccines)(insertVaccineRecommendation)
   }
 
-  private def insertVaccineOptionalBulk(countryId: Int, vaccines: List[Vaccine]): F[Unit] = {
+  private def insertVaccineOptionalBulk(countryId: Int, vaccines: List[Vaccine]): F[Int] = {
     insertVaccinationsBulk(countryId, vaccines)(insertVaccineOptional)
   }
 

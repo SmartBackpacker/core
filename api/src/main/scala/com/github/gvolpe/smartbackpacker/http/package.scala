@@ -38,11 +38,27 @@ package object http {
   }
 
   implicit val visaCategoryEncoder: Encoder[VisaCategory] = Encoder.instance {
-    visaCategory => Json.fromString(visaCategory.toString)
+    x => Json.fromString(x.toString)
   }
 
   implicit val baggageTypeEncoder: Encoder[BaggageType] = Encoder.instance {
-    bag => Json.fromString(bag.toString)
+    x => Json.fromString(x.toString)
+  }
+
+  implicit val alertLevelEncoder: Encoder[AlertLevel] = Encoder.instance {
+    x => Json.fromString(x.toString)
+  }
+
+  implicit val diseaseEncoder: Encoder[Disease] = Encoder.instance {
+    x => Json.fromString(x.toString)
+  }
+
+  implicit val diseaseCategoryEncoder: Encoder[DiseaseCategory] = Encoder.instance {
+    x => Json.fromString(x.toString)
+  }
+
+  implicit val webLinkEncoder: Encoder[WebLink] = Encoder.instance {
+    x => Json.fromString(x.toString)
   }
 
 }

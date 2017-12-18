@@ -15,8 +15,7 @@ class VisaRestrictionIndexHttpEndpoint[F[_] : Monad]
 
   val service: AuthedService[String, F] = AuthedService {
     case GET -> Root / ApiVersion / "ranking" / countryCode as _ =>
-      val ioIndex = visaRestrictionIndexService.findIndex(countryCode.as[CountryCode])
-      ioIndex.flatMap {
+      visaRestrictionIndexService.findIndex(countryCode.as[CountryCode]) flatMap {
         case Some(index)  => Ok(index.asJson)
         case None         => NotFound(ApiError(ApiErrorCode.ENTITY_NOT_FOUND, s"Country not found $countryCode").asJson)
       }

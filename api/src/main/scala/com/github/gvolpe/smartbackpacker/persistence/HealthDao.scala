@@ -3,7 +3,6 @@ package com.github.gvolpe.smartbackpacker.persistence
 import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
-import cats.syntax.functor._
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.model._
 import doobie.free.connection.ConnectionIO
@@ -15,28 +14,34 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
                              (implicit F: MonadError[F, Throwable]) extends HealthDao[F] {
 
   override def findHealthInfo(from: CountryCode): F[Option[Health]] = {
-    val recommendationsStatement: ConnectionIO[List[VaccineDTO]] =
-      sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_code = ${from.value}"
+    val findCountryId: ConnectionIO[Int] = {
+      sql"SELECT id FROM countries WHERE code = ${from.value}"
+        .query[Int].unique
+    }
+
+    def recommendationsStatement(countryId: Int): ConnectionIO[List[VaccineDTO]] =
+      sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_id = $countryId"
         .query[VaccineDTO].list
 
-    val optionalStatement: ConnectionIO[List[VaccineDTO]] =
-      sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_code = ${from.value}"
+    def  optionalStatement(countryId: Int): ConnectionIO[List[VaccineDTO]] =
+      sql"SELECT v.disease, v.description, v.categories FROM vaccine_recommendations AS vr INNER JOIN vaccine AS v ON vr.vaccine_id=v.id WHERE vr.country_id = $countryId"
         .query[VaccineDTO].list
 
-    val healthNoticesStatement: ConnectionIO[List[HealthNoticeDTO]] =
-      sql"SELECT ha.title, ha.weblink, ha.description FROM health_notice AS hn INNER JOIN health_alert AS ha ON hn.alert_id = ha.id WHERE hn.country_code = ${from.value}"
+    def healthNoticesStatement(countryId: Int): ConnectionIO[List[HealthNoticeDTO]] =
+      sql"SELECT ha.title, ha.weblink, ha.description FROM health_notice AS hn INNER JOIN health_alert AS ha ON hn.alert_id = ha.id WHERE hn.country_id = $countryId"
         .query[HealthNoticeDTO].list
 
-    val healthAlertStatement: ConnectionIO[HealthAlertDTO] =
-      sql"SELECT alert_level FROM health_alert_level WHERE country_code = ${from.value}"
+    def healthAlertStatement(countryId: Int): ConnectionIO[HealthAlertDTO] =
+      sql"SELECT alert_level FROM health_alert_level WHERE country_id = $countryId"
         .query[HealthAlertDTO].unique
 
     val program: ConnectionIO[Health] =
       for {
-        r <- recommendationsStatement
-        o <- optionalStatement
-        n <- healthNoticesStatement
-        a <- healthAlertStatement
+        c <- findCountryId
+        r <- recommendationsStatement(c)
+        o <- optionalStatement(c)
+        n <- healthNoticesStatement(c)
+        a <- healthAlertStatement(c)
       } yield {
         val recommendations = r.map(_.toVaccine)
         val optional        = o.map(_.toVaccine)

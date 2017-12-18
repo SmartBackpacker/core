@@ -2,8 +2,8 @@ package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
 import com.github.gvolpe.smartbackpacker.http.HttpErrorHandler
-import com.github.gvolpe.smartbackpacker.persistence.{AirlineDao, PostgresAirlineDao, PostgresVisaRequirementsDao, PostgresVisaRestrictionsIndexDao, VisaRequirementsDao, VisaRestrictionsIndexDao}
-import com.github.gvolpe.smartbackpacker.service.{AirlineService, CountryService, ExchangeRateService, VisaRestrictionIndexService}
+import com.github.gvolpe.smartbackpacker.persistence.{AirlineDao, HealthDao, PostgresAirlineDao, PostgresHealthDao, PostgresVisaRequirementsDao, PostgresVisaRestrictionsIndexDao, VisaRequirementsDao, VisaRestrictionsIndexDao}
+import com.github.gvolpe.smartbackpacker.service._
 import doobie.util.transactor.Transactor
 
 // It wires all the instances together
@@ -42,5 +42,11 @@ class Bindings[F[_] : Effect] {
 
   lazy val countryService: CountryService[F] =
     new CountryService[F](visaRequirementsDao, ExchangeRateService[F])
+
+  lazy val healthDao: HealthDao[F] =
+    new PostgresHealthDao[F](xa)
+
+  lazy val healthService: HealthService[F] =
+    new HealthService[F](healthDao)
 
 }

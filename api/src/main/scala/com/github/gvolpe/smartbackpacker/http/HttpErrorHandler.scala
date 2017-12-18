@@ -10,6 +10,7 @@ import org.http4s.Response
 
 import scala.reflect.ClassTag
 
+// TODO: Change API to have signatures F[Either[ApiServiceError, A]]
 class HttpErrorHandler[F[_] : Monad] extends Http4sDsl[F] {
 
   private val errorHandler: ApiServiceError => F[Response[F]] = {
