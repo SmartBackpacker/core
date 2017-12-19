@@ -168,6 +168,11 @@ object model {
   case object LevelTwo extends AlertLevel
   case object NoAlert extends AlertLevel
 
+  object AlertLevel {
+    def fromString(value: String): AlertLevel =
+      List(LevelOne, LevelTwo).find(_.toString == value).getOrElse(NoAlert)
+  }
+
   sealed trait DiseaseCategory extends Product with Serializable
   case object AvoidNonSterileEquipment extends DiseaseCategory
   case object TakeAntimalarialMeds extends DiseaseCategory

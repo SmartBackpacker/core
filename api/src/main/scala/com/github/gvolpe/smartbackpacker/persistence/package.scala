@@ -79,7 +79,7 @@ package object persistence {
   }
 
   implicit class HealthAlertConversions(dto: HealthAlertDTO) {
-    def toAlertLevel: AlertLevel = dto.head.as[AlertLevel]
+    def toAlertLevel: AlertLevel = AlertLevel.fromString(dto.head)
   }
 
 }
