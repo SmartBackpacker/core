@@ -93,6 +93,7 @@ object ScraperJob extends IOApp {
       case "loadCountries"      => countriesProgram
       case "loadVisaCategories" => visaCategoriesProgram
       case "visaRequirements"   => visaRequirementsProgram
+      case "visaRanking"        => visaIndexProgram
       case "healthInfo"         => healthInfoProgram
       case _                    => ifEmpty
     }
@@ -102,6 +103,8 @@ object ScraperJob extends IOApp {
     lazy val fmt    = DateTimeFormat.forPattern("H:m:s.S")
     lazy val start  = Instant.now()
     for {
+      _ <- if (devDbUrl.nonEmpty) IO { println(s"DEV DB connection established: $devDbUrl") } else IO.unit
+      _ <- if (devDbUrl.isEmpty) IO { println(s"DB connection established: $dbUrl") } else IO.unit
       _ <- IO { println(s"Starting job at ${start.toString(fmt)}") }
       _ <- readArgs(args)
       f = Instant.now()

@@ -45,6 +45,18 @@ package object http {
     x => Json.fromString(x.toString)
   }
 
+  implicit val visaRankingEncoder: Encoder[Ranking] = Encoder.instance {
+    x => Json.fromString(x.toString)
+  }
+
+  implicit val rankingCountTypeEncoder: Encoder[Count] = Encoder.instance {
+    x => Json.fromString(x.toString)
+  }
+
+  implicit val rankingSharingEncoder: Encoder[Sharing] = Encoder.instance {
+    x => Json.fromString(x.toString)
+  }
+
   implicit val alertLevelEncoder: Encoder[AlertLevel] = Encoder.instance {
     x => Json.fromString(x.toString)
   }
