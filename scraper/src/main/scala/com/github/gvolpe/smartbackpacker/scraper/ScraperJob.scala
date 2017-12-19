@@ -103,8 +103,8 @@ object ScraperJob extends IOApp {
     lazy val fmt    = DateTimeFormat.forPattern("H:m:s.S")
     lazy val start  = Instant.now()
     for {
-      _ <- if (devDbUrl.nonEmpty) IO { println(s"DEV DB connection established: $devDbUrl") } else IO.unit
-      _ <- if (devDbUrl.isEmpty) IO { println(s"DB connection established: $dbUrl") } else IO.unit
+      _ <- if (devDbUrl.nonEmpty) IO { println(s"DEV DB connection established: $devDbUrl") }
+           else IO { println(s"DB connection established: $dbUrl") }
       _ <- IO { println(s"Starting job at ${start.toString(fmt)}") }
       _ <- readArgs(args)
       f = Instant.now()
