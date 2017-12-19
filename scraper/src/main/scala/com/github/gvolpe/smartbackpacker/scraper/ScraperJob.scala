@@ -81,8 +81,7 @@ object ScraperJob extends IOApp {
     } yield ()
 
   val healthInfoProgram: IO[Unit] = {
-    //val codes = ScraperConfiguration.countriesCode()
-    val codes = List(new CountryCode("AR"))
+    val codes = ScraperConfiguration.countriesCode()
     Applicative[IO].traverse(codes)(c => healthInfoProgramFor(c)).map(_ => ())
   }
 

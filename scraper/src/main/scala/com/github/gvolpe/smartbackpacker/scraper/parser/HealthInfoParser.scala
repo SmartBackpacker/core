@@ -68,7 +68,7 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
         if (value.contains("Most travelers")) Seq(MostTravelers)
         else if (value.contains("Some travelers")) Seq(SomeTravelers)
         else if (value.contains("All travelers")) Seq(AllTravelers)
-        else Seq(EmptyRow)
+        else Seq.empty[HealthInfoRow]
       case Success(x) if x == "traveler-disease" =>
         val value = e >> text
         Seq(DiseaseName(removeBracketsAndWebLink(value)))
@@ -103,19 +103,19 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
       val cols = rows.flatMap(_ >> extractor("td", healthTableExtractor))
 
       // Span the three different sections all, most and some
-      val (all, mostAndSome)  = cols.filter(_ == EmptyRow).span(_ != MostTravelers)
+      val (all, mostAndSome)  = cols.span(_ != MostTravelers)
       val (most, some)        = mostAndSome.span(_ != SomeTravelers)
 
       // Drop category and group per disease
-      val mandatory: List[Vaccine] = all.tail.grouped(3).toList.collect {
+      val mandatory: List[Vaccine] = all.tailOrEmpty.grouped(3).toList.collect {
         case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) if n != "Routine vaccines" => Vaccine(n.as[Disease], d, c)
       }
 
-      val recommended: List[Vaccine] = most.tail.grouped(3).toList.collect {
+      val recommended: List[Vaccine] = most.tailOrEmpty.grouped(3).toList.collect {
         case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(n.as[Disease], d, c)
       }
 
-      val optional: List[Vaccine] = some.tail.grouped(3).toList.collect {
+      val optional: List[Vaccine] = some.tailOrEmpty.grouped(3).toList.collect {
         case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(n.as[Disease], d, c)
       }
 
@@ -123,13 +123,18 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
       val travelNoticeTable: List[Element] = doc >> elementList("#travel-notices")
       val section: List[Element] = travelNoticeTable.flatMap(_ >> elementList(".section_body"))
 
-      val alertLevel: String = section.map(_ >> text("h4")).mkString("")
+      val alertLevel: AlertLevel = section.map(_ >?> text("h4")).headOption.flatten match {
+        case Some(x) if x.contains("Level 1") => LevelOne
+        case Some(x) if x.contains("Level 2") => LevelTwo
+        case _                                => NoAlert
+      }
+
       val alerts: List[HealthAlert] = section.flatMap(_ >> extractor("ul", travelNoticeExtractor))
 
       Health(
         vaccinations = Vaccinations(mandatory, recommended, optional),
         notices = HealthNotices(
-          alertLevel = alertLevel.as[AlertLevel],
+          alertLevel = alertLevel,
           alerts = alerts
         )
       )

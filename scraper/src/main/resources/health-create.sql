@@ -1,3 +1,6 @@
+DROP TABLE vaccine_mandatory; DROP TABLE vaccine_recommendations; DROP TABLE vaccine_optional; DROP TABLE vaccine; DROP TABLE health_notice; DROP TABLE health_alert_level; DROP TABLE health_alert;
+DELETE FROM vaccine_mandatory; DELETE FROM vaccine_recommendations; DELETE FROM vaccine_optional; DELETE FROM vaccine; DELETE FROM health_notice; DELETE FROM health_alert_level; DELETE FROM health_alert;
+
 CREATE TABLE vaccine (
   id SERIAL PRIMARY KEY,
   disease VARCHAR (200) NOT NULL,

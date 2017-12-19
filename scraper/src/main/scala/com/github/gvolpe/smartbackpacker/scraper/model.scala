@@ -29,8 +29,6 @@ object model {
   case class DiseaseDescription(value: String) extends HealthInfoRow
   case class DiseaseCategories(value: List[DiseaseCategory]) extends HealthInfoRow
 
-  case object EmptyRow extends HealthInfoRow
-
   case class TravelHealthNotice(title: String, summary: String)
   case class TravelHealthNotices(level: String, notices: List[TravelHealthNotice])
 

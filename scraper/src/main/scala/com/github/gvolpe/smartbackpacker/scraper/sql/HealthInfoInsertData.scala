@@ -68,7 +68,7 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
 
   // Health Notices
   private def insertAlertLevel(countryId: Int, alertLevel: AlertLevel): ConnectionIO[Int] = {
-    sql"INSERT INTO health_alert_level (country_id, alert_level) VALUES ($countryId, ${alertLevel.value})"
+    sql"INSERT INTO health_alert_level (country_id, alert_level) VALUES ($countryId, ${alertLevel.toString})"
       .update.run
   }
 

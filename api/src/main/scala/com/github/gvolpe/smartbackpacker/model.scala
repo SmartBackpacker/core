@@ -162,9 +162,11 @@ object model {
   class WebLink(val value: String) extends AnyVal {
     override def toString: String = value.toString
   }
-  class AlertLevel(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
+
+  sealed trait AlertLevel extends Product with Serializable
+  case object LevelOne extends AlertLevel
+  case object LevelTwo extends AlertLevel
+  case object NoAlert extends AlertLevel
 
   sealed trait DiseaseCategory extends Product with Serializable
   case object AvoidNonSterileEquipment extends DiseaseCategory
