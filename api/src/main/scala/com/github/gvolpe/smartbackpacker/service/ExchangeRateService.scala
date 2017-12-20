@@ -35,12 +35,13 @@ abstract class AbstractExchangeRateService[F[_]](implicit E: ApplicativeError[F,
   protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO]
 
   def exchangeRateFor(baseCurrency: Currency, foreignCurrency: Currency): F[CurrencyExchangeDTO] = {
-    val ifEmpty = CurrencyExchangeDTO(baseCurrency.value, "", Map(baseCurrency.value -> 0.0)).pure
+    val ifEmpty = CurrencyExchangeDTO(baseCurrency.value, "", Map(baseCurrency.value -> 0.0)).pure[F]
     validateCurrencies(baseCurrency, foreignCurrency).fold(ifEmpty) { uri =>
       retrieveExchangeRate(uri).map { exchangeRate =>
         if (exchangeRate.rates.nonEmpty) exchangeRate
         else exchangeRate.copy(rates = Map(baseCurrency.value -> -1.0))
       }.recoverWith {
+        // We don't want the whole country service to fail if the exchange rate service is unavailable
         case _: UnexpectedStatus => ifEmpty
       }
     }

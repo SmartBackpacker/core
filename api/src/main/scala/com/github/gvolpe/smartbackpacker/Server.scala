@@ -20,8 +20,8 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
         authMiddleware        <- Stream.eval(JwtTokenAuthMiddleware[F](ctx.ApiToken))
         destinationInfo       = new DestinationInfoHttpEndpoint[F](ctx.countryService, ctx.httpErrorHandler).service
         airlines              = new AirlinesHttpEndpoint[F](ctx.airlineService, ctx.httpErrorHandler).service
-        visaRestrictionIndex  = new VisaRestrictionIndexHttpEndpoint[F](ctx.visaRestrictionsIndexService).service
-        healthInfo            = new HealthInfoHttpEndpoint[F](ctx.healthService).service
+        visaRestrictionIndex  = new VisaRestrictionIndexHttpEndpoint[F](ctx.visaRestrictionsIndexService, ctx.httpErrorHandler).service
+        healthInfo            = new HealthInfoHttpEndpoint[F](ctx.healthService, ctx.httpErrorHandler).service
         httpEndpoints         = destinationInfo <+> airlines <+> visaRestrictionIndex <+> healthInfo
         exitCode              <- BlazeBuilder[F]
                                   .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")

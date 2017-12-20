@@ -6,9 +6,11 @@ package object service {
 
   case class CurrencyExchangeDTO(base: String, date: String, rates: Map[String, Double])
 
-  sealed trait ApiServiceError extends Exception
-  case object CountriesMustBeDifferent extends ApiServiceError
-  case class CountryNotFound(countryCode: CountryCode) extends ApiServiceError
-  case class AirlineNotFound(airlineName: AirlineName) extends ApiServiceError
+  sealed trait ValidationError extends Exception
+  case object CountriesMustBeDifferent extends ValidationError
+  case class CountryNotFound(countryCode: CountryCode) extends ValidationError
+  case class AirlineNotFound(airlineName: AirlineName) extends ValidationError
+  case class VisaRestrictionsIndexNotFound(countryCode: CountryCode) extends ValidationError
+  case class HealthInfoNotFound(countryCode: CountryCode) extends ValidationError
 
 }

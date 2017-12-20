@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.repository.AirlineDao
+import com.github.gvolpe.smartbackpacker.repository.algebra.AirlineRepository
 import com.github.gvolpe.smartbackpacker.service.AirlineService
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
@@ -47,7 +47,7 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
     )
   )
 
-  private val testAirlineDao = new AirlineDao[IO] {
+  private val testAirlineRepo = new AirlineRepository[IO] {
     override def findAirline(airlineName: AirlineName): IO[Option[Airline]] = IO {
       airlines.find(_.name.value == airlineName.value)
     }
@@ -56,7 +56,7 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new AirlinesHttpEndpoint(
-        new AirlineService[IO](testAirlineDao),
+        new AirlineService[IO](testAirlineRepo),
         new HttpErrorHandler[IO]
       ).service
     )

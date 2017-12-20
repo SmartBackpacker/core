@@ -13,11 +13,11 @@ object algebra {
   }
 
   trait VisaRequirementsRepository[F[_]] {
-    def find(from: CountryCode, to: CountryCode): F[Option[VisaRequirementsData]]
+    def findVisaRequirements(from: CountryCode, to: CountryCode): F[Option[VisaRequirementsData]]
   }
 
   trait VisaRestrictionsIndexRepository[F[_]] {
-    def findIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]]
+    def findRestrictionsIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]]
   }
 
 }

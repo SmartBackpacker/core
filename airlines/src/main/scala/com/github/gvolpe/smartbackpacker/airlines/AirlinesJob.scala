@@ -35,6 +35,8 @@ object AirlinesJob extends IOApp {
               airlineFile: AirlineFile,
               allowanceFile: AllowanceFile): IO[Unit] =
     for {
+      _       <- if (devDbUrl.nonEmpty) IO { println(s"DEV DB connection established: $devDbUrl") }
+                 else IO { println(s"DB connection established: $dbUrl") }
       _       <- IO { println("Starting job") }
       _       <- if (createTables) new AirlinesCreateTables[IO](xa).run else IO.unit
       parser  = AirlinesFileParser[IO](airlineFile, allowanceFile)

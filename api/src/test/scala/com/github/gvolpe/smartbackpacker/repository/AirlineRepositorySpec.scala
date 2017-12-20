@@ -11,7 +11,7 @@ import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class PostgresAirlineDaoSpec extends AirlineSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
+class AirlineRepositorySpec extends AirlineSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
     H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
@@ -23,10 +23,10 @@ class PostgresAirlineDaoSpec extends AirlineSQLSetup with FlatSpecLike with Matc
 
   it should "find and NOT find the airline" in IOAssertion {
     for {
-      xa  <- h2Transactor
-      dao = new PostgresAirlineRepository[IO](xa)
-      rs1 <- dao.findAirline(new AirlineName("Aer Lingus"))
-      rs2 <- dao.findAirline(new AirlineName("Ryan Air"))
+      xa    <- h2Transactor
+      repo  = new PostgresAirlineRepository[IO](xa)
+      rs1   <- repo.findAirline(new AirlineName("Aer Lingus"))
+      rs2   <- repo.findAirline(new AirlineName("Ryan Air"))
     } yield {
       rs1 should be (Some(airlines.head))
       rs2 should be (None)

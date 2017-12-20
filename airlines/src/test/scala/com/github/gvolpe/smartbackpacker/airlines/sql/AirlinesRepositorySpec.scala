@@ -6,7 +6,7 @@ import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import doobie.h2.H2Transactor
 import org.scalatest.{FlatSpecLike, Matchers}
 
-class AirlinesDaoSpec extends FlatSpecLike with Matchers {
+class AirlinesRepositorySpec extends FlatSpecLike with Matchers {
 
   private val parser = AirlinesFileParser[IO](
     new AirlineFile(getClass.getResource("/airlines-file-sample").getPath),

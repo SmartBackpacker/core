@@ -5,7 +5,7 @@ import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.repository.VisaRequirementsDao
+import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
 import com.github.gvolpe.smartbackpacker.service.{AbstractExchangeRateService, CountryService, CurrencyExchangeDTO}
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
@@ -39,8 +39,8 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     ("AR", "KO", Status.NotFound, "Country not found", """{"code":"100","error":"Country not found KO"}""")
   )
 
-  object MockVisaRequirementsDao extends VisaRequirementsDao[IO] {
-    override def find(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
+  object MockVisaRequirementsRepository extends VisaRequirementsRepository[IO] {
+    override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
       if (to.value == "KO") none[VisaRequirementsData]
       else
       VisaRequirementsData(
@@ -61,7 +61,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new DestinationInfoHttpEndpoint(
-        new CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService),
+        new CountryService[IO](MockVisaRequirementsRepository, TestExchangeRateService),
         new HttpErrorHandler[IO]
       ).service
     )

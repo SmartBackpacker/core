@@ -1,16 +1,17 @@
 package com.github.gvolpe.smartbackpacker.service
 
+import cats.data.EitherT
 import cats.effect.IO
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.repository.VisaRequirementsDao
+import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class CountryServiceSpec extends FlatSpecLike with Matchers {
 
-  object MockVisaRequirementsDao extends VisaRequirementsDao[IO] {
-    override def find(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
+  object MockVisaRequirementsRepository extends VisaRequirementsRepository[IO] {
+    override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
       VisaRequirementsData(
         from = Country("AR".as[CountryCode], "Argentina".as[CountryName]),
         to   = Country("RO".as[CountryCode], "Romania".as[CountryName]),
@@ -26,23 +27,23 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     }
   }
 
-  object MockCountryService extends CountryService[IO](MockVisaRequirementsDao, TestExchangeRateService)
+  object MockCountryService extends CountryService[IO](MockVisaRequirementsRepository, TestExchangeRateService)
 
   private val service = MockCountryService
 
   it should "retrieve destination information" in IOAssertion {
-    service.destinationInformation("AR".as[CountryCode], "RO".as[CountryCode], "EUR".as[Currency]).map { info =>
+    EitherT(service.destinationInformation("AR".as[CountryCode], "RO".as[CountryCode], "EUR".as[Currency])).map { info =>
       info.countryCode.value  should be ("RO")
       info.countryName.value  should be ("Romania")
       info.exchangeRate       should be (ExchangeRate("EUR".as[Currency], "RON".as[Currency], 4.59))
       info.visaRequirements   should be (VisaRequirements(VisaNotRequired, "90 days within any 180 day period"))
-    }
+    }.value
   }
 
   it should "validate countries" in IOAssertion {
-    service.destinationInformation("AR".as[CountryCode], "AR".as[CountryCode], "EUR".as[Currency]).attempt.map { info =>
-      info should be (Left(CountriesMustBeDifferent))
-    }
+    EitherT(service.destinationInformation("AR".as[CountryCode], "AR".as[CountryCode], "EUR".as[Currency])).leftMap { error =>
+      error should be (CountriesMustBeDifferent)
+    }.value
   }
 
 }

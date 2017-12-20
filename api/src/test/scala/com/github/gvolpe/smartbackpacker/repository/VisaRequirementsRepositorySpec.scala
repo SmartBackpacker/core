@@ -9,7 +9,7 @@ import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class PostgresVisaRequirementsDaoSpec extends VisaRequirementsSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
+class VisaRequirementsRepositorySpec extends VisaRequirementsSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
     H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
@@ -22,7 +22,7 @@ class PostgresVisaRequirementsDaoSpec extends VisaRequirementsSQLSetup with Flat
   it should "NOT find visa requirements" in IOAssertion {
     for {
       xa <- h2Transactor
-      vr <- new PostgresVisaRequirementsRepository[IO](xa).find("AR".as[CountryCode], "PL".as[CountryCode])
+      vr <- new PostgresVisaRequirementsRepository[IO](xa).findVisaRequirements("AR".as[CountryCode], "PL".as[CountryCode])
     } yield {
       vr should be (None)
     }

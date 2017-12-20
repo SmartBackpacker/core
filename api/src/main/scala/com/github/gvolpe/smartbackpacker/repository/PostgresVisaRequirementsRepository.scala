@@ -14,7 +14,7 @@ import doobie.util.transactor.Transactor
 class PostgresVisaRequirementsRepository[F[_]](xa: Transactor[F])
                                               (implicit F: MonadError[F, Throwable]) extends VisaRequirementsRepository[F] {
 
-  override def find(from: CountryCode, to: CountryCode): F[Option[VisaRequirementsData]] = {
+  override def findVisaRequirements(from: CountryCode, to: CountryCode): F[Option[VisaRequirementsData]] = {
     val fromStatement: ConnectionIO[CountryDTO] =
       sql"SELECT * FROM countries WHERE code = ${from.value}"
         .query[CountryDTO].unique

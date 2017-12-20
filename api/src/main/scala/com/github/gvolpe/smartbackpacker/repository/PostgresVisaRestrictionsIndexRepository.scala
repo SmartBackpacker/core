@@ -14,7 +14,7 @@ import doobie.util.transactor.Transactor
 class PostgresVisaRestrictionsIndexRepository[F[_]](xa: Transactor[F])
                                                    (implicit F: MonadError[F, Throwable]) extends VisaRestrictionsIndexRepository[F] {
 
-  override def findIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]] = {
+  override def findRestrictionsIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]] = {
     val indexStatement: ConnectionIO[RestrictionsIndexDTO] =
       sql"SELECT rank, acc, sharing FROM visa_restrictions_index WHERE country_code = ${countryCode.value}"
         .query[RestrictionsIndexDTO].unique
