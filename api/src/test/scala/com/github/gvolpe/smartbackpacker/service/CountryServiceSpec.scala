@@ -4,7 +4,7 @@ import cats.effect.IO
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.persistence.VisaRequirementsDao
+import com.github.gvolpe.smartbackpacker.repository.VisaRequirementsDao
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class CountryServiceSpec extends FlatSpecLike with Matchers {

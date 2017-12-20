@@ -1,17 +1,18 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.repository.algebra.AirlineRepository
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
-class PostgresAirlineDao[F[_]](xa: Transactor[F])
-                              (implicit F: MonadError[F, Throwable]) extends AirlineDao[F] {
+class PostgresAirlineRepository[F[_]](xa: Transactor[F])
+                                     (implicit F: MonadError[F, Throwable]) extends AirlineRepository[F] {
 
   override def findAirline(airlineName: AirlineName): F[Option[Airline]] = {
     val airlineStatement: ConnectionIO[AirlineDTO] =
@@ -33,8 +34,4 @@ class PostgresAirlineDao[F[_]](xa: Transactor[F])
     }
   }
 
-}
-
-trait AirlineDao[F[_]] {
-  def findAirline(airlineName: AirlineName): F[Option[Airline]]
 }

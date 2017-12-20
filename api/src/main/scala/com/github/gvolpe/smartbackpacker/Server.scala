@@ -14,29 +14,20 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
 
   private val ctx = new Bindings[F]
 
-  private val destinationInfoHttpEndpoint =
-    new DestinationInfoHttpEndpoint[F](ctx.countryService, ctx.httpErrorHandler).service
-
-  private val airlinesHttpEndpoint =
-    new AirlinesHttpEndpoint[F](ctx.airlineService, ctx.httpErrorHandler).service
-
-  private val visaRestrictionIndexHttpEndpoint =
-    new VisaRestrictionIndexHttpEndpoint[F](ctx.visaRestrictionsIndexService).service
-
-  private val healthInfoHttpEndpoint =
-    new HealthInfoHttpEndpoint[F](ctx.healthService).service
-
-  private val httpEndpoints =
-    destinationInfoHttpEndpoint <+> airlinesHttpEndpoint <+> visaRestrictionIndexHttpEndpoint <+> healthInfoHttpEndpoint
-
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
     Scheduler(corePoolSize = 2) flatMap { implicit scheduler =>
-      Stream.eval(JwtTokenAuthMiddleware[F](ctx.ApiToken)) flatMap { authMiddleware =>
-        BlazeBuilder[F]
-          .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
-          .mountService(authMiddleware(httpEndpoints))
-          .serve
-      }
+      for {
+        authMiddleware        <- Stream.eval(JwtTokenAuthMiddleware[F](ctx.ApiToken))
+        destinationInfo       = new DestinationInfoHttpEndpoint[F](ctx.countryService, ctx.httpErrorHandler).service
+        airlines              = new AirlinesHttpEndpoint[F](ctx.airlineService, ctx.httpErrorHandler).service
+        visaRestrictionIndex  = new VisaRestrictionIndexHttpEndpoint[F](ctx.visaRestrictionsIndexService).service
+        healthInfo            = new HealthInfoHttpEndpoint[F](ctx.healthService).service
+        httpEndpoints         = destinationInfo <+> airlines <+> visaRestrictionIndex <+> healthInfo
+        exitCode              <- BlazeBuilder[F]
+                                  .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
+                                  .mountService(authMiddleware(httpEndpoints))
+                                  .serve
+      } yield exitCode
     }
 
 }

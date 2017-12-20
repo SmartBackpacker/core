@@ -1,17 +1,18 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRestrictionsIndexRepository
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
-class PostgresVisaRestrictionsIndexDao[F[_]](xa: Transactor[F])
-                                            (implicit F: MonadError[F, Throwable]) extends VisaRestrictionsIndexDao[F] {
+class PostgresVisaRestrictionsIndexRepository[F[_]](xa: Transactor[F])
+                                                   (implicit F: MonadError[F, Throwable]) extends VisaRestrictionsIndexRepository[F] {
 
   override def findIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]] = {
     val indexStatement: ConnectionIO[RestrictionsIndexDTO] =
@@ -23,8 +24,4 @@ class PostgresVisaRestrictionsIndexDao[F[_]](xa: Transactor[F])
     }
   }
 
-}
-
-trait VisaRestrictionsIndexDao[F[_]] {
-  def findIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]]
 }

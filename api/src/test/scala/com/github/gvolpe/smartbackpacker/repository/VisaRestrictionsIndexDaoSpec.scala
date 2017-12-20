@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
@@ -22,7 +22,7 @@ class PostgresVisaRestrictionsIndexDaoSpec extends VisaRestrictionsIndexSQLSetup
   it should "NOT find the visa restriction index" in IOAssertion {
     for {
       xa  <- h2Transactor
-      idx <- new PostgresVisaRestrictionsIndexDao[IO](xa).findIndex(new CountryCode("AR"))
+      idx <- new PostgresVisaRestrictionsIndexRepository[IO](xa).findIndex(new CountryCode("AR"))
     } yield {
       idx should be (None)
     }

@@ -1,17 +1,18 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import cats.MonadError
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.repository.algebra.HealthRepository
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.transactor.Transactor
 
-class PostgresHealthDao[F[_]](xa: Transactor[F])
-                             (implicit F: MonadError[F, Throwable]) extends HealthDao[F] {
+class PostgresHealthRepository[F[_]](xa: Transactor[F])
+                                    (implicit F: MonadError[F, Throwable]) extends HealthRepository[F] {
 
   override def findHealthInfo(from: CountryCode): F[Option[Health]] = {
     val findCountryId: ConnectionIO[Int] = {
@@ -62,8 +63,4 @@ class PostgresHealthDao[F[_]](xa: Transactor[F])
     }
   }
 
-}
-
-trait HealthDao[F[_]] {
-  def findHealthInfo(countryCode: CountryCode): F[Option[Health]]
 }

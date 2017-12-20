@@ -3,7 +3,7 @@ package com.github.gvolpe.smartbackpacker
 import com.github.gvolpe.smartbackpacker.model._
 import shapeless._
 
-package object persistence {
+package object repository {
 
   type AirlineDTO           = Int :: String :: Int :: Option[String] :: Option[String] :: HNil
   type BaggageAllowanceDTO  = String :: Option[Int] :: Int :: Int :: Int :: HNil

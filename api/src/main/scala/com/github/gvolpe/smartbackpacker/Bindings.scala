@@ -2,7 +2,8 @@ package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
 import com.github.gvolpe.smartbackpacker.http.HttpErrorHandler
-import com.github.gvolpe.smartbackpacker.persistence.{AirlineDao, HealthDao, PostgresAirlineDao, PostgresHealthDao, PostgresVisaRequirementsDao, PostgresVisaRestrictionsIndexDao, VisaRequirementsDao, VisaRestrictionsIndexDao}
+import com.github.gvolpe.smartbackpacker.repository.algebra.{AirlineRepository, HealthRepository, VisaRequirementsRepository, VisaRestrictionsIndexRepository}
+import com.github.gvolpe.smartbackpacker.repository.{PostgresAirlineRepository, PostgresHealthRepository, PostgresVisaRequirementsRepository, PostgresVisaRestrictionsIndexRepository}
 import com.github.gvolpe.smartbackpacker.service._
 import doobie.util.transactor.Transactor
 
@@ -25,28 +26,28 @@ class Bindings[F[_] : Effect] {
 
   lazy val ApiToken: Option[String] = sys.env.get("SB_API_TOKEN")
 
-  lazy val visaRestrictionsIndexDao: VisaRestrictionsIndexDao[F] =
-    new PostgresVisaRestrictionsIndexDao[F](xa)
+  lazy val visaRestrictionsIndexRepo: VisaRestrictionsIndexRepository[F] =
+    new PostgresVisaRestrictionsIndexRepository[F](xa)
 
   lazy val visaRestrictionsIndexService: VisaRestrictionIndexService[F] =
-    new VisaRestrictionIndexService[F](visaRestrictionsIndexDao)
+    new VisaRestrictionIndexService[F](visaRestrictionsIndexRepo)
 
-  lazy val airlineDao: AirlineDao[F] =
-    new PostgresAirlineDao[F](xa)
+  lazy val airlineRepo: AirlineRepository[F] =
+    new PostgresAirlineRepository[F](xa)
 
   lazy val airlineService: AirlineService[F] =
-    new AirlineService[F](airlineDao)
+    new AirlineService[F](airlineRepo)
 
-  lazy val visaRequirementsDao: VisaRequirementsDao[F] =
-    new PostgresVisaRequirementsDao[F](xa)
+  lazy val visaRequirementsRepo: VisaRequirementsRepository[F] =
+    new PostgresVisaRequirementsRepository[F](xa)
 
   lazy val countryService: CountryService[F] =
-    new CountryService[F](visaRequirementsDao, ExchangeRateService[F])
+    new CountryService[F](visaRequirementsRepo, ExchangeRateService[F])
 
-  lazy val healthDao: HealthDao[F] =
-    new PostgresHealthDao[F](xa)
+  lazy val healthRepo: HealthRepository[F] =
+    new PostgresHealthRepository[F](xa)
 
   lazy val healthService: HealthService[F] =
-    new HealthService[F](healthDao)
+    new HealthService[F](healthRepo)
 
 }

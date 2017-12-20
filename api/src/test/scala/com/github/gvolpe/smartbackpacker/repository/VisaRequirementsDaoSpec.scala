@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
@@ -22,7 +22,7 @@ class PostgresVisaRequirementsDaoSpec extends VisaRequirementsSQLSetup with Flat
   it should "NOT find visa requirements" in IOAssertion {
     for {
       xa <- h2Transactor
-      vr <- new PostgresVisaRequirementsDao[IO](xa).find("AR".as[CountryCode], "PL".as[CountryCode])
+      vr <- new PostgresVisaRequirementsRepository[IO](xa).find("AR".as[CountryCode], "PL".as[CountryCode])
     } yield {
       vr should be (None)
     }

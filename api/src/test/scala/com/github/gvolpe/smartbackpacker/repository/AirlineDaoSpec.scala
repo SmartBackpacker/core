@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import cats.Applicative
 import cats.effect.IO
@@ -24,7 +24,7 @@ class PostgresAirlineDaoSpec extends AirlineSQLSetup with FlatSpecLike with Matc
   it should "find and NOT find the airline" in IOAssertion {
     for {
       xa  <- h2Transactor
-      dao = new PostgresAirlineDao[IO](xa)
+      dao = new PostgresAirlineRepository[IO](xa)
       rs1 <- dao.findAirline(new AirlineName("Aer Lingus"))
       rs2 <- dao.findAirline(new AirlineName("Ryan Air"))
     } yield {

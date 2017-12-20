@@ -5,7 +5,7 @@ import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.persistence.VisaRequirementsDao
+import com.github.gvolpe.smartbackpacker.repository.VisaRequirementsDao
 import com.github.gvolpe.smartbackpacker.service.{AbstractExchangeRateService, CountryService, CurrencyExchangeDTO}
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks

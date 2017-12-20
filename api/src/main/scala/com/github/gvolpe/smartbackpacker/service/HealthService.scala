@@ -1,12 +1,12 @@
 package com.github.gvolpe.smartbackpacker.service
 
 import com.github.gvolpe.smartbackpacker.model.{CountryCode, Health}
-import com.github.gvolpe.smartbackpacker.persistence.HealthDao
+import com.github.gvolpe.smartbackpacker.repository.algebra.HealthRepository
 
-class HealthService[F[_]](healthDao: HealthDao[F]) {
+class HealthService[F[_]](healthRepo: HealthRepository[F]) {
 
   def findHealthInfo(countryCode: CountryCode): F[Option[Health]] = {
-    healthDao.findHealthInfo(countryCode)
+    healthRepo.findHealthInfo(countryCode)
   }
 
 }

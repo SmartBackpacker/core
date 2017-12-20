@@ -4,7 +4,7 @@ import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.persistence.AirlineDao
+import com.github.gvolpe.smartbackpacker.repository.AirlineDao
 import com.github.gvolpe.smartbackpacker.service.AirlineService
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks

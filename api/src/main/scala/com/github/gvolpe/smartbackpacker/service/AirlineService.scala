@@ -4,13 +4,13 @@ import cats.effect.Sync
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName}
-import com.github.gvolpe.smartbackpacker.persistence.AirlineDao
+import com.github.gvolpe.smartbackpacker.repository.algebra.AirlineRepository
 
-class AirlineService[F[_] : Sync](airlineDao: AirlineDao[F]) {
+class AirlineService[F[_] : Sync](airlineRepo: AirlineRepository[F]) {
 
   def baggagePolicy(airlineName: AirlineName): F[Airline] = {
     val ifEmpty = Sync[F].raiseError[Airline](AirlineNotFound(airlineName))
-    airlineDao.findAirline(airlineName).flatMap { maybeAirline =>
+    airlineRepo.findAirline(airlineName).flatMap { maybeAirline =>
       maybeAirline.fold(ifEmpty)(_.pure[F])
     }
   }

@@ -6,9 +6,9 @@ import cats.syntax.apply._
 import cats.syntax.flatMap._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.persistence.VisaRequirementsDao
+import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
 
-class CountryService[F[_]](visaRequirementsDao: VisaRequirementsDao[F],
+class CountryService[F[_]](visaRequirementsRepo: VisaRequirementsRepository[F],
                            exchangeRateService: AbstractExchangeRateService[F])
                           (implicit F: MonadError[F, Throwable]) {
 
@@ -33,7 +33,7 @@ class CountryService[F[_]](visaRequirementsDao: VisaRequirementsDao[F],
 
   private def visaRequirementsFor(from: CountryCode, to: CountryCode): F[VisaRequirementsData] = {
     val ifEmpty = F.raiseError[VisaRequirementsData](CountryNotFound(to))
-    visaRequirementsDao.find(from, to).flatMap { maybeData =>
+    visaRequirementsRepo.find(from, to).flatMap { maybeData =>
       maybeData.fold(ifEmpty)(_.pure[F])
     }
   }

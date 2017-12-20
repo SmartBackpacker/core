@@ -3,7 +3,7 @@ package com.github.gvolpe.smartbackpacker.http
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model.{Count, CountryCode, Ranking, Sharing, VisaRestrictionsIndex}
-import com.github.gvolpe.smartbackpacker.persistence.VisaRestrictionsIndexDao
+import com.github.gvolpe.smartbackpacker.repository.VisaRestrictionsIndexDao
 import com.github.gvolpe.smartbackpacker.service.VisaRestrictionIndexService
 import org.http4s.{HttpService, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks

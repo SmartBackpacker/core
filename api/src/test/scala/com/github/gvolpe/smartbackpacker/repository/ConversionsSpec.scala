@@ -1,4 +1,4 @@
-package com.github.gvolpe.smartbackpacker.persistence
+package com.github.gvolpe.smartbackpacker.repository
 
 import com.github.gvolpe.smartbackpacker.model._
 import org.scalacheck.Arbitrary.arbitrary
