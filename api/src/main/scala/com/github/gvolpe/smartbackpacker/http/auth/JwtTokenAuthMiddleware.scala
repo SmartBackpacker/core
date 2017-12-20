@@ -1,10 +1,8 @@
 package com.github.gvolpe.smartbackpacker.http.auth
 
-import cats.data.{Kleisli, OptionT}
+import cats.data.{EitherT, Kleisli, OptionT}
 import cats.effect.Sync
-import cats.syntax.applicative._
 import cats.syntax.applicativeError._
-import cats.syntax.either._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.http.auth.JwtTokenAuthMiddleware.AuthConfig
 import org.http4s.Credentials.Token
@@ -64,7 +62,7 @@ class JwtTokenAuthMiddleware[F[_] : Sync](config: AuthConfig) extends Http4sDsl[
       verifyToken(request, jwtKey).value.map { option =>
         Either.cond[String, String](option.isDefined, option.get, "Unable to authorize token")
       }.recoverWith {
-        case MacVerificationError(msg) => msg.asLeft[String].pure[F]
+        case MacVerificationError(msg) => EitherT.leftT(msg).value
       }
     }
 
