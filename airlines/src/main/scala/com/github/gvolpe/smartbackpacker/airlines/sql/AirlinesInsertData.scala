@@ -1,17 +1,14 @@
 package com.github.gvolpe.smartbackpacker.airlines.sql
 
-import cats.Applicative
 import cats.effect.Async
 import cats.instances.list._
-import cats.instances.vector._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.airlines.parser.AirlinesFileParser
 import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
+import fs2.Stream
 
 class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: AirlinesFileParser[F]) {
 
@@ -40,9 +37,9 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: Airlin
     } yield ()
 
   def run: F[Unit] = {
-    airlinesParser.airlines.runLog.flatMap { airlines =>
-      Applicative[F].traverse(airlines)(a => program(a).transact(xa)).map(_ => ())
-    }
+    airlinesParser.airlines.flatMap { a =>
+      Stream.eval(program(a).transact(xa))
+    }.run
   }
 
 }

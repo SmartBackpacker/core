@@ -25,8 +25,8 @@ object AirlinesJob extends IOApp {
   def readArgs(args: List[String]): IO[(AirlineFile, AllowanceFile)] = {
     val ifEmpty = IO.raiseError[String](MissingArgument)
     for {
-      x <- args.tail.headOption.fold(ifEmpty)(IO(_))
-      y <- args.tail.tail.headOption.fold(ifEmpty)(IO(_))
+      x <- args.headOption.fold(ifEmpty)(IO(_))
+      y <- args.lastOption.fold(ifEmpty)(IO(_))
     } yield (new AirlineFile(x), new AllowanceFile(y))
   }
 
