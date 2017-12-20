@@ -21,6 +21,7 @@ class HealthInfoParserSpec extends FlatSpecLike with Matchers {
 
   }
 
+  // TODO: test properly
   it should "parse health information page" in IOAssertion {
     val from = new CountryCode("BI")
     MockParser.parse(from).map( result =>
