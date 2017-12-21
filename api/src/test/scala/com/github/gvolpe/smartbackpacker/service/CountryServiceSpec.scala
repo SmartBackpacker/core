@@ -4,11 +4,14 @@ import cats.data.EitherT
 import cats.effect.IO
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class CountryServiceSpec extends FlatSpecLike with Matchers {
+
+  private lazy val sbConfig = new SBConfiguration[IO]
 
   object MockVisaRequirementsRepository extends VisaRequirementsRepository[IO] {
     override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
@@ -21,13 +24,13 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     }
   }
 
-  object TestExchangeRateService extends AbstractExchangeRateService[IO] {
+  object TestExchangeRateService extends AbstractExchangeRateService[IO](sbConfig) {
     override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
 
-  object MockCountryService extends CountryService[IO](MockVisaRequirementsRepository, TestExchangeRateService)
+  object MockCountryService extends CountryService[IO](sbConfig, MockVisaRequirementsRepository, TestExchangeRateService)
 
   private val service = MockCountryService
 

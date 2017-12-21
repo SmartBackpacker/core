@@ -9,28 +9,39 @@ import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
 
-class CountryService[F[_]](visaRequirementsRepo: VisaRequirementsRepository[F],
+class CountryService[F[_]](sbConfig: SBConfiguration[F],
+                           visaRequirementsRepo: VisaRequirementsRepository[F],
                            exchangeRateService: AbstractExchangeRateService[F])
                           (implicit F: MonadError[F, Throwable]) {
 
-  def destinationInformation(from: CountryCode, to: CountryCode, baseCurrency: Currency): F[ValidationError Either DestinationInfo] = {
-    val result = EitherT.fromEither(validateCountries(from, to)) flatMap { _ =>
-      val foreignCurrency = SBConfiguration.countryCurrency(to).getOrElse("EUR").as[Currency]
-      EitherT(
-        (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN {
-          case (Right(vr), er) =>
-            DestinationInfo(
-              countryName = vr.to.name,
-              countryCode = vr.to.code,
-              visaRequirements = VisaRequirements(vr.visaCategory, vr.description),
-              exchangeRate = ExchangeRate(er.base.as[Currency], foreignCurrency, er.rates.getOrElse(foreignCurrency.value, -1.0))
-            ).asRight[ValidationError]
-          case (Left(e), _) =>
-            e.asLeft[DestinationInfo]
-        }
-      )
-    }
+  def destinationInformation(from: CountryCode,
+                             to: CountryCode,
+                             baseCurrency: Currency): F[ValidationError Either DestinationInfo] = {
+    val result =
+      for {
+        _  <- EitherT.fromEither(validateCountries(from, to))
+        fc <- EitherT.liftF(sbConfig.countryCurrency(to, default = "EUR".as[Currency]))
+        rs <- EitherT(retrieveDestinationInfoInParallel(from, to, baseCurrency, fc))
+      } yield rs
+
     result.value
+  }
+
+  private def retrieveDestinationInfoInParallel(from: CountryCode,
+                                                to: CountryCode,
+                                                baseCurrency: Currency,
+                                                foreignCurrency: Currency): F[ValidationError Either DestinationInfo] = {
+    (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN {
+      case (Right(vr), er) =>
+        DestinationInfo(
+          countryName = vr.to.name,
+          countryCode = vr.to.code,
+          visaRequirements = VisaRequirements(vr.visaCategory, vr.description),
+          exchangeRate = ExchangeRate(er.base.as[Currency], foreignCurrency, er.rates.getOrElse(foreignCurrency.value, -1.0))
+        ).asRight[ValidationError]
+      case (Left(e), _) =>
+        e.asLeft[DestinationInfo]
+    }
   }
 
   private def validateCountries(from: CountryCode, to: CountryCode): Either[ValidationError, (CountryCode, CountryCode)] = {

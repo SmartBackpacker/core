@@ -15,7 +15,8 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
     Scheduler(corePoolSize = 2) flatMap { implicit scheduler =>
       for {
-        authMiddleware <- Stream.eval(JwtTokenAuthMiddleware[F](ctx.ApiToken))
+        apiToken       <- Stream.eval(ctx.ApiToken)
+        authMiddleware <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
         exitCode       <- BlazeBuilder[F]
                             .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
                             .mountService(authMiddleware(ctx.httpEndpoints))

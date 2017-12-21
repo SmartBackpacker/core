@@ -3,6 +3,7 @@ package com.github.gvolpe.smartbackpacker.http
 import cats.effect.IO
 import cats.syntax.option._
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
@@ -52,7 +53,9 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     }
   }
 
-  object TestExchangeRateService extends AbstractExchangeRateService[IO] {
+  private lazy val sbConfig = new SBConfiguration[IO]
+
+  object TestExchangeRateService extends AbstractExchangeRateService[IO](sbConfig) {
     override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
@@ -61,7 +64,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new DestinationInfoHttpEndpoint(
-        new CountryService[IO](MockVisaRequirementsRepository, TestExchangeRateService),
+        new CountryService[IO](sbConfig, MockVisaRequirementsRepository, TestExchangeRateService),
         new HttpErrorHandler[IO]
       ).service
     )
