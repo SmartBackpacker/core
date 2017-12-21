@@ -54,7 +54,7 @@ class PostgresHealthRepository[F[_]](xa: Transactor[F])
         val optional        = o.map(_.toVaccine)
         val vaccinations    = Vaccinations(mandatory, recommendations, optional)
         val alertLevel      = a.toAlertLevel
-        val healthNotices   = n.map(_.toHealthAlert(alertLevel))
+        val healthNotices   = n.map(_.toHealthAlert)
         Health(vaccinations, HealthNotices(alertLevel, healthNotices))
       }
 

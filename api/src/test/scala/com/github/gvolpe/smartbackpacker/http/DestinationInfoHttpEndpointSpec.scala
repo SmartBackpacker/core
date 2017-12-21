@@ -40,7 +40,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     ("AR", "KO", Status.NotFound, "Country not found", """{"code":"100","error":"Country not found KO"}""")
   )
 
-  object MockVisaRequirementsRepository extends VisaRequirementsRepository[IO] {
+  private val repo = new VisaRequirementsRepository[IO] {
     override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
       if (to.value == "KO") none[VisaRequirementsData]
       else
@@ -55,7 +55,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
 
   private lazy val sbConfig = new SBConfiguration[IO]
 
-  object TestExchangeRateService extends AbstractExchangeRateService[IO](sbConfig) {
+  private val rateService = new AbstractExchangeRateService[IO](sbConfig) {
     override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
@@ -64,7 +64,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new DestinationInfoHttpEndpoint(
-        new CountryService[IO](sbConfig, MockVisaRequirementsRepository, TestExchangeRateService),
+        new CountryService[IO](sbConfig, repo, rateService),
         new HttpErrorHandler[IO]
       ).service
     )

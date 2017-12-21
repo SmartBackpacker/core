@@ -11,7 +11,7 @@ import org.scalatest.{FlatSpecLike, Matchers}
 
 class VisaRestrictionIndexHttpEndpointSpec extends FlatSpecLike with Matchers with VisaRestrictionIndexFixture {
 
-  forAll(examples) { (countryCode, expectedStatus, httpService) =>
+  forAll(examples) { (countryCode, expectedStatus) =>
     it should s"try to retrieve visa restriction index for $countryCode" in IOAssertion {
       val request = Request[IO](uri = Uri(path = s"/$ApiVersion/ranking/$countryCode"))
 
@@ -29,7 +29,7 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
 
   import Http4sUtils._
 
-  object MockVisaRestrictionIndexRepository extends VisaRestrictionsIndexRepository[IO] {
+  private val repo = new VisaRestrictionsIndexRepository[IO] {
     override def findRestrictionsIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
       IO {
         if (countryCode.value == "AR") Some(VisaRestrictionsIndex(new Ranking(0), new Count(0), new Sharing(0)))
@@ -37,18 +37,18 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
       }
   }
 
-  private val httpService: HttpService[IO] =
+  val httpService: HttpService[IO] =
     middleware(
       new VisaRestrictionIndexHttpEndpoint(
-        new VisaRestrictionIndexService[IO](MockVisaRestrictionIndexRepository),
+        new VisaRestrictionIndexService[IO](repo),
         new HttpErrorHandler[IO]
       ).service
     )
 
   val examples = Table(
-    ("countryCode", "expectedStatus", "httpService"),
-    ("AR", Status.Ok, httpService),
-    ("XX", Status.NotFound, httpService)
+    ("countryCode", "expectedStatus"),
+    ("AR", Status.Ok),
+    ("XX", Status.NotFound)
   )
 
 }

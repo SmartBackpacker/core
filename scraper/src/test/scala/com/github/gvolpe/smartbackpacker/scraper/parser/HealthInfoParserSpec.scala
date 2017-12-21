@@ -11,7 +11,7 @@ import scala.io.Source
 
 class HealthInfoParserSpec extends FlatSpecLike with Matchers {
 
-  object MockParser extends AbstractHealthInfoParser[IO] {
+  private val parser = new AbstractHealthInfoParser[IO] {
 
     override def htmlDocument(from: CountryCode): IO[Document] = IO {
       val browser = JsoupBrowser()
@@ -21,12 +21,24 @@ class HealthInfoParserSpec extends FlatSpecLike with Matchers {
 
   }
 
-  // TODO: test properly
-  it should "parse health information page" in IOAssertion {
-    val from = new CountryCode("BI")
-    MockParser.parse(from).map( result =>
-      println(result)
-    )
+  it should "parse health information page for AR (Argentina)" in IOAssertion {
+    parser.parse("AR".as[CountryCode]).map { health =>
+      health.vaccinations.mandatory       should be (empty)
+      health.vaccinations.recommendations should have size 2
+      health.vaccinations.optional        should have size 3
+      health.notices.alertLevel           should be (LevelTwo)
+      health.notices.alerts               should have size 1
+    }
+  }
+
+  it should "parse health information page for BI (Burundi)" in IOAssertion {
+    parser.parse("BI".as[CountryCode]).map { health =>
+      health.vaccinations.mandatory       should have size 1
+      health.vaccinations.recommendations should have size 3
+      health.vaccinations.optional        should have size 3
+      health.notices.alertLevel           should be (LevelOne)
+      health.notices.alerts               should have size 1
+    }
   }
 
 }

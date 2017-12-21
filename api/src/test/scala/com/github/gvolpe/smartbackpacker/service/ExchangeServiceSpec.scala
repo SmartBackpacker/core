@@ -10,20 +10,20 @@ class ExchangeServiceSpec extends FlatSpecLike with Matchers {
 
   private lazy val sbConfig = new SBConfiguration[IO]
 
-  object TestExchangeRateService extends AbstractExchangeRateService[IO](sbConfig) {
+  private val service  = new AbstractExchangeRateService[IO](sbConfig) {
     override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
 
   it should "retrieve a fake exchange rate" in IOAssertion {
-    TestExchangeRateService.exchangeRateFor("EUR".as[Currency], "RON".as[Currency]).map { exchangeRate =>
+    service.exchangeRateFor("EUR".as[Currency], "RON".as[Currency]).map { exchangeRate =>
       exchangeRate should be(CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59)))
     }
   }
 
   it should "return an empty exchange rate" in IOAssertion {
-    TestExchangeRateService.exchangeRateFor("".as[Currency], "".as[Currency]).map { exchangeRate =>
+    service.exchangeRateFor("".as[Currency], "".as[Currency]).map { exchangeRate =>
       exchangeRate should be(CurrencyExchangeDTO("", "", Map("" -> 0.0)))
     }
   }

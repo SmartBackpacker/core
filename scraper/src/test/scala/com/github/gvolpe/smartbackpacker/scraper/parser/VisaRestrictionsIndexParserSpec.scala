@@ -13,7 +13,7 @@ class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
 
   private val scraperConfig = new ScraperConfiguration[IO]
 
-  object MockParser extends AbstractVisaRestrictionsIndexParser[IO](scraperConfig) {
+  private val parser = new AbstractVisaRestrictionsIndexParser[IO](scraperConfig) {
 
     override val htmlDocument: IO[Document] = IO {
       val browser = JsoupBrowser()
@@ -24,7 +24,7 @@ class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
   }
 
   it should "parse visa restrictions index wiki page" in IOAssertion {
-    MockParser.parse.map { result =>
+    parser.parse.map { result =>
       result should not be empty
       // Not all the countries are part of the ranking
       result should have size 192 // SBConfiguration.countriesCode().size == 199

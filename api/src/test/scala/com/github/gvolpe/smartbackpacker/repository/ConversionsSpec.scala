@@ -56,6 +56,27 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
     }
   }
 
+  forAll { (v: Vaccine) =>
+    test(s"convert VaccineDTO into a $v # ${v.hashCode()}") {
+      val dto = v.disease.value :: v.description :: v.diseaseCategories.map(_.toString).mkString(",") :: HNil
+      assert(dto.toVaccine == v)
+    }
+  }
+
+  forAll { (ha: HealthAlert) =>
+    test(s"convert HealthAlertDTO into a $ha # ${ha.hashCode()}") {
+      val dto = ha.title :: ha.link.value :: ha.description :: HNil
+      assert(dto.toHealthAlert == ha)
+    }
+  }
+
+  forAll { (al: AlertLevel, ha: HealthAlert) =>
+    test(s"convert AlertLevelDTO into a $al # ${ha.hashCode()}") {
+      val dto = al.toString :: HNil
+      assert(dto.toAlertLevel == al)
+    }
+  }
+
 }
 
 trait ConversionsArbitraries {
@@ -130,6 +151,41 @@ trait ConversionsArbitraries {
       cat  <- arbitrary[VisaCategory]
       desc <- Gen.alphaStr
     } yield VisaRequirementsData(from, to, cat, desc)
+  }
+
+  implicit val diseaseCategory: Arbitrary[DiseaseCategory] = Arbitrary[DiseaseCategory] {
+    val list = List(
+      AvoidNonSterileEquipment, TakeAntimalarialMeds, GetVaccinated,
+      AvoidSharingBodyFluids, ReduceExposureToGerms, EatAndDrinkSafely,
+      PreventBugBites, KeepAwayFromAnimals
+    )
+    Gen.oneOf(list)
+  }
+
+  implicit val vaccine: Arbitrary[Vaccine] = Arbitrary[Vaccine] {
+    for {
+      d <- Gen.alphaStr
+      x <- Gen.alphaStr
+      c <- Gen.listOf(arbitrary[DiseaseCategory])
+    } yield {
+      val categories = {
+        if (c.isEmpty) List(UnknownDiseaseCategory)
+        else c
+      }
+      Vaccine(d.as[Disease], x, categories)
+    }
+  }
+
+  implicit val healthAlert: Arbitrary[HealthAlert] = Arbitrary[HealthAlert] {
+    for {
+      t <- Gen.alphaStr
+      w <- Gen.alphaStr
+      d <- Gen.alphaStr
+    } yield HealthAlert(t, w.as[WebLink], d)
+  }
+
+  implicit val alertLevel: Arbitrary[AlertLevel] = Arbitrary[AlertLevel] {
+    Gen.oneOf(LevelOne, LevelTwo)
   }
 
 }

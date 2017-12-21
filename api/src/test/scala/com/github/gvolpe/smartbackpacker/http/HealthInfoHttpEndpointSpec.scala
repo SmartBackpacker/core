@@ -1,0 +1,61 @@
+package com.github.gvolpe.smartbackpacker.http
+
+import cats.effect.IO
+import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.model.{CountryCode, Health, HealthAlert, HealthNotices, LevelOne, Vaccinations, Vaccine}
+import com.github.gvolpe.smartbackpacker.repository.algebra.HealthRepository
+import com.github.gvolpe.smartbackpacker.service.HealthService
+import org.http4s.{HttpService, Request, Status, Uri}
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{FlatSpecLike, Matchers}
+
+class HealthInfoHttpEndpointSpec extends FlatSpecLike with Matchers with HealthInfoFixture {
+
+  forAll(examples) { (countryCode, expectedStatus) =>
+    it should s"try to retrieve health information for $countryCode" in IOAssertion {
+      val request = Request[IO](uri = Uri(path = s"/$ApiVersion/health/$countryCode"))
+
+      httpService(request).value.map { task =>
+        task.fold(fail("Empty response")){ response =>
+          response.status should be (expectedStatus)
+        }
+      }
+    }
+  }
+
+}
+
+trait HealthInfoFixture extends PropertyChecks {
+
+  import Http4sUtils._
+
+  private val testHealth = Health(
+    vaccinations = Vaccinations(List.empty[Vaccine], List.empty[Vaccine], List.empty[Vaccine]),
+    notices = HealthNotices(
+      alertLevel = LevelOne,
+      alerts = List.empty[HealthAlert]
+    )
+  )
+
+  private val repo = new HealthRepository[IO] {
+    override def findHealthInfo(countryCode: CountryCode): IO[Option[Health]] = IO {
+      if (countryCode.value == "AR") Some(testHealth)
+      else None
+    }
+  }
+
+  val httpService: HttpService[IO] =
+    middleware(
+      new HealthInfoHttpEndpoint(
+        new HealthService[IO](repo),
+        new HttpErrorHandler[IO]
+      ).service
+    )
+
+  val examples = Table(
+    ("countryCode", "expectedStatus"),
+    ("AR", Status.Ok),
+    ("XX", Status.NotFound)
+  )
+
+}

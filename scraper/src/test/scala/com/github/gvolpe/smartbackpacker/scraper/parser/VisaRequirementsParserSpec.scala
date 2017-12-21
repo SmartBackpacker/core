@@ -15,7 +15,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
 
   private val scraperConfig = new ScraperConfiguration[IO]
 
-  object TestWikiPageParser extends AbstractVisaRequirementsParser[IO](scraperConfig) {
+  private val parser = new AbstractVisaRequirementsParser[IO](scraperConfig) {
     override def htmlDocument(from: CountryCode): IO[Document] = IO {
       val browser = JsoupBrowser()
       val fileContent = Source.fromResource(s"wikiPageTest-${from.value}.html").mkString
@@ -24,14 +24,14 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   it should "NOT find the wiki page for a non-existent country code" in IOAssertion {
-    TestWikiPageParser.visaRequirementsFor("XX".as[CountryCode]).attempt.map { result =>
+    parser.visaRequirementsFor("XX".as[CountryCode]).attempt.map { result =>
       assert(result.isLeft)
     }
   }
 
   forAll(examples) { (description, from, to, expectedCategory, expectedDescription) =>
     it should description in IOAssertion {
-      TestWikiPageParser.visaRequirementsFor(from.as[CountryCode]).map { list =>
+      parser.visaRequirementsFor(from.as[CountryCode]).map { list =>
         list.filter(_.to.value == to).foreach { req =>
           req.visaCategory should be (expectedCategory)
           req.description  should be (expectedDescription)
@@ -42,7 +42,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for AR -> $to" in IOAssertion.when(to != "Argentina" && to != "France") { // it's France and territories for AR
-      TestWikiPageParser.visaRequirementsFor("AR".as[CountryCode]).map { list =>
+      parser.visaRequirementsFor("AR".as[CountryCode]).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty
@@ -53,7 +53,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for GB -> $to" in IOAssertion.when(to != "United Kingdom") {
-      TestWikiPageParser.visaRequirementsFor("GB".as[CountryCode]).map { list =>
+      parser.visaRequirementsFor("GB".as[CountryCode]).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty
@@ -64,7 +64,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for IE -> $to" in IOAssertion.when(to != "Ireland") {
-      TestWikiPageParser.visaRequirementsFor("IE".as[CountryCode]).map { list =>
+      parser.visaRequirementsFor("IE".as[CountryCode]).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty
@@ -75,7 +75,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for KR -> $to" in IOAssertion.when(to != "South Korea" && to != "France") { // it's France and territories for KR
-      TestWikiPageParser.visaRequirementsFor("KR".as[CountryCode]).map { list =>
+      parser.visaRequirementsFor("KR".as[CountryCode]).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty
@@ -88,7 +88,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
     it should s"parse the visa requirements for CA -> $to" in IOAssertion.when(
       to != "Canada" && to != "France" && to != "Australia" // it's France and territories, etc
       && to != "Denmark" && to != "Netherlands" && to != "United Kingdom") {
-        TestWikiPageParser.visaRequirementsFor("CA".as[CountryCode]).map { list =>
+        parser.visaRequirementsFor("CA".as[CountryCode]).map { list =>
           list.foreach { req =>
             req.visaCategory should not be UnknownVisaCategory
             req.description  should not be empty
@@ -99,7 +99,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
 
   forAll(countries) { to =>
     it should s"parse the visa requirements for RU -> $to" in IOAssertion.when(to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
-      TestWikiPageParser.visaRequirementsFor("RU".as[CountryCode]).map { list =>
+      parser.visaRequirementsFor("RU".as[CountryCode]).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty

@@ -13,7 +13,7 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
 
   private lazy val sbConfig = new SBConfiguration[IO]
 
-  object MockVisaRequirementsRepository extends VisaRequirementsRepository[IO] {
+  private val repo = new VisaRequirementsRepository[IO] {
     override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
       VisaRequirementsData(
         from = Country("AR".as[CountryCode], "Argentina".as[CountryName]),
@@ -24,13 +24,13 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     }
   }
 
-  object TestExchangeRateService extends AbstractExchangeRateService[IO](sbConfig) {
+  private val rateService = new AbstractExchangeRateService[IO](sbConfig) {
     override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
 
-  object MockCountryService extends CountryService[IO](sbConfig, MockVisaRequirementsRepository, TestExchangeRateService)
+  object MockCountryService extends CountryService[IO](sbConfig, repo, rateService)
 
   private val service = MockCountryService
 

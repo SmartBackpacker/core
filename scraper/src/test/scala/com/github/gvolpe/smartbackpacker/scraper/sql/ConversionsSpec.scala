@@ -16,6 +16,13 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
     }
   }
 
+  forAll { (v: Vaccine) =>
+    test(s"convert a $v into a VaccineDTO # ${v.hashCode()}") {
+      val dto = (v.disease.value, v.description, v.diseaseCategories.map(_.toString).mkString(","))
+      assert(v.toVaccineDTO == dto)
+    }
+  }
+
 }
 
 trait ConversionsArbitraries {
@@ -26,7 +33,7 @@ trait ConversionsArbitraries {
       VisaRequired, VisaDeFactoRequired, ElectronicVisa, ElectronicVisitor,
       ElectronicTravelAuthority, FreeVisaOnArrival, VisaOnArrival,
       ElectronicVisaPlusVisaOnArrival, OnlineReciprocityFee,
-      MainlandTravelPermit, HomeReturnPermitOnly
+      MainlandTravelPermit, HomeReturnPermitOnly, UnknownVisaCategory
     )
     Gen.oneOf(list)
   }
@@ -38,6 +45,23 @@ trait ConversionsArbitraries {
       c <- arbitrary[VisaCategory]
       d <- Gen.alphaStr
     } yield VisaRequirementsFor(f.as[CountryCode], t.as[CountryCode], c, d)
+  }
+
+  implicit val diseaseCategory: Arbitrary[DiseaseCategory] = Arbitrary[DiseaseCategory] {
+    val list = List(
+      AvoidNonSterileEquipment, TakeAntimalarialMeds, GetVaccinated,
+      AvoidSharingBodyFluids, ReduceExposureToGerms, EatAndDrinkSafely,
+      PreventBugBites, KeepAwayFromAnimals, UnknownDiseaseCategory
+    )
+    Gen.oneOf(list)
+  }
+
+  implicit val vaccine: Arbitrary[Vaccine] = Arbitrary[Vaccine] {
+    for {
+      d <- Gen.alphaStr
+      x <- Gen.alphaStr
+      c <- Gen.listOf(arbitrary[DiseaseCategory])
+    } yield Vaccine(d.as[Disease], x, c)
   }
 
 }

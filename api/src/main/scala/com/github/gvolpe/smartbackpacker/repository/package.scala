@@ -70,7 +70,7 @@ package object repository {
   }
 
   implicit class HealthNoticeConversions(dto: HealthNoticeDTO) {
-    def toHealthAlert(alertLevel: AlertLevel): HealthAlert =
+    def toHealthAlert: HealthAlert =
       HealthAlert(
         title = dto.head,
         link = dto.tail.head.as[WebLink],
