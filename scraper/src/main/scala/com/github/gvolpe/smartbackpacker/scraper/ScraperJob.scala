@@ -5,7 +5,6 @@ import cats.effect.IO
 import cats.instances.list._
 import com.github.gvolpe.smartbackpacker.common.IOApp
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{Instant, Seconds}
 
@@ -44,8 +43,9 @@ object ScraperJob extends IOApp {
     } yield ()
 
   val visaRequirementsProgram: IO[Unit] = {
-    val codes = ScraperConfiguration.countriesCode()
-    Applicative[IO].traverse(codes)(c => visaRequirementsProgramFor(c)).map(_ => ())
+    ctx.scraperConfig.countriesCode() flatMap { codes =>
+      Applicative[IO].traverse(codes)(c => visaRequirementsProgramFor(c)).map(_ => ())
+    }
   }
 
   def healthInfoProgramFor(cc: CountryCode): IO[Unit] =
@@ -56,11 +56,12 @@ object ScraperJob extends IOApp {
     } yield ()
 
   val healthInfoProgram: IO[Unit] = {
-    val codes = ScraperConfiguration.countriesCode()
-    Applicative[IO].traverse(codes)(c => healthInfoProgramFor(c)).map(_ => ())
+    ctx.scraperConfig.countriesCode() flatMap { codes =>
+      Applicative[IO].traverse(codes)(c => healthInfoProgramFor(c)).map(_ => ())
+    }
   }
 
-  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `loadVisaCategories`, `visaRequirement` or `healthInfo`")
+  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `loadVisaCategories`, `visaRequirements` or `healthInfo`")
 
   def readArgs(args: List[String]): IO[Unit] = {
     val ifEmpty = IO.raiseError[Unit](MissingArgument)

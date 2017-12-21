@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.effect.Sync
+import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
@@ -13,16 +14,20 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
 import scala.util.{Success, Try}
 
-class HealthInfoParser[F[_]](implicit F: Sync[F]) extends AbstractHealthInfoParser[F] {
+class HealthInfoParser[F[_]](scraperConfig: ScraperConfiguration[F])
+                            (implicit F: Sync[F]) extends AbstractHealthInfoParser[F] {
 
   private val baseUrl = "https://wwwnc.cdc.gov/travel/destinations/traveler/none"
 
   override def htmlDocument(from: CountryCode): F[Document] = {
     val ifEmpty = F.raiseError[Document](HealthPageNotFound(from.value))
-    ScraperConfiguration.healthPage(from).fold(ifEmpty) { healthPage =>
-      F.delay {
-        val browser = new JsoupBrowser()
-        browser.get(s"$baseUrl/$healthPage")
+
+    scraperConfig.healthPage(from) flatMap { maybeHealthPage =>
+      maybeHealthPage.fold(ifEmpty) { healthPage =>
+        F.delay {
+          val browser = new JsoupBrowser()
+          browser.get(s"$baseUrl/$healthPage")
+        }
       }
     }
   }

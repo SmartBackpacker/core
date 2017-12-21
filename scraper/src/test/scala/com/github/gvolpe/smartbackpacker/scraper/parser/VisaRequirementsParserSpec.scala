@@ -3,6 +3,7 @@ package com.github.gvolpe.smartbackpacker.scraper.parser
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
+import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
 import org.scalatest.prop.PropertyChecks
@@ -12,7 +13,9 @@ import scala.io.Source
 
 class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaRequirementsParserFixture {
 
-  object TestWikiPageParser extends AbstractVisaRequirementsParser[IO] {
+  private val scraperConfig = new ScraperConfiguration[IO]
+
+  object TestWikiPageParser extends AbstractVisaRequirementsParser[IO](scraperConfig) {
     override def htmlDocument(from: CountryCode): IO[Document] = IO {
       val browser = JsoupBrowser()
       val fileContent = Source.fromResource(s"wikiPageTest-${from.value}.html").mkString

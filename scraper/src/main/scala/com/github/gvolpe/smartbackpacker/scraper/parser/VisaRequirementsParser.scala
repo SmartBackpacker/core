@@ -1,11 +1,13 @@
 package com.github.gvolpe.smartbackpacker.scraper.parser
 
-import cats.Functor
+import cats.Monad
 import cats.effect.Sync
+import cats.instances.list._
+import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
-import com.github.gvolpe.smartbackpacker.scraper.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
+import com.github.gvolpe.smartbackpacker.scraper.model._
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL._
@@ -14,34 +16,41 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
 import scala.util.{Failure, Success, Try}
 
-class VisaRequirementsParser[F[_]](implicit F: Sync[F]) extends AbstractVisaRequirementsParser[F] {
+class VisaRequirementsParser[F[_]](scraperConfig: ScraperConfiguration[F])
+                                  (implicit F: Sync[F]) extends AbstractVisaRequirementsParser[F](scraperConfig) {
 
   override def htmlDocument(from: CountryCode): F[Document] = {
     val ifEmpty: F[Document] = F.raiseError(WikiPageNotFound(from.value))
-    ScraperConfiguration.wikiPage(from).fold(ifEmpty) { wikiPage =>
-      F.delay {
-        val browser = new JsoupBrowser()
-        browser.get(wikiPage)
+
+    scraperConfig.wikiPage(from) flatMap { maybeWikiPage =>
+      maybeWikiPage.fold(ifEmpty) { wikiPage =>
+        F.delay {
+          val browser = new JsoupBrowser()
+          browser.get(wikiPage)
+        }
       }
     }
   }
 
 }
 
-abstract class AbstractVisaRequirementsParser[F[_] : Functor] {
+abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfiguration[F])
+                                                   (implicit F: Monad[F]) {
 
   def htmlDocument(from: CountryCode): F[Document]
 
   def visaRequirementsFor(from: CountryCode): F[List[VisaRequirementsFor]] = {
-    parseVisaRequirements(from).map { _.map { vr =>
-      // If we can't find the code we just same the country name instead to easily trace the data
-      val ifEmpty = VisaRequirementsFor(from, vr.to.value.as[CountryCode], vr.visaCategory, vr.description)
-      countryCodeFor(vr.to).fold(ifEmpty)(VisaRequirementsFor(from, _, vr.visaCategory, vr.description))
-    }}
+    parseVisaRequirements(from) flatMap { vrp =>
+      F.traverse(vrp) { vr =>
+        // If we can't find the code we just use the same the country name instead to easily trace the data
+        val ifEmpty = VisaRequirementsFor(from, vr.to.value.as[CountryCode], vr.visaCategory, vr.description)
+        countryCodeFor(vr.to).map(_.fold(ifEmpty)(VisaRequirementsFor(from, _, vr.visaCategory, vr.description)))
+      }
+    }
   }
 
-  private def countryCodeFor(name: CountryName): Option[CountryCode] = {
-    ScraperConfiguration.countriesWithNames().find(_.names.map(_.value).contains(name.value)).map(_.code)
+  private def countryCodeFor(name: CountryName): F[Option[CountryCode]] = {
+    scraperConfig.countriesWithNames().map(_.find(_.names.map(_.value).contains(name.value)).map(_.code))
   }
 
   // To handle special cases like the Irish wiki page containing a table of both 4 and 5 columns
@@ -119,7 +128,7 @@ abstract class AbstractVisaRequirementsParser[F[_] : Functor] {
   // TODO: Aggregate ".sortable" table with ".wikitable" table that for some countries have partially recognized countries like Kosovo
   // TODO: This will require add more visa categories (See Polish page)
   private def parseVisaRequirements(from: CountryCode): F[List[VisaRequirementsParsing]] =
-    htmlDocument(from).map { doc =>
+    htmlDocument(from) map { doc =>
       // Get first of all sortable tables
       val wikiTables = (doc >> elementList(".sortable")).headOption
       // Find out whether it's an irregular (colspan=2) or regular table

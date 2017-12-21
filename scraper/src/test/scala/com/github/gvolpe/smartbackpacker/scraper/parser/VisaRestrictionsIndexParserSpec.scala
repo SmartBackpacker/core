@@ -2,6 +2,7 @@ package com.github.gvolpe.smartbackpacker.scraper.parser
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -10,7 +11,9 @@ import scala.io.Source
 
 class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
 
-  object MockParser extends AbstractVisaRestrictionsIndexParser[IO] {
+  private val scraperConfig = new ScraperConfiguration[IO]
+
+  object MockParser extends AbstractVisaRestrictionsIndexParser[IO](scraperConfig) {
 
     override val htmlDocument: IO[Document] = IO {
       val browser = JsoupBrowser()

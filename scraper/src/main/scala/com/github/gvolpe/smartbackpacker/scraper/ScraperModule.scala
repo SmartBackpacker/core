@@ -1,11 +1,14 @@
 package com.github.gvolpe.smartbackpacker.scraper
 
 import cats.effect.Async
+import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.parser.{HealthInfoParser, VisaRequirementsParser, VisaRestrictionsIndexParser}
 import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, HealthInfoInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
 import doobie.util.transactor.Transactor
 
 class ScraperModule[F[_] : Async] {
+
+  val scraperConfig     = new ScraperConfiguration[F]
 
   val devDbUrl: String  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
   val dbUrl: String     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
@@ -19,15 +22,15 @@ class ScraperModule[F[_] : Async] {
     else Transactor.fromDriverManager[F](dbDriver, dbUrl, dbUser, dbPass)
   }
 
-  private val visaRequirementsParser  = new VisaRequirementsParser[F]()
-  private val healthInfoParser        = new HealthInfoParser[F]
+  private val visaRequirementsParser  = new VisaRequirementsParser[F](scraperConfig)
+  private val healthInfoParser        = new HealthInfoParser[F](scraperConfig)
 
   val visaRequirementsInsertData      = new VisaRequirementsInsertData[F](xa, visaRequirementsParser)
 
-  val visaRestrictionsIndexParser     = new VisaRestrictionsIndexParser[F]
+  val visaRestrictionsIndexParser     = new VisaRestrictionsIndexParser[F](scraperConfig)
   val visaRestrictionsInsertData      = new VisaRestrictionsIndexInsertData[F](xa)
 
-  val countryInsertData               = new CountryInsertData[F](xa)
+  val countryInsertData               = new CountryInsertData[F](scraperConfig, xa)
   val visaCategoryInsertData          = new VisaCategoryInsertData[F](xa)
 
   val healthInfoInsertData            = new HealthInfoInsertData[F](xa, healthInfoParser)

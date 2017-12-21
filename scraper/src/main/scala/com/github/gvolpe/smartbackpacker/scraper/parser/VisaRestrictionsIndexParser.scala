@@ -1,7 +1,9 @@
 package com.github.gvolpe.smartbackpacker.scraper.parser
 
-import cats.Functor
+import cats.Monad
 import cats.effect.Sync
+import cats.instances.list._
+import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
@@ -14,7 +16,7 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
 import scala.util.{Failure, Success, Try}
 
-class VisaRestrictionsIndexParser[F[_] : Sync] extends AbstractVisaRestrictionsIndexParser[F] {
+class VisaRestrictionsIndexParser[F[_] : Sync](scraperConfig: ScraperConfiguration[F]) extends AbstractVisaRestrictionsIndexParser[F](scraperConfig) {
 
   override val htmlDocument: F[Document] = Sync[F].delay {
     val browser = new JsoupBrowser()
@@ -23,36 +25,46 @@ class VisaRestrictionsIndexParser[F[_] : Sync] extends AbstractVisaRestrictionsI
 
 }
 
-abstract class AbstractVisaRestrictionsIndexParser[F[_] : Functor] {
+abstract class AbstractVisaRestrictionsIndexParser[F[_]](scraperConfig: ScraperConfiguration[F])
+                                                        (implicit F: Monad[F]) {
 
   val CountriesOnIndex: Int = 104 // Number of countries that are part of the ranking
 
   def htmlDocument: F[Document]
 
-  def parse: F[List[(CountryCode, VisaRestrictionsIndex)]] =
-    htmlDocument.map { doc =>
-      val wikiTable: List[Element] = doc >> elementList(".sortable")
-      val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
+  private val countryNames: F[List[(CountryCode, List[String])]] =
+    for {
+      ccs <- scraperConfig.countriesCode()
+      nms <- F.traverse(ccs) { cc => scraperConfig.countryNames(cc).map((cc, _)) }
+    } yield nms
 
-      val ranking = result.grouped(3).take(CountriesOnIndex).map {
-        case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionsRanking(r, c, pc)
-      }.toList
+  def parse: F[List[(CountryCode, VisaRestrictionsIndex)]] = {
+    countryNames flatMap { codeAndNames =>
+      htmlDocument.map { doc =>
+        val wikiTable: List[Element] = doc >> elementList(".sortable")
+        val result = wikiTable.flatMap(e => (e >> extractor(".collapsible td", wikiTableExtractor)).toList)
 
-      for {
-        code    <- ScraperConfiguration.countriesCode()
-        names   = ScraperConfiguration.countryNames(code)
-        index   <- ranking
-        country <- index.countries
-        if names.contains(country)
-      } yield {
-        val visaIndex = VisaRestrictionsIndex(
-          rank = new Ranking(index.rank),
-          count = new Count(index.count),
-          sharing = new Sharing(index.countries.size)
-        )
-        (code, visaIndex)
+        val ranking = result.grouped(3).take(CountriesOnIndex).map {
+          case List(Rank(r), Countries(c), PlacesCount(pc)) => VisaRestrictionsRanking(r, c, pc)
+        }.toList
+
+        for {
+          cn            <- codeAndNames
+          (code, names) = cn
+          index         <- ranking
+          country       <- index.countries
+          if names.contains(country)
+        } yield {
+          val visaIndex = VisaRestrictionsIndex(
+            rank = new Ranking(index.rank),
+            count = new Count(index.count),
+            sharing = new Sharing(index.countries.size)
+          )
+          (code, visaIndex)
+        }
       }
     }
+  }
 
   private val wikiTableExtractor: HtmlExtractor[Element, Iterable[VisaRestrictionsIndexValues]] = _.map { e =>
     Try(e.text.toInt) match {
