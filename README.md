@@ -1,10 +1,10 @@
 Smart Backpacker
 ================
 
-[Smart Backpacker](http://smartbackpackerapp.com) is an App where you can find Visa Requirements information for any country in the world regardless of your nationality, currency exchange and airline's baggage policy!
+[Smart Backpacker](http://smartbackpackerapp.com) is an App where you can find Visa Requirements information for any country in the world regardless of your nationality, currency exchange and airline's baggage policy among others.
 
 - Download it for `Android` [here](https://play.google.com/store/apps/details?id=io.github.gvolpe.sb).
-- Download it for `iOS` here - NOT AVAILABLE YET
+- Download it for `iOS` [here](https://itunes.apple.com/us/app/smartbackpackerapp/id1322542121?ls=1&mt=8)
 
 ### Modules
 
@@ -13,11 +13,11 @@ Smart Backpacker
 It's the main back-end application exposing the Http Rest API. It also contains a token generator.
 
 - Dependencies
-    - [Fixer.io](http://fixer.io/) running on [localhost:8081](http://localhost:8081) using `docker-compose`. See the source code [here](https://github.com/hakanensari/fixer).
+    - [Fixer.io](http://fixer.io/) running on [localhost:8081](http://localhost:8081) using `docker-compose`. See the source code [here](https://github.com/hakanensari/fixer). Or you can also use the public API, just change the URL in the configuration.
 
 #### Airlines
 
-It contains the [PostgreSQL](https://www.postgresql.org/) setup scripts for the airline tables and the job to insert new airline's data using plain files as the source (fs2.io is used here).
+It contains the SQL setup scripts for the airline tables and the job to insert new airline's data using plain files as the source (`fs2.io` is used here).
 
 #### Common
 
@@ -25,7 +25,11 @@ At the moment it just contains some utils for `cats.effect.IO`.
 
 #### Scraper
 
-It has all the wiki page parsers and scrapers, SQL scripts for table creation and all the jobs to insert parsed data into the DB.
+It has all the html page parsers and scrapers, SQL scripts for table creation and all the jobs to insert parsed data into the DB.
+
+### Database
+
+Smart Backpacker uses [PostgreSQL](https://www.postgresql.org/) as the main data storage.
 
 ## LICENSE
 
