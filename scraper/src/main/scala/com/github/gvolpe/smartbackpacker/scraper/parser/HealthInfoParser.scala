@@ -12,7 +12,7 @@ import net.ruippeixotog.scalascraper.dsl.DSL._
 import net.ruippeixotog.scalascraper.model.{Document, Element}
 import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 class HealthInfoParser[F[_]](scraperConfig: ScraperConfiguration[F])
                             (implicit F: Sync[F]) extends AbstractHealthInfoParser[F] {
@@ -38,8 +38,13 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
 
   def htmlDocument(from: CountryCode): F[Document]
 
-  private def extractWebLink(v: String): String = {
-    v.split('(').tail.headOption.getOrElse(" ").dropRight(1)
+  private val linksBaseUri = "https://wwwnc.cdc.gov"
+
+  private def extractWebLink(e: Element): String = {
+    Try(e >> attr("href")) match {
+      case Success(link) => linksBaseUri + link
+      case Failure(e)    => println(s"Error parsing link: ${e.getMessage}"); ""
+    }
   }
 
   private def removeBracketsAndWebLink(v: String): String = {
@@ -47,23 +52,23 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
   }
 
   private val travelNoticeExtractor: HtmlExtractor[Element, Iterable[HealthAlert]] = _.flatMap { e =>
-    val listBlock: List[Element] = e >> elementList(".list-block li")
-    val titleAndLink  = listBlock.map(_ >> text("a")).mkString("")
-    val title         = removeBracketsAndWebLink(titleAndLink)
-    val link          = extractWebLink(titleAndLink)
+    val listBlock = e >> elementList(".list-block li")
+    val titles    = listBlock.map(_ >> text("a"))
+    val links     = listBlock.map(_ >> element("a")).map(extractWebLink)
 
-    val summary: String =
-      (for {
+    val summaries: List[String] =
+      for {
         e     <- listBlock
         elems <- e >> elementList("span")
-      } yield {
-        Try(elems.attr("class")) match {
-          case Success(x) if x == "summary" => elems >> text
-          case _ => ""
-        }
-      }).mkString("")
+        list  <- Try(elems.attr("class")) match {
+                  case Success(x) if x == "summary" => List(elems >> text)
+                  case _ => List.empty[String]
+                }
+      } yield list
 
-    Seq(HealthAlert(title, link.as[WebLink], summary))
+    List(titles, links, summaries).transpose.flatten.grouped(3).collect {
+      case (t :: l :: s :: Nil) => HealthAlert(t, l.as[WebLink], s)
+    }
   }
 
   private val healthTableExtractor: HtmlExtractor[Element, Iterable[HealthInfoRow]] = _.flatMap { e =>
@@ -134,13 +139,13 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
         case _                                => NoAlert
       }
 
-      val alerts: List[HealthAlert] = section.flatMap(_ >> extractor("ul", travelNoticeExtractor))
+      val healthAlerts: List[HealthAlert] = section.flatMap(_ >> extractor("ul", travelNoticeExtractor))
 
       Health(
         vaccinations = Vaccinations(mandatory, recommended, optional),
         notices = HealthNotices(
           alertLevel = alertLevel,
-          alerts = alerts
+          alerts = healthAlerts
         )
       )
     }

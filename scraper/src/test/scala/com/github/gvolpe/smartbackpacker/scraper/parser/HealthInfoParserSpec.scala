@@ -28,6 +28,7 @@ class HealthInfoParserSpec extends FlatSpecLike with Matchers {
       health.vaccinations.optional        should have size 3
       health.notices.alertLevel           should be (LevelTwo)
       health.notices.alerts               should have size 1
+      health.notices.alerts.foreach(_.link.value should not be empty)
     }
   }
 
@@ -38,7 +39,20 @@ class HealthInfoParserSpec extends FlatSpecLike with Matchers {
       health.vaccinations.optional        should have size 3
       health.notices.alertLevel           should be (LevelOne)
       health.notices.alerts               should have size 1
+      health.notices.alerts.foreach(_.link.value should not be empty)
     }
   }
+
+  it should "parse health information page for AG (Antigua and Barbuda)" in IOAssertion {
+    parser.parse("AG".as[CountryCode]).map { health =>
+      health.vaccinations.mandatory       should be (empty)
+      health.vaccinations.recommendations should have size 2
+      health.vaccinations.optional        should have size 3
+      health.notices.alertLevel           should be (LevelTwo)
+      health.notices.alerts               should have size 2
+      health.notices.alerts.foreach(_.link.value should not be empty)
+    }
+  }
+
 
 }

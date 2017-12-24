@@ -73,7 +73,7 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
   }
 
   private def insertHealthAlert(a: HealthAlert): ConnectionIO[Int] = {
-    sql"INSERT INTO health_alert (title, weblink, description) VALUES (${a.title}, ${a.link}, ${a.description})"
+    sql"INSERT INTO health_alert (title, weblink, description) VALUES (${a.title}, ${a.link.value}, ${a.description})"
       .update.withUniqueGeneratedKeys("id")
   }
 
