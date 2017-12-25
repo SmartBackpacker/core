@@ -5,6 +5,7 @@ import cats.instances.list._
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.traverse._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.model._
 import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractHealthInfoParser
@@ -40,7 +41,7 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
 
   private def insertVaccinationsBulk(countryId: Int, vaccines: List[Vaccine])
                                     (f: (Int, Int) => ConnectionIO[Int]): F[Int] = {
-    val result = F.traverse(vaccines) { v =>
+    val result = vaccines.traverse { v =>
       for {
         id <- insertVaccine(v).transact(xa)
         _  <- f(countryId, id).transact(xa)
@@ -83,7 +84,7 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
   }
 
   private def insertHealthAlertsBulk(countryId: Int, alerts: List[HealthAlert]): F[Int] = {
-    val result = F.traverse(alerts) { a =>
+    val result = alerts.traverse { a =>
       for {
         id <- insertHealthAlert(a).transact(xa)
         _  <- insertHealthNotice(countryId, id).transact(xa)

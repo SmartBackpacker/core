@@ -14,7 +14,7 @@ class VisaRestrictionsIndexInsertDataSpec extends FunSuite with VisaRestrictions
   test("create table visa_restrictions_index and insert data") {
     IOAssertion {
       for {
-        xa <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+        xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
         _  <- createVisaIndexTable(xa)
         _  <- new VisaRestrictionsIndexInsertData[IO](xa).run(countries)
       } yield ()

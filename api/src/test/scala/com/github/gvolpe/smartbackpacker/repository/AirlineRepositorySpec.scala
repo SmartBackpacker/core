@@ -1,6 +1,5 @@
 package com.github.gvolpe.smartbackpacker.repository
 
-import cats.Applicative
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.model._
@@ -14,7 +13,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 class AirlineRepositorySpec extends AirlineSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
-    H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+    H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -38,6 +37,7 @@ class AirlineRepositorySpec extends AirlineSQLSetup with FlatSpecLike with Match
 trait AirlineSQLSetup {
 
   import cats.instances.list._
+  import cats.syntax.traverse._
 
   def h2Transactor: IO[H2Transactor[IO]]
 
@@ -67,7 +67,7 @@ trait AirlineSQLSetup {
     } yield ()
 
   def insertData(xa: Transactor[IO]): IO[List[Unit]] = {
-    Applicative[IO].traverse(airlines)(a => insertDataProgram(a).transact(xa))
+    airlines.traverse(a => insertDataProgram(a).transact(xa))
   }
 
   private val createAirlineTable: ConnectionIO[Int] =
@@ -134,5 +134,5 @@ trait AirlineSQLSetup {
       }
     }
   }
-
 }
+

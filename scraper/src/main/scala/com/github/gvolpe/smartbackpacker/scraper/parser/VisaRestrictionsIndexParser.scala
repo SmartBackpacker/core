@@ -5,6 +5,7 @@ import cats.effect.Sync
 import cats.instances.list._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.traverse._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.model.VisaRestrictionsRanking
@@ -35,7 +36,7 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_]](scraperConfig: ScraperC
   private val countryNames: F[List[(CountryCode, List[String])]] =
     for {
       ccs <- scraperConfig.countriesCode()
-      nms <- F.traverse(ccs) { cc => scraperConfig.countryNames(cc).map((cc, _)) }
+      nms <- ccs.traverse { cc => scraperConfig.countryNames(cc).map((cc, _)) }
     } yield nms
 
   def parse: F[List[(CountryCode, VisaRestrictionsIndex)]] = {

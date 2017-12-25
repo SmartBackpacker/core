@@ -5,6 +5,7 @@ import cats.effect.Sync
 import cats.instances.list._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.traverse._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.model._
@@ -41,7 +42,7 @@ abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfig
 
   def visaRequirementsFor(from: CountryCode): F[List[VisaRequirementsFor]] = {
     parseVisaRequirements(from) flatMap { vrp =>
-      F.traverse(vrp) { vr =>
+      vrp.traverse { vr =>
         // If we can't find the code we just use the same the country name instead to easily trace the data
         val ifEmpty = VisaRequirementsFor(from, vr.to.value.as[CountryCode], vr.visaCategory, vr.description)
         countryCodeFor(vr.to).map(_.fold(ifEmpty)(VisaRequirementsFor(from, _, vr.visaCategory, vr.description)))

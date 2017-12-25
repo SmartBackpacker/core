@@ -9,7 +9,7 @@ import com.github.gvolpe.smartbackpacker.repository.algebra._
 import com.github.gvolpe.smartbackpacker.service._
 import doobie.util.transactor.Transactor
 import org.http4s.AuthedService
-import org.http4s.client.blaze.PooledHttp1Client
+import org.http4s.client.blaze.{Http1Client, PooledHttp1Client}
 
 // It wires all the instances together
 class Module[F[_]](implicit F: Effect[F]) {
@@ -46,7 +46,7 @@ class Module[F[_]](implicit F: Effect[F]) {
     new PostgresVisaRequirementsRepository[F](xa)
 
   private lazy val exchangeRateService: ExchangeRateService[F] =
-    new ExchangeRateService[F](PooledHttp1Client[F](), sbConfig)
+    new ExchangeRateService[F](Http1Client[F](), sbConfig)
 
   private lazy val countryService: CountryService[F] =
     new CountryService[F](sbConfig, visaRequirementsRepo, exchangeRateService)

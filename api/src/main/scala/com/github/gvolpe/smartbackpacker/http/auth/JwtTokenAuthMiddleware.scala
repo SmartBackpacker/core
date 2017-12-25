@@ -10,9 +10,8 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{AuthScheme, AuthedService, Request}
 import org.http4s.headers.Authorization
 import org.http4s.server.AuthMiddleware
-import tsec.jws.mac._
+import tsec.jws.mac.JWTMac
 import tsec.mac.imports._
-import tsec.mac.imports.JCAMacPure._
 
 object JwtTokenAuthMiddleware {
   def apply[F[_] : Sync](apiToken: Option[String]): F[AuthMiddleware[F, String]] =
@@ -53,7 +52,7 @@ class JwtTokenAuthMiddleware[F[_] : Sync](config: AuthConfig) extends Http4sDsl[
                           jwtKey: MacSigningKey[HMACSHA256]): OptionT[F, String] =
     for {
       token       <- bearerTokenFromRequest(request)
-      verified    <- OptionT.liftF(JWTMacM.verifyAndParse[F, HMACSHA256](token, jwtKey))
+      verified    <- OptionT.liftF(JWTMac.verifyAndParse[F, HMACSHA256](token, jwtKey))
       accessToken <- OptionT.fromOption[F](verified.body.subject)
     } yield accessToken
 

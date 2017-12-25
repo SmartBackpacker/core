@@ -31,7 +31,7 @@ class VisaRequirementsInsertDataSpec extends FunSuite with VisaRequirementsInser
   ignore("create visa requirements tables and insert data") {
     IOAssertion {
       for {
-        xa <- H2Transactor[IO]("jdbc:h2:mem:vr_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+        xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:vr_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
         _  <- createHealthTables(xa)
         _  <- new CountryInsertData[IO](scraperConfig, xa).run
         _  <- new VisaCategoryInsertData[IO](xa).run

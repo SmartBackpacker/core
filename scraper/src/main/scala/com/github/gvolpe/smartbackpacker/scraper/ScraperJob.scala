@@ -1,8 +1,8 @@
 package com.github.gvolpe.smartbackpacker.scraper
 
-import cats.Applicative
 import cats.effect.IO
 import cats.instances.list._
+import cats.syntax.traverse._
 import com.github.gvolpe.smartbackpacker.common.IOApp
 import com.github.gvolpe.smartbackpacker.model._
 import org.joda.time.format.DateTimeFormat
@@ -44,7 +44,7 @@ object ScraperJob extends IOApp {
 
   val visaRequirementsProgram: IO[Unit] = {
     ctx.scraperConfig.countriesCode() flatMap { codes =>
-      Applicative[IO].traverse(codes)(c => visaRequirementsProgramFor(c)).map(_ => ())
+      codes.traverse(c => visaRequirementsProgramFor(c)).map(_ => ())
     }
   }
 
@@ -57,7 +57,7 @@ object ScraperJob extends IOApp {
 
   val healthInfoProgram: IO[Unit] = {
     ctx.scraperConfig.countriesCode() flatMap { codes =>
-      Applicative[IO].traverse(codes)(c => healthInfoProgramFor(c)).map(_ => ())
+      codes.traverse(c => healthInfoProgramFor(c)).map(_ => ())
     }
   }
 
