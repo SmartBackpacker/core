@@ -8,3 +8,5 @@ ALTER COLUMN schengen SET NOT NULL;
 
 -- Data update
 UPDATE countries SET schengen = 'no';
+
+INSERT INTO countries (code, name, currency, schengen) VALUES ('XK', 'Kosovo', 'EUR', 'no');

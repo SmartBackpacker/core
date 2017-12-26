@@ -37,7 +37,8 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val examples = Table(
     ("from", "code", "expectedStatus","expectedCountry", "expectedVisa"),
     ("AR", "GB", Status.Ok, "United Kingdom", "VisaNotRequired"),
-    ("AR", "KO", Status.NotFound, "Country not found", """{"code":"100","error":"Country not found KO"}""")
+    ("AR", "KO", Status.NotFound, "Country not found", """{"code":"100","error":"Country not found KO"}"""),
+    ("AR", "AR", Status.BadRequest, "Countries must be different", """{"code":"101","error":"Countries must be different!"}""")
   )
 
   private val repo = new VisaRequirementsRepository[IO] {

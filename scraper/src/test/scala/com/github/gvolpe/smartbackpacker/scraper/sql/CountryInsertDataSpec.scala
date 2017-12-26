@@ -18,7 +18,9 @@ class CountryInsertDataSpec extends FunSuite with CountryFixture {
       for {
         xa <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
         _  <- createCountryTable(xa)
-        _  <- new CountryInsertData[IO](scraperConfig, xa).run
+        cd = new CountryInsertData[IO](scraperConfig, xa)
+        _  <- cd.run
+        _  <- cd.runUpdate
       } yield ()
     }
   }

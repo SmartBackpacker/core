@@ -27,7 +27,7 @@ class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
     parser.parse.map { result =>
       result should not be empty
       // Not all the countries are part of the ranking
-      result should have size 192 // SBConfiguration.countriesCode().size == 199
+      result should have size 193 // SBConfiguration.countriesCode().size == 199
     }
   }
 
