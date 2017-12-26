@@ -3,8 +3,8 @@ ADD COLUMN currency VARCHAR (3),
 ADD COLUMN schengen BOOLEAN;
 
 ALTER TABLE countries
-ALTER COLUMN currency SET NOT NULL UNIQUE,
+ALTER COLUMN currency SET NOT NULL,
 ALTER COLUMN schengen SET NOT NULL;
 
 -- Data update
-UPDATE countries SET schengen = 'yes';
+UPDATE countries SET schengen = 'no';

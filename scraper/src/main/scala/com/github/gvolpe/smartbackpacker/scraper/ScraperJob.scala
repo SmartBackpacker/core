@@ -21,6 +21,13 @@ object ScraperJob extends IOApp {
       _       <- IO { println("Visa index scraping job done") }
     } yield ()
 
+  val updateCountriesProgram: IO[Unit] =
+    for {
+      _ <- IO { println("Starting countries updating data job") }
+      _ <- ctx.countryInsertData.runUpdate
+      _ <- IO { println("Countries updating data job DONE") }
+    } yield ()
+
   val countriesProgram: IO[Unit] =
     for {
       _ <- IO { println("Starting countries inserting data job") }
@@ -67,6 +74,7 @@ object ScraperJob extends IOApp {
     val ifEmpty = IO.raiseError[Unit](MissingArgument)
     args.headOption.fold(ifEmpty) {
       case "loadCountries"      => countriesProgram
+      case "updateCountries"    => updateCountriesProgram
       case "loadVisaCategories" => visaCategoriesProgram
       case "visaRequirements"   => visaRequirementsProgram
       case "visaRanking"        => visaIndexProgram

@@ -13,15 +13,14 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
   private val ctx = new Module[F]
 
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
-    Scheduler(corePoolSize = 2) flatMap { implicit scheduler =>
-      for {
-        apiToken       <- Stream.eval(ctx.ApiToken)
-        authMiddleware <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
-        exitCode       <- BlazeBuilder[F]
-                            .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
-                            .mountService(authMiddleware(ctx.httpEndpoints))
-                            .serve
-      } yield exitCode
-    }
+    for {
+      _              <- Scheduler(corePoolSize = 2)
+      apiToken       <- Stream.eval(ctx.ApiToken)
+      authMiddleware <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
+      exitCode       <- BlazeBuilder[F]
+                          .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
+                          .mountService(authMiddleware(ctx.httpEndpoints))
+                          .serve
+    } yield exitCode
 
 }

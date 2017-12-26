@@ -45,8 +45,8 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
       if (to.value == "KO") none[VisaRequirementsData]
       else
       VisaRequirementsData(
-        from = Country("AR".as[CountryCode], "Argentina".as[CountryName]),
-        to   = Country("GB".as[CountryCode], "United Kingdom".as[CountryName]),
+        from = Country("AR".as[CountryCode], "Argentina".as[CountryName], "ARS".as[Currency]),
+        to   = Country("GB".as[CountryCode], "United Kingdom".as[CountryName], "GBP".as[Currency]),
         visaCategory = VisaNotRequired,
         description = "90 days within any 180 day period"
       ).some

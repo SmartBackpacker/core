@@ -16,8 +16,8 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
   private val repo = new VisaRequirementsRepository[IO] {
     override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
       VisaRequirementsData(
-        from = Country("AR".as[CountryCode], "Argentina".as[CountryName]),
-        to   = Country("RO".as[CountryCode], "Romania".as[CountryName]),
+        from = Country("AR".as[CountryCode], "Argentina".as[CountryName], "ARS".as[Currency]),
+        to   = Country("RO".as[CountryCode], "Romania".as[CountryName], "RON".as[Currency]),
         visaCategory = VisaNotRequired,
         description = "90 days within any 180 day period"
       ).some

@@ -9,8 +9,9 @@ import doobie.util.transactor.Transactor
 
 class PostgresCountryRepository[F[_] : Monad](xa: Transactor[F]) extends CountryRepository[F] {
 
-  private def findCountries(query: ConnectionIO[List[CountryDTO]]) =
-    query.map(list => list.map(_.toCountry)).transact(xa)
+  private def findCountries(query: ConnectionIO[List[CountryDTO]]) = {
+    query.map(_.map(_.toCountry)).transact(xa)
+  }
 
   override def findAll: F[List[Country]] = {
     val sql = sql"SELECT id, code, name, currency FROM countries ORDER BY name"

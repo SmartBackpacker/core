@@ -43,11 +43,14 @@ class CountryInsertData[F[_] : Async](scraperConfig: ScraperConfiguration[F],
     }
   }
 
+  def runUpdate: F[Unit] = {
+    runSchengenUpdate.flatMap(_ => runCurrencyUpdate)
+  }
+
   def run: F[Unit] = {
-    runSchengenUpdate
-//    scraperConfig.countries() flatMap { countries =>
-//      insertCountriesBulk(countries).transact(xa).map(_ => ())
-//    }
+    scraperConfig.countries() flatMap { countries =>
+      insertCountriesBulk(countries).transact(xa).map(_ => ())
+    }
   }
 
 }

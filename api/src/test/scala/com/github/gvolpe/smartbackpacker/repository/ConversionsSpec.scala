@@ -50,8 +50,8 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
   forAll { (data: VisaRequirementsData) =>
     test(s"convert VisaRequirementsDTO into a $data") {
       val dto   = data.visaCategory.toString :: data.description :: HNil
-      val from  = 1 :: data.from.code.value :: data.from.name.value :: HNil
-      val to    = 1 :: data.to.code.value :: data.to.name.value :: HNil
+      val from  = 1 :: data.from.code.value :: data.from.name.value :: data.from.currency.value :: HNil
+      val to    = 1 :: data.to.code.value :: data.to.name.value :: data.to.currency.value :: HNil
       assert(dto.toVisaRequirementsData(from, to) == data)
     }
   }
@@ -130,7 +130,8 @@ trait ConversionsArbitraries {
     for {
       c <- Gen.alphaUpperStr
       n <- Gen.alphaStr
-    } yield Country(new CountryCode(c), new CountryName(n))
+      u <- Gen.alphaStr
+    } yield Country(new CountryCode(c), new CountryName(n), new Currency(u))
   }
 
   implicit val visaCategory: Arbitrary[VisaCategory] = Arbitrary[VisaCategory] {
