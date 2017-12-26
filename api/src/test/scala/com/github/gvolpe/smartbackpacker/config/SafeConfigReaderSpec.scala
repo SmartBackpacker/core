@@ -12,7 +12,7 @@ class SafeConfigReaderSpec extends FunSuite {
   }
 
   test("it fails trying to parse a map") {
-    assert(safeConfig.objectMap("asd").isEmpty)
+    assert(safeConfig.objectMapOfList("asd").isEmpty)
   }
 
 }

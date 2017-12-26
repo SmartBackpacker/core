@@ -40,7 +40,22 @@ class SafeConfigReader(config: Config) {
     }
   }
 
-  def objectMap(key: String): Map[String, List[String]] = {
+  def objectMap(key: String): Map[String, String] = {
+    import scala.collection.JavaConverters._
+    Try {
+      config.getAnyRef(key)
+        .asInstanceOf[java.util.Map[String, String]]
+        .asScala
+        .toMap
+    } match {
+      case Failure(error) =>
+        log.warn(s"Key $key not found: ${error.getMessage}.")
+        Map.empty[String, String]
+      case Success(map) => map
+    }
+  }
+
+  def objectMapOfList(key: String): Map[String, List[String]] = {
     import scala.collection.JavaConverters._
     Try {
       config.getAnyRef(key)

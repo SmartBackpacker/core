@@ -1,7 +1,7 @@
 package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
-import cats.syntax.semigroupk._
+import cats.syntax.semigroupk._ // For appending http services with <+>
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.http._
 import com.github.gvolpe.smartbackpacker.repository._
@@ -48,14 +48,20 @@ class Module[F[_]](implicit F: Effect[F]) {
   private lazy val exchangeRateService: ExchangeRateService[F] =
     new ExchangeRateService[F](PooledHttp1Client[F](), sbConfig)
 
-  private lazy val countryService: CountryService[F] =
-    new CountryService[F](sbConfig, visaRequirementsRepo, exchangeRateService)
+  private lazy val destinationInfoService: DestinationInfoService[F] =
+    new DestinationInfoService[F](sbConfig, visaRequirementsRepo, exchangeRateService)
 
   private lazy val healthRepo: HealthRepository[F] =
     new PostgresHealthRepository[F](xa)
 
   private lazy val healthService: HealthService[F] =
     new HealthService[F](healthRepo)
+
+  private lazy val countryRepository: CountryRepository[F] =
+    new PostgresCountryRepository[F](xa)
+
+  private lazy val countryService: CountryService[F] =
+    new CountryService[F](countryRepository)
 
   // Http stuff
   private lazy val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
@@ -64,7 +70,7 @@ class Module[F[_]](implicit F: Effect[F]) {
 
   // Http Endpoints
   private lazy val destinationInfoHttpEndpoint: AuthedService[String, F] =
-    new DestinationInfoHttpEndpoint[F](countryService, httpErrorHandler).service
+    new DestinationInfoHttpEndpoint[F](destinationInfoService, httpErrorHandler).service
 
   private lazy val airlinesHttpEndpoint: AuthedService[String, F] =
     new AirlinesHttpEndpoint[F](airlineService, httpErrorHandler).service
@@ -75,7 +81,12 @@ class Module[F[_]](implicit F: Effect[F]) {
   private lazy val healthInfoHttpEndpoint: AuthedService[String, F] =
     new HealthInfoHttpEndpoint[F](healthService, httpErrorHandler).service
 
+  private lazy val countriesHttpEndpoint: AuthedService[String, F] =
+    new CountriesHttpEndpoint[F](countryService, httpErrorHandler).service
+
   lazy val httpEndpoints: AuthedService[String, F] =
-    destinationInfoHttpEndpoint <+> airlinesHttpEndpoint <+> visaRestrictionIndexHttpEndpoint <+> healthInfoHttpEndpoint
+    (destinationInfoHttpEndpoint <+> airlinesHttpEndpoint
+      <+> visaRestrictionIndexHttpEndpoint <+> healthInfoHttpEndpoint
+      <+> countriesHttpEndpoint)
 
 }

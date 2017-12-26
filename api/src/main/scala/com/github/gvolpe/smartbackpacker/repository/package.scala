@@ -9,7 +9,7 @@ package object repository {
   type BaggageAllowanceDTO  = String :: Option[Int] :: Int :: Int :: Int :: HNil
   type RestrictionsIndexDTO = Int :: Int :: Int :: HNil
 
-  type CountryDTO           = Int :: String :: String :: HNil
+  type CountryDTO           = Int :: String :: String :: String :: HNil
   type VisaRequirementsDTO  = String :: String :: HNil
 
   type VaccineDTO           = String :: String :: String :: HNil
@@ -49,8 +49,8 @@ package object repository {
   implicit class VisaRequirementsConversions(dto: VisaRequirementsDTO) {
     def toVisaRequirementsData(fromDto: CountryDTO, toDto: CountryDTO): VisaRequirementsData =
       VisaRequirementsData(
-        from          = Country(new CountryCode(fromDto(1)), new CountryName(fromDto.last)),
-        to            = Country(new CountryCode(toDto(1)), new CountryName(toDto.last)),
+        from          = fromDto.toCountry,
+        to            = toDto.toCountry,
         visaCategory  = VisaCategory.fromName(dto.head),
         description   = dto.last
       )
@@ -80,6 +80,15 @@ package object repository {
 
   implicit class HealthAlertConversions(dto: HealthAlertDTO) {
     def toAlertLevel: AlertLevel = AlertLevel.fromString(dto.head)
+  }
+
+  implicit class CountryConversions(dto: CountryDTO) {
+    def toCountry: Country =
+      Country(
+        code = new CountryCode(dto(1)),
+        name = new CountryName(dto(2)),
+        currency = new Currency(dto.last)
+      )
   }
 
 }

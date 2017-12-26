@@ -18,16 +18,30 @@ class ScraperConfiguration[F[_]](implicit F: Sync[F]) {
     safeConfig.string(s"health.page.${countryCode.value}")
   }
 
+  def schengen(): F[List[CountryCode]] = F.delay {
+    safeConfig.list("countries.schengen").map(_.as[CountryCode])
+  }
+
   def countries(): F[List[Country]] = F.delay {
-    safeConfig.objectMap("countries.name").map(kv =>
-      (kv._1.as[CountryCode], kv._2.headOption.getOrElse("Empty").as[CountryName])
-    ).toList.map(kv => Country(kv._1, kv._2)).sortBy(_.code.value)
+    val names = safeConfig.objectMapOfList("countries.name").map {
+      case ((co, ns)) => (co.as[CountryCode], ns.headOption.getOrElse("Empty").as[CountryName])
+    }.toList.sortBy(_._1.value)
+
+    val currencies = safeConfig.objectMap("countries.currency").map {
+      case ((co, cu)) => (co.as[CountryCode], cu.as[Currency])
+    }.toList.sortBy(_._1.value)
+
+    names.zip(currencies).flatMap {
+      case ((co, cn), (co2, cu)) if co.value == co2.value =>
+        List(Country(co, cn, cu))
+      case _ => List.empty[Country]
+    }.sortBy(_.code.value)
   }
 
   def countriesWithNames(): F[List[CountryWithNames]] = F.delay {
-    safeConfig.objectMap("countries.name").map(kv =>
-      (kv._1.as[CountryCode], kv._2.map(_.as[CountryName]))
-    ).toList.map(kv => CountryWithNames(kv._1, kv._2)).sortBy(_.code.value)
+    safeConfig.objectMapOfList("countries.name").map {
+      case ((co, ns)) => CountryWithNames(co.as[CountryCode], ns.map(_.as[CountryName]))
+    }.toList.sortBy(_.code.value)
   }
 
   def countriesCode(): F[List[CountryCode]] = F.delay {

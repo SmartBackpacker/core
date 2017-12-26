@@ -1,6 +1,6 @@
 package com.github.gvolpe.smartbackpacker.repository
 
-import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, CountryCode, Health, VisaRequirementsData, VisaRestrictionsIndex}
+import com.github.gvolpe.smartbackpacker.model.{Airline, AirlineName, Country, CountryCode, Health, VisaRequirementsData, VisaRestrictionsIndex}
 
 object algebra {
 
@@ -18,6 +18,11 @@ object algebra {
 
   trait VisaRestrictionsIndexRepository[F[_]] {
     def findRestrictionsIndex(countryCode: CountryCode): F[Option[VisaRestrictionsIndex]]
+  }
+
+  trait CountryRepository[F[_]] {
+    def findAll: F[List[Country]]
+    def findSchengen: F[List[Country]]
   }
 
 }

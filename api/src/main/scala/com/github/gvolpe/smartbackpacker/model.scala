@@ -93,7 +93,7 @@ object model {
     }
   }
 
-  case class Country(code: CountryCode, name: CountryName)
+  case class Country(code: CountryCode, name: CountryName, currency: Currency)
   case class CountryWithNames(code: CountryCode, names: List[CountryName])
 
   case class VisaRequirementsData(from: Country,

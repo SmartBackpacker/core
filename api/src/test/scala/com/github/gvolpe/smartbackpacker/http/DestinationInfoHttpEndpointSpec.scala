@@ -7,7 +7,7 @@ import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.http.Http4sUtils._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.repository.algebra.VisaRequirementsRepository
-import com.github.gvolpe.smartbackpacker.service.{AbstractExchangeRateService, CountryService, CurrencyExchangeDTO}
+import com.github.gvolpe.smartbackpacker.service.{AbstractExchangeRateService, DestinationInfoService, CurrencyExchangeDTO}
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -64,7 +64,7 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   val httpService: HttpService[IO] =
     middleware(
       new DestinationInfoHttpEndpoint(
-        new CountryService[IO](sbConfig, repo, rateService),
+        new DestinationInfoService[IO](sbConfig, repo, rateService),
         new HttpErrorHandler[IO]
       ).service
     )

@@ -30,12 +30,10 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
     }
   }
 
-  object MockCountryService extends CountryService[IO](sbConfig, repo, rateService)
-
-  private val service = MockCountryService
+  private val service = new DestinationInfoService[IO](sbConfig, repo, rateService)
 
   it should "retrieve destination information" in IOAssertion {
-    EitherT(service.destinationInformation("AR".as[CountryCode], "RO".as[CountryCode], "EUR".as[Currency])).map { info =>
+    EitherT(service.find("AR".as[CountryCode], "RO".as[CountryCode], "EUR".as[Currency])).map { info =>
       info.countryCode.value  should be ("RO")
       info.countryName.value  should be ("Romania")
       info.exchangeRate       should be (ExchangeRate("EUR".as[Currency], "RON".as[Currency], 4.59))
@@ -44,7 +42,7 @@ class CountryServiceSpec extends FlatSpecLike with Matchers {
   }
 
   it should "validate countries" in IOAssertion {
-    EitherT(service.destinationInformation("AR".as[CountryCode], "AR".as[CountryCode], "EUR".as[Currency])).leftMap { error =>
+    EitherT(service.find("AR".as[CountryCode], "AR".as[CountryCode], "EUR".as[Currency])).leftMap { error =>
       error should be (CountriesMustBeDifferent)
     }.value
   }
