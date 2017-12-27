@@ -7,7 +7,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   inThisBuild(List(
     organization := "com.github.gvolpe",
     scalaVersion := "2.12.3",
-    version      := "1.1.0",
+    version      := "1.2.0",
     scalacOptions := Seq(
       "-deprecation",
       "-encoding",
