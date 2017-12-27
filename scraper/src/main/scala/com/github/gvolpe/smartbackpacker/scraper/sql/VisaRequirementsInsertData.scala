@@ -7,6 +7,7 @@ import cats.instances.list._
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import com.github.gvolpe.smartbackpacker.common.Log
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.model._
 import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractVisaRequirementsParser
@@ -14,9 +15,9 @@ import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 
-class VisaRequirementsInsertData[F[_]](xa: Transactor[F],
-                                       visaRequirementsParser: AbstractVisaRequirementsParser[F])
-                                      (implicit F: Async[F]) {
+class VisaRequirementsInsertData[F[_] : Async](xa: Transactor[F],
+                                               visaRequirementsParser: AbstractVisaRequirementsParser[F])
+                                              (implicit L: Log[F]) {
 
   private def insertVisaRequirementsBulk(list: List[VisaRequirementsFor]) = {
     val sql =
@@ -41,19 +42,17 @@ class VisaRequirementsInsertData[F[_]](xa: Transactor[F],
 
   private val errorHandler: PartialFunction[Throwable, F[Unit]] = {
     // For example Algerian Wiki page has Burundi duplicated
-    case e: BatchUpdateException if e.getCause.getMessage.contains("duplicate key value") =>
-      F.delay(println(e.getMessage))
-    case WikiPageNotFound(code) =>
-      F.delay(println(s"Wiki page not found for $code"))
+    case e: BatchUpdateException if e.getCause.getMessage.contains("duplicate key value") => L.error(e)
+    case e: WikiPageNotFound => L.error(e)
   }
 
   def run(from: CountryCode): F[Unit] = {
     val program = for {
-      _   <- F.delay(println(s"${from.value} >> Gathering visa requirements from Wikipedia"))
+      _   <- L.info(s"${from.value} >> Gathering visa requirements from Wikipedia")
       req <- visaRequirementsParser.visaRequirementsFor(from)
-      _   <- F.delay(println(s"${from.value} >> Starting data insertion into DB"))
+      _   <- L.info(s"${from.value} >> Starting data insertion into DB")
       rs  <- insertVisaRequirementsBulk(req).transact(xa)
-      _   <- F.delay(println(s"${from.value} >> Created $rs records"))
+      _   <- L.info(s"${from.value} >> Created $rs records")
     } yield ()
     program.recoverWith(errorHandler)
   }

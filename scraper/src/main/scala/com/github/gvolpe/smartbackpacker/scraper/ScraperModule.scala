@@ -1,6 +1,7 @@
 package com.github.gvolpe.smartbackpacker.scraper
 
 import cats.effect.Async
+import com.github.gvolpe.smartbackpacker.common.instances.log._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.parser.{HealthInfoParser, VisaRequirementsParser, VisaRestrictionsIndexParser}
 import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, HealthInfoInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
@@ -8,14 +9,14 @@ import doobie.util.transactor.Transactor
 
 class ScraperModule[F[_] : Async] {
 
-  val scraperConfig     = new ScraperConfiguration[F]
+  lazy val scraperConfig     = new ScraperConfiguration[F]
 
-  val devDbUrl: String  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
-  val dbUrl: String     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
+  lazy val devDbUrl: String  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+  lazy val dbUrl: String     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
 
-  private val dbDriver  = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
-  private val dbUser    = sys.env.getOrElse("SB_DB_USER", "postgres")
-  private val dbPass    = sys.env.getOrElse("SB_DB_PASSWORD", "")
+  private lazy val dbDriver  = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
+  private lazy val dbUser    = sys.env.getOrElse("SB_DB_USER", "postgres")
+  private lazy val dbPass    = sys.env.getOrElse("SB_DB_PASSWORD", "")
 
   private val xa = {
     if (devDbUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbUrl)

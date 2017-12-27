@@ -14,39 +14,39 @@ object ScraperJob extends IOApp {
 
   val visaIndexProgram: IO[Unit] =
     for {
-      _       <- IO { println("Starting visa index scraping job") }
+      _       <- putStrLn("Starting visa index scraping job")
       ranking <- ctx.visaRestrictionsIndexParser.parse
-      _       <- IO { println("Starting visa index inserting data job") }
+      _       <- putStrLn("Starting visa index inserting data job")
       _       <- ctx.visaRestrictionsInsertData.run(ranking)
-      _       <- IO { println("Visa index scraping job done") }
+      _       <- putStrLn("Visa index scraping job done")
     } yield ()
 
   val updateCountriesProgram: IO[Unit] =
     for {
-      _ <- IO { println("Starting countries updating data job") }
+      _ <- putStrLn("Starting countries updating data job")
       _ <- ctx.countryInsertData.runUpdate
-      _ <- IO { println("Countries updating data job DONE") }
+      _ <- putStrLn("Countries updating data job DONE")
     } yield ()
 
   val countriesProgram: IO[Unit] =
     for {
-      _ <- IO { println("Starting countries inserting data job") }
+      _ <- putStrLn("Starting countries inserting data job")
       _ <- ctx.countryInsertData.run
-      _ <- IO { println("Countries inserting data job DONE") }
+      _ <- putStrLn("Countries inserting data job DONE")
     } yield ()
 
   val visaCategoriesProgram: IO[Unit] =
     for {
-      _ <- IO { println("Starting visa categories inserting data job") }
+      _ <- putStrLn("Starting visa categories inserting data job")
       _ <- ctx.visaCategoryInsertData.run
-      _ <- IO { println("Visa categories inserting data job DONE") }
+      _ <- putStrLn("Visa categories inserting data job DONE")
     } yield ()
 
   def visaRequirementsProgramFor(from: CountryCode): IO[Unit] =
     for {
-      _ <- IO { println(s"${from.value} >> Starting visa requirements job") }
+      _ <- putStrLn(s"${from.value} >> Starting visa requirements job")
       _ <- ctx.visaRequirementsInsertData.run(from)
-      _ <- IO { println(s"${from.value} >> Visa requirements job DONE") }
+      _ <- putStrLn(s"${from.value} >> Visa requirements job DONE")
     } yield ()
 
   val visaRequirementsProgram: IO[Unit] = {
@@ -57,9 +57,9 @@ object ScraperJob extends IOApp {
 
   def healthInfoProgramFor(cc: CountryCode): IO[Unit] =
     for {
-      _ <- IO { println("Starting health info inserting data job") }
+      _ <- putStrLn("Starting health info inserting data job")
       _ <- ctx.healthInfoInsertData.run(cc)
-      _ <- IO { println("Health info inserting data job DONE") }
+      _ <- putStrLn("Health info inserting data job DONE")
     } yield ()
 
   val healthInfoProgram: IO[Unit] = {
@@ -68,7 +68,7 @@ object ScraperJob extends IOApp {
     }
   }
 
-  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `loadVisaCategories`, `visaRequirements` or `healthInfo`")
+  case object MissingArgument extends Exception("There should be only one argument with one of the following values: `loadCountries`, `updateCountries`, `loadVisaCategories`, `visaRequirements`, `visaRanking` or `healthInfo`")
 
   def readArgs(args: List[String]): IO[Unit] = {
     val ifEmpty = IO.raiseError[Unit](MissingArgument)
@@ -85,14 +85,14 @@ object ScraperJob extends IOApp {
 
   override def start(args: List[String]): IO[Unit] = {
     lazy val fmt    = DateTimeFormat.forPattern("H:m:s.S")
-    lazy val start  = Instant.now()
     for {
-      _ <- if (ctx.devDbUrl.nonEmpty) IO { println(s"DEV DB connection established: ${ctx.devDbUrl}") }
-           else IO { println(s"DB connection established: ${ctx.dbUrl}") }
-      _ <- IO { println(s"Starting job at ${start.toString(fmt)}") }
-      _ <- readArgs(args)
-      f = Instant.now()
-      _ <- IO { println(s"Finished job at ${f.toString(fmt)}. Duration ${Seconds.secondsBetween(start, f).getSeconds} seconds") }
+      start <- getTime
+      _     <- if (ctx.devDbUrl.nonEmpty) putStrLn(s"DEV DB connection established: ${ctx.devDbUrl}")
+               else putStrLn(s"DB connection established: ${ctx.dbUrl}")
+      _     <- putStrLn(s"Starting job at ${start.toString(fmt)}")
+      _     <- readArgs(args)
+      end   <- getTime
+      _     <- putStrLn(s"Finished job at ${end.toString(fmt)}. Duration ${Seconds.secondsBetween(start, end).getSeconds} seconds")
     } yield ()
   }
 

@@ -13,9 +13,9 @@ object ApiTokenGenerator extends TokenGeneration[IO] with IOApp {
 
   override def start(args: List[String]): IO[Unit] =
     for {
-      _     <- IO { println("Generating API Token") }
+      _     <- putStrLn("Generating API Token")
       token <- tokenGenerator
-      _     <- IO { println(token) }
+      _     <- putStrLn(token)
     } yield ()
 
 }

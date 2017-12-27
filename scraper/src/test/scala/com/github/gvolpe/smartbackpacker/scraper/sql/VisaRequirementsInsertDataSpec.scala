@@ -2,6 +2,7 @@ package com.github.gvolpe.smartbackpacker.scraper.sql
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.instances.log._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractVisaRequirementsParser

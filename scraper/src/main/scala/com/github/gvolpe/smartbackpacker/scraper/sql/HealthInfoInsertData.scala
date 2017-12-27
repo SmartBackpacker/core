@@ -5,6 +5,8 @@ import cats.instances.list._
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.traverse._
+import com.github.gvolpe.smartbackpacker.common.Log
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.model._
 import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractHealthInfoParser
@@ -12,9 +14,9 @@ import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 
-class HealthInfoInsertData[F[_]](xa: Transactor[F],
-                                 healthInfoParser: AbstractHealthInfoParser[F])
-                                 (implicit F: Async[F]) {
+class HealthInfoInsertData[F[_] : Async](xa: Transactor[F],
+                                         healthInfoParser: AbstractHealthInfoParser[F])
+                                        (implicit L: Log[F]) {
 
   // Vaccines
   private def insertVaccine(vaccine: Vaccine): ConnectionIO[Int] = {
@@ -40,7 +42,7 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
 
   private def insertVaccinationsBulk(countryId: Int, vaccines: List[Vaccine])
                                     (f: (Int, Int) => ConnectionIO[Int]): F[Int] = {
-    val result = F.traverse(vaccines) { v =>
+    val result = vaccines.traverse { v =>
       for {
         id <- insertVaccine(v).transact(xa)
         _  <- f(countryId, id).transact(xa)
@@ -83,7 +85,7 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
   }
 
   private def insertHealthAlertsBulk(countryId: Int, alerts: List[HealthAlert]): F[Int] = {
-    val result = F.traverse(alerts) { a =>
+    val result = alerts.traverse { a =>
       for {
         id <- insertHealthAlert(a).transact(xa)
         _  <- insertHealthNotice(countryId, id).transact(xa)
@@ -94,23 +96,22 @@ class HealthInfoInsertData[F[_]](xa: Transactor[F],
 
   // Insert data Program
   private val errorHandler: PartialFunction[Throwable, F[Unit]] = {
-    case HealthPageNotFound(code) =>
-      F.delay(println(s"Health page not found for $code"))
+    case e: HealthPageNotFound => L.error(e)
   }
 
   def run(cc: CountryCode): F[Unit] = {
     val program = for {
-      _      <- F.delay(println(s"${cc.value} >> Gathering health information from CDC"))
+      _      <- L.info(s"${cc.value} >> Gathering health information from CDC")
       health <- healthInfoParser.parse(cc)
-      _      <- F.delay(println(s"${cc.value} >> Starting data insertion into DB"))
+      _      <- L.info(s"${cc.value} >> Starting data insertion into DB")
       cid    <- findCountryId(cc).transact(xa)
       rs0    <- insertVaccineMandatoryBulk(cid, health.vaccinations.mandatory)
       rs1    <- insertVaccineRecommendationsBulk(cid, health.vaccinations.recommendations)
       rs2    <- insertVaccineOptionalBulk(cid, health.vaccinations.optional)
-      _      <- F.delay(println(s"${cc.value} >> Created $rs0 records for mandatory, $rs1 for recommendations and $rs2 for optional"))
+      _      <- L.info(s"${cc.value} >> Created $rs0 records for mandatory, $rs1 for recommendations and $rs2 for optional")
       _      <- insertAlertLevel(cid, health.notices.alertLevel).transact(xa)
       rs3    <- insertHealthAlertsBulk(cid, health.notices.alerts)
-      _      <- F.delay(println(s"${cc.value} >> Created $rs3 records for health alerts"))
+      _      <- L.info(s"${cc.value} >> Created $rs3 records for health alerts")
     } yield ()
     program.recoverWith(errorHandler)
   }

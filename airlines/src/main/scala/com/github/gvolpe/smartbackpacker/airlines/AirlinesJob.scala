@@ -22,11 +22,11 @@ object AirlinesJob extends IOApp {
   def program(airlineFile: AirlineFile,
               allowanceFile: AllowanceFile): IO[Unit] =
     for {
-      _       <- if (ctx.devDbUrl.nonEmpty) IO { println(s"DEV DB connection established: ${ctx.devDbUrl}") }
-                 else IO { println(s"DB connection established: ${ctx.dbUrl}") }
-      _       <- IO { println("Starting job") }
+      _       <- if (ctx.devDbUrl.nonEmpty) putStrLn(s"DEV DB connection established: ${ctx.devDbUrl}")
+                 else putStrLn(s"DB connection established: ${ctx.dbUrl}")
+      _       <- putStrLn("Starting job")
       _       <- ctx.airlinesInsertData(airlineFile, allowanceFile).run
-      _       <- IO { println("Job finished successfully") }
+      _       <- putStrLn("Job finished successfully")
     } yield ()
 
   override def start(args: List[String]): IO[Unit] =
