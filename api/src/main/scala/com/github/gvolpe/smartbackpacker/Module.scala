@@ -2,6 +2,7 @@ package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
 import cats.syntax.semigroupk._ // For appending http services with <+>
+import com.github.gvolpe.smartbackpacker.common.instances.log._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.http._
 import com.github.gvolpe.smartbackpacker.repository._
