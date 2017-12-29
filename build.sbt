@@ -44,6 +44,9 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
     scalaTest,
     scalaCheck
   ),
+  organizationName := "Smart Backpacker App",
+  startYear := Some(2017),
+  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   pomExtra :=
     <scm>
       <url>git@github.com:gvolpe/smart-backpacker-api.git</url>
@@ -63,23 +66,27 @@ val AirlinesDependencies: Seq[ModuleID] = Seq(
 )
 
 lazy val root = project.in(file("."))
-  .aggregate(api, airlines, scraper)
+  .aggregate(api, airlines, common, scraper)
 
 lazy val common = project.in(file("common"))
   .settings(commonSettings: _*)
+  .enablePlugins(AutomateHeaderPlugin)
 
 lazy val api = project.in(file("api"))
   .settings(commonSettings: _*)
   .dependsOn(common)
   .enablePlugins(JavaAppPackaging)
+  .enablePlugins(AutomateHeaderPlugin)
 
 lazy val airlines = project.in(file("airlines"))
   .settings(commonSettings: _*)
   .settings(libraryDependencies ++= AirlinesDependencies)
   .enablePlugins(JavaAppPackaging)
+  .enablePlugins(AutomateHeaderPlugin)
   .dependsOn(api)
 
 lazy val scraper = project.in(file("scraper"))
   .settings(commonSettings: _*)
   .enablePlugins(JavaAppPackaging)
+  .enablePlugins(AutomateHeaderPlugin)
   .dependsOn(api)
