@@ -49,7 +49,7 @@ class HealthInfoInsertDataSpec extends FunSuite with HealthInfoInsertDataFixture
   test("create health tables and insert data") {
     IOAssertion {
       for {
-        xa <- H2Transactor[IO]("jdbc:h2:mem:health_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+        xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:health_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
         _  <- createHealthTables(xa)
         _  <- new CountryInsertData[IO](scraperConfig, xa).run
         _  <- new HealthInfoInsertData[IO](xa, parser).run("BI".as[CountryCode])

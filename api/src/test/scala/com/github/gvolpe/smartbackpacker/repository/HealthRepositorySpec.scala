@@ -28,7 +28,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 class HealthRepositorySpec extends HealthSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
-    H2Transactor[IO]("jdbc:h2:mem:health_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+    H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:health_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
 
   override def beforeAll(): Unit = {
     super.beforeAll()

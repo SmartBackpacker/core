@@ -26,7 +26,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 class CountryRepositorySpec extends CountrySQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
   override val h2Transactor: IO[H2Transactor[IO]] =
-    H2Transactor[IO]("jdbc:h2:mem:country_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+    H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:country_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
 
   override def beforeAll(): Unit = {
     super.beforeAll()

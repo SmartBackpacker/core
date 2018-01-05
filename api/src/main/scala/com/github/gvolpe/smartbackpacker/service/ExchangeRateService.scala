@@ -28,12 +28,12 @@ import io.circe.generic.auto._
 import org.http4s.circe._
 import org.http4s.client.{Client, UnexpectedStatus}
 
-class ExchangeRateService[F[_] : Effect](client: Client[F],
+class ExchangeRateService[F[_] : Effect](client: F[Client[F]],
                                          sbConfig: SBConfiguration[F])
                                         (implicit L: Log[F]) extends AbstractExchangeRateService[F](sbConfig) {
 
   override protected def retrieveExchangeRate(uri: String): F[CurrencyExchangeDTO] = {
-    client.expect[CurrencyExchangeDTO](uri)(jsonOf[F, CurrencyExchangeDTO])
+    client.flatMap(_.expect[CurrencyExchangeDTO](uri)(jsonOf[F, CurrencyExchangeDTO]))
   }
 
 }

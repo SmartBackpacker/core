@@ -29,7 +29,7 @@ class VisaCategoryInsertDataSpec extends FunSuite with VisaCategoryFixture {
   test("create table visa_category and insert data") {
     IOAssertion {
       for {
-        xa <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+        xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
         _  <- createVisaCategoryTable(xa)
         _  <- new VisaCategoryInsertData[IO](xa).run
       } yield ()

@@ -28,7 +28,7 @@ class AirlinesRepositorySpec extends AirlinesDataFixture with FlatSpecLike with 
 
   it should "Create tables and insert data from files" in IOAssertion  {
     for {
-      xa <- H2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+      xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
       _  <- createTables.transact(xa)
       _  <- new AirlinesInsertData[IO](xa, parser).run
     } yield ()
