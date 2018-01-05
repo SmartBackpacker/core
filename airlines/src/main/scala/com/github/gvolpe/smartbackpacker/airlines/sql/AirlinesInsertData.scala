@@ -52,10 +52,10 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: Airlin
       _         <- insertManyBaggageAllowance(policyId, airline.baggagePolicy.allowance)
     } yield ()
 
-  def run: F[Unit] = {
+  def run: Stream[F, Unit] = {
     airlinesParser.airlines.flatMap { a =>
       Stream.eval(program(a).transact(xa))
-    }.run
+    }
   }
 
 }

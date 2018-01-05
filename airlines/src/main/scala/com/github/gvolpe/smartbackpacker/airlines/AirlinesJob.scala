@@ -16,40 +16,47 @@
 
 package com.github.gvolpe.smartbackpacker.airlines
 
-import cats.effect.IO
+import cats.effect.{Effect, IO}
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AllowanceFile}
-import com.github.gvolpe.smartbackpacker.common.IOApp
+import fs2.StreamApp.ExitCode
+import fs2.{Stream, StreamApp}
+
+object AirlinesJob extends Airlines[IO]
 
 // See: https://wikitravel.org/en/Discount_airlines_in_Europe
-object AirlinesJob extends IOApp {
+class Airlines[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
 
-  private val ctx = new AirlinesModule[IO]
+  private val ctx = new AirlinesModule[F]
 
   case object MissingArgument extends Exception("There should be 2 arguments in the following order: `Airline file path` and `Allowance file path`.")
 
-  def readArgs(args: List[String]): IO[(AirlineFile, AllowanceFile)] = {
-    val ifEmpty = IO.raiseError[String](MissingArgument)
+  private def putStrLn(value: String): Stream[F, Unit] = Stream.eval(F.delay(println(value)))
+
+  def readArgs(args: List[String]): F[(AirlineFile, AllowanceFile)] = {
+    val ifEmpty = F.raiseError[String](MissingArgument)
     for {
-      x <- args.headOption.fold(ifEmpty)(IO(_))
-      y <- args.lastOption.fold(ifEmpty)(IO(_))
+      x <- args.headOption.fold(ifEmpty)(F.delay(_))
+      y <- args.lastOption.fold(ifEmpty)(F.delay(_))
     } yield (new AirlineFile(x), new AllowanceFile(y))
   }
 
   def program(airlineFile: AirlineFile,
-              allowanceFile: AllowanceFile): IO[Unit] =
+              allowanceFile: AllowanceFile): Stream[F, ExitCode] =
     for {
       _       <- if (ctx.devDbUrl.nonEmpty) putStrLn(s"DEV DB connection established: ${ctx.devDbUrl}")
                  else putStrLn(s"DB connection established: ${ctx.dbUrl}")
       _       <- putStrLn("Starting job")
       _       <- ctx.airlinesInsertData(airlineFile, allowanceFile).run
       _       <- putStrLn("Job finished successfully")
-    } yield ()
+    } yield ExitCode.Success
 
-  override def start(args: List[String]): IO[Unit] =
+  def stream(args: List[String], requestShutdown: F[Unit]): Stream[F,ExitCode] =
     for {
-      files  <- readArgs(args)
-      (x, y) = files
-      _      <- program(x, y)
-    } yield ()
+      files     <- Stream.eval(readArgs(args))
+      (x, y)    = files
+      exitCode  <- program(x, y)
+    } yield exitCode
 
 }
