@@ -27,8 +27,8 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class AirlinesHttpEndpoint[F[_] : Monad](airlineService: AirlineService[F],
-                                         httpErrorHandler: HttpErrorHandler[F]) extends Http4sDsl[F] {
+class AirlinesHttpEndpoint[F[_] : Monad](airlineService: AirlineService[F])
+                                        (implicit handler: HttpErrorHandler[F]) extends Http4sDsl[F] {
 
   object AirlineNameQueryParamMatcher extends QueryParamDecoderMatcher[String]("name")
 
@@ -36,7 +36,7 @@ class AirlinesHttpEndpoint[F[_] : Monad](airlineService: AirlineService[F],
     case GET -> Root / ApiVersion / "airlines" :? AirlineNameQueryParamMatcher(airline) as _ =>
       for {
         policy    <- airlineService.baggagePolicy(airline.as[AirlineName])
-        response  <- policy.fold(httpErrorHandler.handle, x => Ok(x.asJson))
+        response  <- policy.fold(handler.handle, x => Ok(x.asJson))
       } yield response
   }
 

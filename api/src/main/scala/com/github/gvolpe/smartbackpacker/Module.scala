@@ -81,25 +81,25 @@ class Module[F[_]](implicit F: Effect[F]) {
     new CountryService[F](countryRepository)
 
   // Http stuff
-  private lazy val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
+  private implicit val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
 
   lazy val ApiToken: F[Option[String]] = F.delay(sys.env.get("SB_API_TOKEN"))
 
   // Http Endpoints
   private lazy val destinationInfoHttpEndpoint: AuthedService[String, F] =
-    new DestinationInfoHttpEndpoint[F](destinationInfoService, httpErrorHandler).service
+    new DestinationInfoHttpEndpoint[F](destinationInfoService).service
 
   private lazy val airlinesHttpEndpoint: AuthedService[String, F] =
-    new AirlinesHttpEndpoint[F](airlineService, httpErrorHandler).service
+    new AirlinesHttpEndpoint[F](airlineService).service
 
   private lazy val visaRestrictionIndexHttpEndpoint: AuthedService[String, F] =
-    new VisaRestrictionIndexHttpEndpoint[F](visaRestrictionsIndexService, httpErrorHandler).service
+    new VisaRestrictionIndexHttpEndpoint[F](visaRestrictionsIndexService).service
 
   private lazy val healthInfoHttpEndpoint: AuthedService[String, F] =
-    new HealthInfoHttpEndpoint[F](healthService, httpErrorHandler).service
+    new HealthInfoHttpEndpoint[F](healthService).service
 
   private lazy val countriesHttpEndpoint: AuthedService[String, F] =
-    new CountriesHttpEndpoint[F](countryService, httpErrorHandler).service
+    new CountriesHttpEndpoint[F](countryService).service
 
   lazy val httpEndpoints: AuthedService[String, F] =
     (destinationInfoHttpEndpoint <+> airlinesHttpEndpoint

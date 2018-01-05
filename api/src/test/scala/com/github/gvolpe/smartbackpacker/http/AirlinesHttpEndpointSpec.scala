@@ -69,11 +69,12 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
     }
   }
 
+  private implicit val errorHandler = new HttpErrorHandler[IO]
+
   val httpService: HttpService[IO] =
     middleware(
       new AirlinesHttpEndpoint(
-        new AirlineService[IO](testAirlineRepo),
-        new HttpErrorHandler[IO]
+        new AirlineService[IO](testAirlineRepo)
       ).service
     )
 

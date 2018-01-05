@@ -66,11 +66,12 @@ trait CountriesHttpEndpointFixture {
     override def findSchengen: IO[List[Country]] = IO(testSchengenCountries)
   }
 
+  private implicit val errorHandler = new HttpErrorHandler[IO]
+
   val httpService: HttpService[IO] =
     middleware(
       new CountriesHttpEndpoint[IO](
-        new CountryService[IO](repo),
-        new HttpErrorHandler[IO]
+        new CountryService[IO](repo)
       ).service
     )
 

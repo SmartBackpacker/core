@@ -53,11 +53,12 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
       }
   }
 
+  private implicit val errorHandler = new HttpErrorHandler[IO]
+
   val httpService: HttpService[IO] =
     middleware(
       new VisaRestrictionIndexHttpEndpoint(
-        new VisaRestrictionIndexService[IO](repo),
-        new HttpErrorHandler[IO]
+        new VisaRestrictionIndexService[IO](repo)
       ).service
     )
 

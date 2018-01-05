@@ -27,8 +27,8 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class DestinationInfoHttpEndpoint[F[_] : Monad](destinationInfoService: DestinationInfoService[F],
-                                                httpErrorHandler: HttpErrorHandler[F]) extends Http4sDsl[F] {
+class DestinationInfoHttpEndpoint[F[_] : Monad](destinationInfoService: DestinationInfoService[F])
+                                               (implicit handler: HttpErrorHandler[F]) extends Http4sDsl[F] {
 
   object BaseCurrencyQueryParamMatcher extends QueryParamDecoderMatcher[String]("baseCurrency")
 
@@ -36,7 +36,7 @@ class DestinationInfoHttpEndpoint[F[_] : Monad](destinationInfoService: Destinat
     case GET -> Root / ApiVersion / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) as _ =>
       for {
         info      <- destinationInfoService.find(from.as[CountryCode], to.as[CountryCode], baseCurrency.as[Currency])
-        response  <- info.fold(httpErrorHandler.handle, x => Ok(x.asJson))
+        response  <- info.fold(handler.handle, x => Ok(x.asJson))
       } yield response
   }
 

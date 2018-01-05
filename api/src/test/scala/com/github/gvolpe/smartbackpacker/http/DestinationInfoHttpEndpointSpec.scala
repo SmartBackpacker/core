@@ -79,11 +79,12 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     }
   }
 
+  private implicit val errorHandler = new HttpErrorHandler[IO]
+
   val httpService: HttpService[IO] =
     middleware(
       new DestinationInfoHttpEndpoint(
-        new DestinationInfoService[IO](sbConfig, repo, rateService),
-        new HttpErrorHandler[IO]
+        new DestinationInfoService[IO](sbConfig, repo, rateService)
       ).service
     )
 

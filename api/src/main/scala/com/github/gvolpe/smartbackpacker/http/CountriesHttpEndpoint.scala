@@ -25,8 +25,7 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class CountriesHttpEndpoint[F[_] : Monad](countryService: CountryService[F],
-                                          httpErrorHandler: HttpErrorHandler[F]) extends Http4sDsl[F] {
+class CountriesHttpEndpoint[F[_] : Monad](countryService: CountryService[F]) extends Http4sDsl[F] {
 
   object BaseQueryParamMatcher extends OptionalQueryParamDecoderMatcher[String]("query")
 
