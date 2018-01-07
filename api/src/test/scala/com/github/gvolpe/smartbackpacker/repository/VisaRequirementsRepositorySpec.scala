@@ -18,93 +18,43 @@ package com.github.gvolpe.smartbackpacker.repository
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.sql.TestDBManager
 import com.github.gvolpe.smartbackpacker.model._
-import doobie.h2.H2Transactor
-import doobie.implicits._
+import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
-import doobie.util.update.Update0
-import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class VisaRequirementsRepositorySpec extends VisaRequirementsSQLSetup with FlatSpecLike with Matchers with BeforeAndAfterAll {
+class VisaRequirementsRepositorySpec extends FunSuite with IOChecker with BeforeAndAfterAll {
 
-  override val h2Transactor: IO[H2Transactor[IO]] =
-    H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
+  override val transactor: Transactor[IO] = TestDBManager.xa.unsafeRunSync()
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    setup.unsafeRunSync()
+    TestDBManager.createTables.unsafeRunSync()
   }
 
-  it should "NOT find visa requirements" in IOAssertion {
-    for {
-      xa <- h2Transactor
-      vr <- new PostgresVisaRequirementsRepository[IO](xa).findVisaRequirements("AR".as[CountryCode], "PL".as[CountryCode])
-    } yield {
-      vr should be (None)
+  private lazy val repo = new PostgresVisaRequirementsRepository[IO](transactor)
+
+  test("NOT find visa requirements") {
+    IOAssertion {
+      for {
+        vr <- repo.findVisaRequirements("AR".as[CountryCode], "PL".as[CountryCode])
+      } yield {
+        assert(vr.isEmpty)
+      }
     }
   }
 
-}
+  test("find country 'from' query") {
+    check(VisaRequirementsStatement.from("AR".as[CountryCode]))
+  }
 
-trait VisaRequirementsSQLSetup {
+  test("find country 'to' query") {
+    check(VisaRequirementsStatement.to("AR".as[CountryCode]))
+  }
 
-  def h2Transactor: IO[H2Transactor[IO]]
-
-  lazy val setup: IO[Unit] =
-    for {
-      xa  <- h2Transactor
-      _   <- createTables(xa)
-    } yield ()
-
-  private val createTableCountries: Update0 =
-    sql"""
-         CREATE TABLE countries (
-           id SERIAL PRIMARY KEY,
-           code VARCHAR (2) NOT NULL UNIQUE,
-           name VARCHAR (100) NOT NULL UNIQUE,
-           currency VARCHAR (3) NOT NULL,
-           schengen BOOLEAN
-         )
-       """.update
-
-  private val createTableVisaCategory: Update0 =
-    sql"""
-         CREATE TABLE visa_category (
-           id SERIAL PRIMARY KEY,
-           name VARCHAR (200)
-         )
-       """.update
-
-  private val createTableVisaRequirements: Update0 =
-    sql"""
-         CREATE TABLE visa_requirements (
-           from_country INT NOT NULL,
-           to_country INT NOT NULL,
-           visa_category INT REFERENCES visa_category (id),
-           description VARCHAR (500)
-         )
-       """.update
-
-  private val createVisaRequirementsFK1: Update0 =
-    sql"ALTER TABLE visa_requirements ADD CONSTRAINT fk_from FOREIGN KEY (from_country) REFERENCES countries (id)"
-      .update
-
-  private val createVisaRequirementsFK2: Update0 =
-    sql"ALTER TABLE visa_requirements ADD CONSTRAINT fk_to FOREIGN KEY (to_country) REFERENCES countries (id)"
-      .update
-
-  private val createVisaRequirementsPK: Update0 =
-    sql"ALTER TABLE visa_requirements ADD PRIMARY KEY (from_country, to_country)"
-      .update
-
-  def createTables(xa: Transactor[IO]): IO[Unit] =
-    for {
-      _ <- createTableCountries.run.transact(xa)
-      _ <- createTableVisaCategory.run.transact(xa)
-      _ <- createTableVisaRequirements.run.transact(xa)
-      _ <- createVisaRequirementsFK1.run.transact(xa)
-      _ <- createVisaRequirementsFK2.run.transact(xa)
-      _ <- createVisaRequirementsPK.run.transact(xa)
-    } yield ()
+  test("find visa requirements query") {
+    check(VisaRequirementsStatement.visaRequirements(1, 2))
+  }
 
 }

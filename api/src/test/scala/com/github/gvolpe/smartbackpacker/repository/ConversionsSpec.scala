@@ -51,21 +51,21 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
 
   forAll { (dto: RestrictionsIndexDTO) =>
     test(s"convert a $dto to VisaRestrictionsIndex") {
-      val expected = VisaRestrictionsIndex(new Ranking(dto(0)), new Count(dto(1)), new Sharing(dto(2)))
+      val expected = VisaRestrictionsIndex(new Ranking(dto(0)), new Count(dto(1)), new Sharing(dto(2).getOrElse(0)))
       assert(dto.toVisaRestrictionsIndex == expected)
     }
   }
 
   forAll { (index: VisaRestrictionsIndex) =>
     test(s"convert a RestrictionsIndexDTO to $index") {
-      val dto = index.rank.value :: index.count.value :: index.sharing.value :: HNil
+      val dto = index.rank.value :: index.count.value :: Option(index.sharing.value) :: HNil
       assert(dto.toVisaRestrictionsIndex == index)
     }
   }
 
   forAll { (data: VisaRequirementsData) =>
     test(s"convert VisaRequirementsDTO into a $data") {
-      val dto   = data.visaCategory.toString :: data.description :: HNil
+      val dto   = Option(data.visaCategory.toString) :: Option(data.description) :: HNil
       val from  = 1 :: data.from.code.value :: data.from.name.value :: data.from.currency.value :: HNil
       val to    = 1 :: data.to.code.value :: data.to.name.value :: data.to.currency.value :: HNil
       assert(dto.toVisaRequirementsData(from, to) == data)
@@ -74,14 +74,14 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
 
   forAll { (v: Vaccine) =>
     test(s"convert VaccineDTO into a $v # ${v.hashCode()}") {
-      val dto = v.disease.value :: v.description :: v.diseaseCategories.map(_.toString).mkString(",") :: HNil
+      val dto = v.disease.value :: v.description :: Option(v.diseaseCategories.map(_.toString).mkString(",")) :: HNil
       assert(dto.toVaccine == v)
     }
   }
 
   forAll { (ha: HealthAlert) =>
     test(s"convert HealthAlertDTO into a $ha # ${ha.hashCode()}") {
-      val dto = ha.title :: ha.link.value :: ha.description :: HNil
+      val dto = ha.title :: Option(ha.link.value) :: Option(ha.description) :: HNil
       assert(dto.toHealthAlert == ha)
     }
   }
@@ -130,7 +130,7 @@ trait ConversionsArbitraries {
     for {
       r <- Gen.posNum[Int]
       c <- Gen.posNum[Int]
-      s <- Gen.posNum[Int]
+      s <- Gen.option(Gen.posNum[Int])
     } yield r :: c :: s :: HNil
   }
 

@@ -23,13 +23,13 @@ package object repository {
 
   type AirlineDTO           = Int :: String :: Int :: Option[String] :: Option[String] :: HNil
   type BaggageAllowanceDTO  = String :: Option[Int] :: Int :: Int :: Int :: HNil
-  type RestrictionsIndexDTO = Int :: Int :: Int :: HNil
+  type RestrictionsIndexDTO = Int :: Int :: Option[Int] :: HNil
 
   type CountryDTO           = Int :: String :: String :: String :: HNil
-  type VisaRequirementsDTO  = String :: String :: HNil
+  type VisaRequirementsDTO  = Option[String] :: Option[String] :: HNil
 
-  type VaccineDTO           = String :: String :: String :: HNil
-  type HealthNoticeDTO      = String :: String :: String :: HNil
+  type VaccineDTO           = String :: String :: Option[String] :: HNil
+  type HealthNoticeDTO      = String :: Option[String] :: Option[String] :: HNil
   type HealthAlertDTO       = String :: HNil
 
   implicit class BaggageAllowanceConversions(allowance: BaggageAllowanceDTO) {
@@ -58,7 +58,7 @@ package object repository {
       VisaRestrictionsIndex(
         rank = new Ranking(index.head),
         count = new Count(index.tail.head),
-        sharing = new Sharing(index.last)
+        sharing = new Sharing(index.last.getOrElse(0))
       )
   }
 
@@ -67,8 +67,8 @@ package object repository {
       VisaRequirementsData(
         from          = fromDto.toCountry,
         to            = toDto.toCountry,
-        visaCategory  = VisaCategory.fromName(dto.head),
-        description   = dto.last
+        visaCategory  = VisaCategory.fromName(dto.head.getOrElse("")),
+        description   = dto.last.getOrElse("")
       )
   }
 
@@ -81,7 +81,7 @@ package object repository {
       Vaccine(
         disease = dto.head.as[Disease],
         description = dto.tail.head,
-        diseaseCategories = parseDiseaseCategories(dto.last)
+        diseaseCategories = parseDiseaseCategories(dto.last.getOrElse(""))
       )
   }
 
@@ -89,8 +89,8 @@ package object repository {
     def toHealthAlert: HealthAlert =
       HealthAlert(
         title = dto.head,
-        link = dto.tail.head.as[WebLink],
-        description = dto.last
+        link = dto.tail.head.getOrElse("").as[WebLink],
+        description = dto.last.getOrElse("")
       )
   }
 

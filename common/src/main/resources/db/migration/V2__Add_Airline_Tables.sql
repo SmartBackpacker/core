@@ -14,8 +14,8 @@ CREATE TABLE baggage_allowance (
   allowance_id SERIAL PRIMARY KEY,
   policy_id INT REFERENCES baggage_policy (policy_id),
   baggage_type VARCHAR (25) NOT NULL,
-  kgs SMALLINT,
-  height SMALLINT NOT NULL,
-  width SMALLINT NOT NULL,
-  depth SMALLINT NOT NULL
+  kgs INT,
+  height INT NOT NULL,
+  width INT NOT NULL,
+  depth INT NOT NULL
 );

@@ -25,7 +25,7 @@ import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class AirlinesRepositorySpec extends FunSuite with IOChecker with BeforeAndAfterAll {
+class AirlinesInsertDataSpec extends FunSuite with IOChecker with BeforeAndAfterAll {
 
   override val transactor: Transactor[IO] = TestDBManager.xa.unsafeRunSync()
 
