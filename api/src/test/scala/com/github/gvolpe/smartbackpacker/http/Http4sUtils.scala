@@ -30,7 +30,7 @@ object Http4sUtils {
 
   implicit class ByteVector2String(body: EntityBody[IO]) {
     def asString: String = {
-      val array = body.runLog.unsafeRunSync().toArray
+      val array = body.compile.toVector.unsafeRunSync().toArray
       new String(array.map(_.toChar))
     }
   }

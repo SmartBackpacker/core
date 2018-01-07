@@ -18,19 +18,20 @@ package com.github.gvolpe.smartbackpacker.airlines.sql
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
-import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.StreamAssertion
 import doobie.free.connection.ConnectionIO
-import doobie.implicits._
 import doobie.h2.H2Transactor
+import doobie.implicits._
+import fs2.Stream
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class AirlinesRepositorySpec extends AirlinesDataFixture with FlatSpecLike with Matchers {
 
-  it should "Create tables and insert data from files" in IOAssertion  {
+  it should "Create tables and insert data from files" in StreamAssertion {
     for {
-      xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
-      _  <- createTables.transact(xa)
-      _  <- new AirlinesInsertData[IO](xa, parser).run.run
+      xa <- Stream.eval(H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", ""))
+      _  <- Stream.eval(createTables.transact(xa))
+      _  <- new AirlinesInsertData[IO](xa, parser).run
     } yield ()
   }
 

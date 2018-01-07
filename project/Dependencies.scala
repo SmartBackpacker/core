@@ -1,11 +1,11 @@
 import sbt._
 
 object Dependencies {
-  lazy val Fs2Version     = "0.10.0-M10"
-  lazy val Http4sVersion  = "0.18.0-M7"
+  lazy val Fs2Version     = "0.10.0-M11"
+  lazy val Http4sVersion  = "0.18.0-M8"
   lazy val TsecVersion    = "0.0.1-M7"
-  lazy val CirceVersion   = "0.9.0-M3"
-  lazy val DoobieVersion  = "0.5.0-M11"
+  lazy val CirceVersion   = "0.9.0"
+  lazy val DoobieVersion  = "0.5.0-M12"
   lazy val H2Version      = "1.4.196"
 
   lazy val fs2Core        = "co.fs2"              %% "fs2-core"                     % Fs2Version
