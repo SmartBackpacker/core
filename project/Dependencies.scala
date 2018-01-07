@@ -7,6 +7,7 @@ object Dependencies {
   lazy val CirceVersion   = "0.9.0"
   lazy val DoobieVersion  = "0.5.0-M12"
   lazy val H2Version      = "1.4.196"
+  lazy val FlywayVersion  = "5.0.5"
 
   lazy val fs2Core        = "co.fs2"              %% "fs2-core"                     % Fs2Version
   lazy val fs2IO          = "co.fs2"              %% "fs2-io"                       % Fs2Version
@@ -21,6 +22,7 @@ object Dependencies {
   lazy val circe          = "io.circe"            %% "circe-core"                   % CirceVersion
   lazy val circeGeneric   = "io.circe"            %% "circe-generic"                % CirceVersion
 
+  lazy val flyway         = "org.flywaydb"        %  "flyway-core"                  % FlywayVersion
   lazy val h2             = "com.h2database"      %  "h2"                           % H2Version
   lazy val doobieCore     = "org.tpolecat"        %% "doobie-core"                  % DoobieVersion
   lazy val doobiePostgres = "org.tpolecat"        %% "doobie-postgres"              % DoobieVersion

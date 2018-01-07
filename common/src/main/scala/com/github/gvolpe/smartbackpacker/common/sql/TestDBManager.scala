@@ -14,11 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.gvolpe.smartbackpacker.common
+package com.github.gvolpe.smartbackpacker.common.sql
 
 import cats.effect.IO
-import fs2.Stream
+import doobie.h2.H2Transactor
+import doobie.util.transactor.Transactor
+import org.flywaydb.core.Flyway
 
-object StreamAssertion {
-  def apply[A](stream: Stream[IO, A]): Unit = stream.compile.drain.unsafeRunSync()
+object TestDBManager {
+
+  private val testDbUrl  = "jdbc:h2:mem:test_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+  private val testDbUser = "sa"
+  private val testDbPass = ""
+
+  def xa: IO[Transactor[IO]] =
+    H2Transactor.newH2Transactor[IO](testDbUrl, testDbUser, testDbPass)
+
+  def createTables: IO[Unit] =
+    IO {
+      val flyway = new Flyway
+      flyway.setDataSource(testDbUrl, testDbUser, testDbPass)
+      flyway.migrate()
+    }
+
 }

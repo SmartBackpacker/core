@@ -19,43 +19,48 @@ package com.github.gvolpe.smartbackpacker.airlines.sql
 import cats.effect.Async
 import cats.instances.list._
 import com.github.gvolpe.smartbackpacker.airlines.parser.AirlinesFileParser
-import com.github.gvolpe.smartbackpacker.model.{Airline, BaggageAllowance, BaggagePolicy}
+import com.github.gvolpe.smartbackpacker.model.{Airline, BaggagePolicy}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
-import doobie.util.update.Update
+import doobie.util.update.{Update, Update0}
 import fs2.Stream
 
 class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: AirlinesFileParser[F]) {
 
-  private def insertAirline(name: String): ConnectionIO[Int] = {
-    sql"INSERT INTO airline (name) VALUES ($name)"
-      .update.withUniqueGeneratedKeys("airline_id")
-  }
-
-  private def insertBaggagePolicy(airlineId: Int,
-                                  baggagePolicy: BaggagePolicy): ConnectionIO[Int] = {
-    sql"INSERT INTO baggage_policy (airline_id, extra, website) VALUES ($airlineId, ${baggagePolicy.extra}, ${baggagePolicy.website})"
-      .update.withUniqueGeneratedKeys("policy_id")
-  }
-
-  private def insertManyBaggageAllowance(policyId: Int,
-                                         baggageAllowance: List[BaggageAllowance]): ConnectionIO[Int] = {
-    val sql = "INSERT INTO baggage_allowance (policy_id, baggage_type, kgs, height, width, depth) VALUES (?, ?, ?, ?, ?, ?)"
-    Update[CreateBaggageAllowanceDTO](sql).updateMany(baggageAllowance.toDTO(policyId))
-  }
+  import AirlineInsertStatement._
 
   private def program(airline: Airline): ConnectionIO[Unit] =
     for {
-      airlineId <- insertAirline(airline.name.value)
-      policyId  <- insertBaggagePolicy(airlineId, airline.baggagePolicy)
-      _         <- insertManyBaggageAllowance(policyId, airline.baggagePolicy.allowance)
+      airlineId <- insertAirline(airline.name.value).withUniqueGeneratedKeys[Int]("airline_id")
+      policyId  <- insertBaggagePolicy(airlineId, airline.baggagePolicy).withUniqueGeneratedKeys[Int]("policy_id")
+      _         <- insertManyBaggageAllowance(policyId).updateMany(airline.baggagePolicy.allowance.toDTO(policyId))
     } yield ()
 
   def run: Stream[F, Unit] = {
     airlinesParser.airlines.flatMap { a =>
       Stream.eval(program(a).transact(xa))
     }
+  }
+
+}
+
+object AirlineInsertStatement {
+
+  def insertAirline(name: String): Update0 = {
+    sql"INSERT INTO airline (name) VALUES ($name)"
+      .update
+  }
+
+  def insertBaggagePolicy(airlineId: Int,
+                          baggagePolicy: BaggagePolicy): Update0 = {
+    sql"INSERT INTO baggage_policy (airline_id, extra, website) VALUES ($airlineId, ${baggagePolicy.extra}, ${baggagePolicy.website})"
+      .update
+  }
+
+  def insertManyBaggageAllowance(policyId: Int): Update[CreateBaggageAllowanceDTO] = {
+    val sql = "INSERT INTO baggage_allowance (policy_id, baggage_type, kgs, height, width, depth) VALUES (?, ?, ?, ?, ?, ?)"
+    Update[CreateBaggageAllowanceDTO](sql)
   }
 
 }

@@ -3,6 +3,13 @@ import sbt.ModuleID
 
 name := "Smart Backpacker Backend"
 
+lazy val testSettings: Seq[SettingsDefinition] = Seq(
+//  sbt.Keys.fork in Test := false,
+//  testOptions in Test += Tests.Setup(_.loadClass("com.github.gvolpe.smartbackpacker.common.sql.TestDBManager$").getMethod("createTablesUnsafe").invoke(null)),
+  testOptions in Test += Tests.Setup( () => println(">>> Setup") ),
+  testOptions in Test += Tests.Cleanup( () => println(">>> Cleanup") )
+)
+
 lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   inThisBuild(List(
     organization := "com.github.gvolpe",
@@ -18,6 +25,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       "-Ypartial-unification"
     )
   )),
+  logBuffered in Test := false,
   parallelExecution in Test := true,
   resolvers += Resolver.sonatypeRepo("releases"),
   resolvers += "jmcardon at bintray" at "https://dl.bintray.com/jmcardon/tsec",
@@ -34,6 +42,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
     circe,
     circeGeneric,
     h2,
+    flyway,
     doobieCore,
     doobieH2,
     doobiePostgres,

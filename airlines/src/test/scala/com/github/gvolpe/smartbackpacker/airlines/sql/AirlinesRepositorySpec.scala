@@ -19,67 +19,38 @@ package com.github.gvolpe.smartbackpacker.airlines.sql
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
 import com.github.gvolpe.smartbackpacker.common.StreamAssertion
-import doobie.free.connection.ConnectionIO
-import doobie.h2.H2Transactor
-import doobie.implicits._
-import fs2.Stream
-import org.scalatest.{FlatSpecLike, Matchers}
+import com.github.gvolpe.smartbackpacker.common.sql.TestDBManager
+import com.github.gvolpe.smartbackpacker.model.{BaggageAllowance, BaggagePolicy}
+import doobie.scalatest.IOChecker
+import doobie.util.transactor.Transactor
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class AirlinesRepositorySpec extends AirlinesDataFixture with FlatSpecLike with Matchers {
+class AirlinesRepositorySpec extends FunSuite with IOChecker with BeforeAndAfterAll {
 
-  it should "Create tables and insert data from files" in StreamAssertion {
-    for {
-      xa <- Stream.eval(H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", ""))
-      _  <- Stream.eval(createTables.transact(xa))
-      _  <- new AirlinesInsertData[IO](xa, parser).run
-    } yield ()
-  }
+  override val transactor: Transactor[IO] = TestDBManager.xa.unsafeRunSync()
 
-}
-
-trait AirlinesDataFixture {
-
-  val parser: AirlinesFileParser[IO] = AirlinesFileParser[IO](
+  private val parser: AirlinesFileParser[IO] = AirlinesFileParser[IO](
     new AirlineFile(getClass.getResource("/airlines-file-sample").getPath),
     new AllowanceFile(getClass.getResource("/allowance-file-sample").getPath)
   )
 
-  def createTables: ConnectionIO[Unit] =
-    for {
-      _ <- createAirlineTable
-      _ <- createBaggagePolicyTable
-      _ <- createBaggageAllowanceTable
-    } yield ()
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    TestDBManager.createTables.unsafeRunSync()
+  }
 
-  private val createAirlineTable: ConnectionIO[Int] =
-    sql"""
-      CREATE TABLE airline (
-        airline_id SERIAL PRIMARY KEY,
-        name VARCHAR (100) NOT NULL UNIQUE
-      )
-      """.update.run
+  test("Create tables and insert data from files") {
+    StreamAssertion {
+      new AirlinesInsertData[IO](transactor, parser).run
+    }
+  }
 
-  private val createBaggagePolicyTable: ConnectionIO[Int] =
-    sql"""
-      CREATE TABLE baggage_policy (
-        policy_id SERIAL PRIMARY KEY,
-        airline_id INT REFERENCES airline (airline_id),
-        extra VARCHAR (500),
-        website VARCHAR (500)
-      )
-      """.update.run
+  test("Insert airline query") {
+    check(AirlineInsertStatement.insertAirline("Ryan Air"))
+  }
 
-  private val createBaggageAllowanceTable: ConnectionIO[Int] =
-    sql"""
-      CREATE TABLE baggage_allowance (
-        allowance_id SERIAL PRIMARY KEY,
-        policy_id INT REFERENCES baggage_policy (policy_id),
-        baggage_type VARCHAR (25) NOT NULL,
-        kgs SMALLINT,
-        height SMALLINT NOT NULL,
-        width SMALLINT NOT NULL,
-        depth SMALLINT NOT NULL
-      )
-      """.update.run
+  test("Insert airline's baggage policy") {
+    check(AirlineInsertStatement.insertBaggagePolicy(1, BaggagePolicy(List.empty[BaggageAllowance], None, None)))
+  }
 
 }
