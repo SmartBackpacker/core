@@ -20,7 +20,7 @@ import cats.effect.Async
 import com.github.gvolpe.smartbackpacker.common.instances.log._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.parser.{HealthInfoParser, VisaRequirementsParser, VisaRestrictionsIndexParser}
-import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, HealthInfoInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
+import com.github.gvolpe.smartbackpacker.scraper.sql.{CountryInsertData, HealthInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}
 import doobie.util.transactor.Transactor
 
 class ScraperModule[F[_] : Async] {
@@ -50,6 +50,6 @@ class ScraperModule[F[_] : Async] {
   val countryInsertData               = new CountryInsertData[F](scraperConfig, xa)
   val visaCategoryInsertData          = new VisaCategoryInsertData[F](xa)
 
-  val healthInfoInsertData            = new HealthInfoInsertData[F](xa, healthInfoParser)
+  val healthInfoInsertData            = new HealthInsertData[F](xa, healthInfoParser)
 
 }

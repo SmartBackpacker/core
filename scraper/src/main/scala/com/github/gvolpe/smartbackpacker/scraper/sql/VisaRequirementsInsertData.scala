@@ -36,6 +36,32 @@ class VisaRequirementsInsertData[F[_] : Async](xa: Transactor[F],
                                               (implicit L: Log[F]) {
 
   private def insertVisaRequirementsBulk(list: List[VisaRequirementsFor]) = {
+    VisaRequirementsInsertStatement.insertVisaRequirements
+      .updateMany(list.map(_.toVisaRequirementsDTO))
+  }
+
+  // For example Algerian Wiki page has Burundi duplicated
+  private val errorHandler: PartialFunction[Throwable, F[Unit]] = {
+    case e: BatchUpdateException if e.getCause.getMessage.contains("duplicate key value") => L.error(e)
+    case e: WikiPageNotFound => L.error(e)
+  }
+
+  def run(from: CountryCode): F[Unit] = {
+    val program = for {
+      _   <- L.info(s"${from.value} >> Gathering visa requirements from Wikipedia")
+      req <- visaRequirementsParser.visaRequirementsFor(from)
+      _   <- L.info(s"${from.value} >> Starting data insertion into DB")
+      rs  <- insertVisaRequirementsBulk(req).transact(xa)
+      _   <- L.info(s"${from.value} >> Created $rs records")
+    } yield ()
+    program.recoverWith(errorHandler)
+  }
+
+}
+
+object VisaRequirementsInsertStatement {
+
+  val insertVisaRequirements: Update[VisaRequirementsDTO] = {
     val sql =
       """
         |WITH from_view AS (
@@ -53,24 +79,7 @@ class VisaRequirementsInsertData[F[_] : Async](xa: Transactor[F],
         |INSERT INTO visa_requirements (from_country, to_country, visa_category, description)
         |SELECT from_id, to_id, visa_id, description FROM from_view, to_view, visa_cat_view, desc_view
       """.stripMargin
-    Update[VisaRequirementsDTO](sql).updateMany(list.map(_.toVisaRequirementsDTO))
-  }
-
-  private val errorHandler: PartialFunction[Throwable, F[Unit]] = {
-    // For example Algerian Wiki page has Burundi duplicated
-    case e: BatchUpdateException if e.getCause.getMessage.contains("duplicate key value") => L.error(e)
-    case e: WikiPageNotFound => L.error(e)
-  }
-
-  def run(from: CountryCode): F[Unit] = {
-    val program = for {
-      _   <- L.info(s"${from.value} >> Gathering visa requirements from Wikipedia")
-      req <- visaRequirementsParser.visaRequirementsFor(from)
-      _   <- L.info(s"${from.value} >> Starting data insertion into DB")
-      rs  <- insertVisaRequirementsBulk(req).transact(xa)
-      _   <- L.info(s"${from.value} >> Created $rs records")
-    } yield ()
-    program.recoverWith(errorHandler)
+    Update[VisaRequirementsDTO](sql)
   }
 
 }

@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.gvolpe.smartbackpacker.scraper.sql
+package com.github.gvolpe.smartbackpacker.common.sql
 
 import cats.effect.IO
-import com.github.gvolpe.smartbackpacker.common.IOAssertion
-import com.github.gvolpe.smartbackpacker.common.sql.RepositorySpec
+import doobie.scalatest.IOChecker
+import doobie.util.transactor.Transactor
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
-class VisaCategoryInsertDataSpec extends RepositorySpec {
+trait RepositorySpec extends FunSuiteLike with IOChecker with BeforeAndAfterAll {
 
-  override def testDbName: String = getClass.getSimpleName
+  def testDbName: String
 
-  test("insert visa category data") {
-    IOAssertion {
-      new VisaCategoryInsertData[IO](transactor).run
-    }
-  }
+  override val transactor: Transactor[IO] = TestDBManager.xa(testDbName).unsafeRunSync()
 
-  test("insert visa category statement") {
-    check(VisaCategoryInsertStatement.insertVisaCategories)
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    TestDBManager.createTables(testDbName).unsafeRunSync()
   }
 
 }

@@ -19,20 +19,18 @@ package com.github.gvolpe.smartbackpacker.scraper.sql
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
 import com.github.gvolpe.smartbackpacker.common.instances.log._
+import com.github.gvolpe.smartbackpacker.common.sql.RepositorySpec
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
 import com.github.gvolpe.smartbackpacker.scraper.parser.AbstractHealthInfoParser
-import doobie.free.connection.ConnectionIO
-import doobie.h2.H2Transactor
-import doobie.implicits._
-import doobie.util.transactor.Transactor
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
 import net.ruippeixotog.scalascraper.model.Document
-import org.scalatest.FunSuite
 
 import scala.io.Source
 
-class HealthInfoInsertDataSpec extends FunSuite with HealthInfoInsertDataFixture {
+class HealthInfoInsertDataSpec extends RepositorySpec {
+
+  override def testDbName: String = getClass.getSimpleName
 
   private val scraperConfig = new ScraperConfiguration[IO]
 
@@ -46,122 +44,47 @@ class HealthInfoInsertDataSpec extends FunSuite with HealthInfoInsertDataFixture
 
   }
 
-  test("create health tables and insert data") {
+  test("insert health data") {
     IOAssertion {
       for {
-        xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:health_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
-        _  <- createHealthTables(xa)
-        _  <- new CountryInsertData[IO](scraperConfig, xa).run
-        _  <- new HealthInfoInsertData[IO](xa, parser).run("BI".as[CountryCode])
+        _  <- new CountryInsertData[IO](scraperConfig, transactor).run
+        _  <- new HealthInsertData[IO](transactor, parser).run("BI".as[CountryCode])
       } yield ()
     }
   }
 
-}
-
-trait HealthInfoInsertDataFixture {
-
-  val countries = List(
-    (new CountryCode("AR"), VisaRestrictionsIndex(new Ranking(1), new Count(176), new Sharing(1))),
-    (new CountryCode("DE"), VisaRestrictionsIndex(new Ranking(2), new Count(175), new Sharing(1))),
-    (new CountryCode("JP"), VisaRestrictionsIndex(new Ranking(3), new Count(173), new Sharing(2)))
-  )
-
-  private val createCountriesTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE countries (
-           id SERIAL PRIMARY KEY,
-           code VARCHAR (2) NOT NULL UNIQUE,
-           name VARCHAR (100) NOT NULL UNIQUE,
-           currency VARCHAR (3) NOT NULL,
-           schengen BOOLEAN
-         )
-       """.update.run
+  test("find country id query") {
+    check(HealthInsertStatement.findCountryId(new CountryCode("AR")))
   }
 
-  private val createVaccineTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE vaccine (
-           id SERIAL PRIMARY KEY,
-           disease VARCHAR (200) NOT NULL,
-           description VARCHAR (3000) NOT NULL,
-           categories VARCHAR (1000)
-         )
-       """.update.run
+  test("insert vaccine statement") {
+    check(HealthInsertStatement.insertVaccine)
   }
 
-  private val createVaccineMandatoryTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE vaccine_mandatory (
-           country_id INT REFERENCES countries (id),
-           vaccine_id INT REFERENCES vaccine (id)
-         )
-       """.update.run
+  test("insert vaccine mandatory statement") {
+    check(HealthInsertStatement.insertVaccineMandatory)
   }
 
-  private val createVaccineRecommendationsTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE vaccine_recommendations (
-           country_id INT REFERENCES countries (id),
-           vaccine_id INT REFERENCES vaccine (id)
-         )
-       """.update.run
+  test("insert vaccine recommendations statement") {
+    check(HealthInsertStatement.insertVaccineRecommendation)
   }
 
-  private val createVaccineOptionalTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE vaccine_optional (
-           country_id INT REFERENCES countries (id),
-           vaccine_id INT REFERENCES vaccine (id)
-         )
-       """.update.run
+  test("insert vaccine optional statement") {
+    check(HealthInsertStatement.insertVaccineOptional)
   }
 
-  private val createHealthAlertTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE health_alert (
-           id SERIAL PRIMARY KEY,
-           title VARCHAR (500) NOT NULL,
-           weblink VARCHAR (1000),
-           description VARCHAR (3000)
-         )
-       """.update.run
+  test("insert health alert level statement") {
+    check(HealthInsertStatement.insertAlertLevel)
   }
 
-  private val createHealthNoticeTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABLE health_notice (
-           country_id INT REFERENCES countries (id),
-           alert_id INT REFERENCES health_alert (id),
-           PRIMARY KEY (country_id, alert_id)
-         )
-       """.update.run
+  test("insert health alert statement") {
+    check(HealthInsertStatement.insertHealthAlert)
   }
 
-  private val createHealthAlertLevelTableStatement: ConnectionIO[Int] = {
-    sql"""
-         CREATE TABlE health_alert_level (
-           country_id INT PRIMARY KEY,
-           alert_level VARCHAR (500) NOT NULL
-         )
-       """.update.run
+  test("insert health notice statement") {
+    check(HealthInsertStatement.insertHealthNotice)
   }
 
-  private val createHealthAlertLevelFK: ConnectionIO[Int] =
-    sql"ALTER TABLE health_alert_level ADD CONSTRAINT fk_country FOREIGN KEY (country_id) REFERENCES countries (id)"
-      .update.run
-
-  def createHealthTables(xa: Transactor[IO]): IO[Unit] =
-    for {
-      _ <- createCountriesTableStatement.transact(xa)
-      _ <- createVaccineTableStatement.transact(xa)
-      _ <- createVaccineMandatoryTableStatement.transact(xa)
-      _ <- createVaccineRecommendationsTableStatement.transact(xa)
-      _ <- createVaccineOptionalTableStatement.transact(xa)
-      _ <- createHealthAlertTableStatement.transact(xa)
-      _ <- createHealthNoticeTableStatement.transact(xa)
-      _ <- createHealthAlertLevelTableStatement.transact(xa)
-      _ <- createHealthAlertLevelFK.transact(xa)
-    } yield ()
+  // TODO: Check the rest of the statements and run the health info Scraper to test performance now that everything runs in one transaction
 
 }

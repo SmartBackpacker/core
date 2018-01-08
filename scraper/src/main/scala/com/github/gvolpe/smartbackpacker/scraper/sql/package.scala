@@ -16,14 +16,14 @@
 
 package com.github.gvolpe.smartbackpacker.scraper
 
-import com.github.gvolpe.smartbackpacker.model.Vaccine
+import com.github.gvolpe.smartbackpacker.model.{HealthAlert, Vaccine}
 import com.github.gvolpe.smartbackpacker.scraper.model.VisaRequirementsFor
 
 package object sql {
 
-  type VisaRequirementsDTO = (String, String, String, String)
-
-  type VaccineDTO = (String, String, String)
+  type VisaRequirementsDTO  = (String, String, String, String)
+  type VaccineDTO           = (String, String, String)
+  type HealthAlertInsertDTO = (String, String, String)
 
   implicit class VisaRequirementsConversions(vr: VisaRequirementsFor) {
     def toVisaRequirementsDTO: VisaRequirementsDTO =
@@ -33,6 +33,11 @@ package object sql {
   implicit class VaccineConversions(v: Vaccine) {
     def toVaccineDTO: VaccineDTO =
       (v.disease.value, v.description, v.diseaseCategories.map(_.toString).mkString(","))
+  }
+
+  implicit class HealthAlertConversions(a: HealthAlert) {
+    def toHealthAlertInsertDTO: HealthAlertInsertDTO =
+      (a.title, a.link.value, a.description)
   }
 
 }

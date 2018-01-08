@@ -19,27 +19,19 @@ package com.github.gvolpe.smartbackpacker.airlines.sql
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
 import com.github.gvolpe.smartbackpacker.common.StreamAssertion
-import com.github.gvolpe.smartbackpacker.common.sql.TestDBManager
+import com.github.gvolpe.smartbackpacker.common.sql.RepositorySpec
 import com.github.gvolpe.smartbackpacker.model.{BaggageAllowance, BaggagePolicy}
-import doobie.scalatest.IOChecker
-import doobie.util.transactor.Transactor
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class AirlinesInsertDataSpec extends FunSuite with IOChecker with BeforeAndAfterAll {
+class AirlinesInsertDataSpec extends RepositorySpec {
 
-  override val transactor: Transactor[IO] = TestDBManager.xa.unsafeRunSync()
+  override def testDbName: String = getClass.getSimpleName
 
   private val parser: AirlinesFileParser[IO] = AirlinesFileParser[IO](
     new AirlineFile(getClass.getResource("/airlines-file-sample").getPath),
     new AllowanceFile(getClass.getResource("/allowance-file-sample").getPath)
   )
 
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    TestDBManager.createTables.unsafeRunSync()
-  }
-
-  test("Create tables and insert data from files") {
+  test("Insert airlines data from files") {
     StreamAssertion {
       new AirlinesInsertData[IO](transactor, parser).run
     }

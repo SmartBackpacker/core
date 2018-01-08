@@ -23,17 +23,19 @@ import org.flywaydb.core.Flyway
 
 object TestDBManager {
 
-  private val testDbUrl  = "jdbc:h2:mem:test_sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+  private def testDbUrl(dbName: String): String =
+    s"jdbc:h2:mem:test_sb_$dbName;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+
   private val testDbUser = "sa"
   private val testDbPass = ""
 
-  def xa: IO[Transactor[IO]] =
-    H2Transactor.newH2Transactor[IO](testDbUrl, testDbUser, testDbPass)
+  def xa(dbName: String): IO[Transactor[IO]] =
+    H2Transactor.newH2Transactor[IO](testDbUrl(dbName), testDbUser, testDbPass)
 
-  def createTables: IO[Unit] =
+  def createTables(dbName: String): IO[Unit] =
     IO {
       val flyway = new Flyway
-      flyway.setDataSource(testDbUrl, testDbUser, testDbPass)
+      flyway.setDataSource(testDbUrl(dbName), testDbUser, testDbPass)
       flyway.migrate()
     }
 

@@ -22,6 +22,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.github.gvolpe.smartbackpacker.model._
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
+import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
@@ -29,22 +30,19 @@ import doobie.util.update.Update
 class CountryInsertData[F[_] : Async](scraperConfig: ScraperConfiguration[F],
                                       xa : Transactor[F]) {
 
-  type CountryDTO       = (String, String, String, Boolean)
-  type CurrencyQueryDTO = (String, String)
-
-  private def insertCountriesBulk(countries: List[Country]) = {
-    val sql = "INSERT INTO countries (code, name, currency, schengen) VALUES (?, ?, ?, ?)"
-    Update[CountryDTO](sql).updateMany(countries.map(c => (c.code.value, c.name.value, c.currency.value, false)))
+  private def insertCountriesBulk(countries: List[Country]): ConnectionIO[Int] = {
+    CountryInsertStatement.insertCountries
+      .updateMany(countries.map(c => (c.code.value, c.name.value, c.currency.value, false)))
   }
 
-  private def updateCountriesCurrencyBulk(countries: List[Country]) = {
-    val sql = "UPDATE countries SET currency = ? WHERE code = ?"
-    Update[CurrencyQueryDTO](sql).updateMany(countries.map(c => (c.currency.value, c.code.value)))
+  private def updateCountriesCurrencyBulk(countries: List[Country]): ConnectionIO[Int] = {
+    CountryInsertStatement.updateCountriesCurrency
+      .updateMany(countries.map(c => (c.currency.value, c.code.value)))
   }
 
-  private def updateSchengenCountriesBulk(countries: List[CountryCode]) = {
-    val sql = "UPDATE countries SET schengen = 't' WHERE code = ?"
-    Update[String](sql).updateMany(countries.map(_.value))
+  private def updateSchengenCountriesBulk(countries: List[CountryCode]): ConnectionIO[Int] = {
+    CountryInsertStatement.updateSchengenCountries
+      .updateMany(countries.map(_.value))
   }
 
   private def runSchengenUpdate: F[Unit] = {
@@ -67,6 +65,28 @@ class CountryInsertData[F[_] : Async](scraperConfig: ScraperConfiguration[F],
     scraperConfig.countries() flatMap { countries =>
       insertCountriesBulk(countries).transact(xa).map(_ => ())
     }
+  }
+
+}
+
+object CountryInsertStatement {
+
+  type CountryDTO       = (String, String, String, Boolean)
+  type CurrencyQueryDTO = (String, String)
+
+  val insertCountries: Update[CountryDTO] = {
+    val sql = "INSERT INTO countries (code, name, currency, schengen) VALUES (?, ?, ?, ?)"
+    Update[CountryDTO](sql)
+  }
+
+  val updateCountriesCurrency: Update[CurrencyQueryDTO] = {
+    val sql = "UPDATE countries SET currency = ? WHERE code = ?"
+    Update[CurrencyQueryDTO](sql)
+  }
+
+  val updateSchengenCountries: Update[String] = {
+    val sql = "UPDATE countries SET schengen = 't' WHERE code = ?"
+    Update[String](sql)
   }
 
 }

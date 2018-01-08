@@ -18,45 +18,35 @@ package com.github.gvolpe.smartbackpacker.scraper.sql
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
+import com.github.gvolpe.smartbackpacker.common.sql.RepositorySpec
 import com.github.gvolpe.smartbackpacker.scraper.config.ScraperConfiguration
-import doobie.h2.H2Transactor
-import doobie.implicits._
-import doobie.util.transactor.Transactor
-import doobie.util.update.Update0
-import org.scalatest.FunSuite
 
-class CountryInsertDataSpec extends FunSuite with CountryFixture {
+class CountryInsertDataSpec extends RepositorySpec {
+
+  override def testDbName: String = getClass.getSimpleName
 
   private val scraperConfig = new ScraperConfiguration[IO]
+  private val repo = new CountryInsertData[IO](scraperConfig, transactor)
 
-  test("create table country and insert data") {
+  test("insert and update country data") {
     IOAssertion {
       for {
-        xa <- H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:sb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "")
-        _  <- createCountryTable(xa)
-        cd = new CountryInsertData[IO](scraperConfig, xa)
-        _  <- cd.run
-        _  <- cd.runUpdate
+        _  <- repo.run
+        _  <- repo.runUpdate
       } yield ()
     }
   }
 
-}
+  test("insert countries statement") {
+    check(CountryInsertStatement.insertCountries)
+  }
 
-trait CountryFixture {
+  test("update countries currency statement") {
+    check(CountryInsertStatement.updateCountriesCurrency)
+  }
 
-  private def createCountryTableStatement: Update0 =
-    sql"""
-         CREATE TABLE countries (
-           id SERIAL PRIMARY KEY,
-           code VARCHAR (2) NOT NULL UNIQUE,
-           name VARCHAR (100) NOT NULL UNIQUE,
-           currency VARCHAR (3) NOT NULL,
-           schengen BOOLEAN
-         )
-       """.update
-
-  def createCountryTable(xa: Transactor[IO]): IO[Int] =
-    createCountryTableStatement.run.transact(xa)
+  test("update schengen countries statement") {
+    check(CountryInsertStatement.updateSchengenCountries)
+  }
 
 }

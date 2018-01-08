@@ -18,19 +18,11 @@ package com.github.gvolpe.smartbackpacker.repository
 
 import cats.effect.IO
 import com.github.gvolpe.smartbackpacker.common.IOAssertion
-import com.github.gvolpe.smartbackpacker.common.sql.TestDBManager
-import doobie.scalatest.IOChecker
-import doobie.util.transactor.Transactor
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import com.github.gvolpe.smartbackpacker.common.sql.RepositorySpec
 
-class CountryRepositorySpec extends FunSuite with IOChecker with BeforeAndAfterAll {
+class CountryRepositorySpec extends RepositorySpec {
 
-  override val transactor: Transactor[IO] = TestDBManager.xa.unsafeRunSync()
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    TestDBManager.createTables.unsafeRunSync()
-  }
+  override def testDbName: String = getClass.getSimpleName
 
   private lazy val repo = new PostgresCountryRepository[IO](transactor)
 
