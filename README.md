@@ -1,7 +1,7 @@
-Smart Backpacker
+![logo](sb.png) Smart Backpacker
 ================
 
-[Smart Backpacker](http://smartbackpackerapp.com) is an App where you can find Visa Requirements information for any country in the world regardless of your nationality, currency exchange and airline's baggage policy among others.
+[Smart Backpacker](http://smartbackpackerapp.com) is an App where you can find Visa Requirements information for any country in the world regardless of your nationality, currency exchange, health information and airline's baggage policy among others.
 
 - Download it for `Android` [here](https://play.google.com/store/apps/details?id=io.github.gvolpe.sb).
 - Download it for `iOS` [here](https://itunes.apple.com/us/app/smartbackpackerapp/id1322542121?ls=1&mt=8)
@@ -17,19 +17,36 @@ It's the main back-end application exposing the Http Rest API. It also contains 
 
 #### Airlines
 
-It contains the SQL setup scripts for the airline tables and the job to insert new airline's data using plain files as the source (`fs2.io` is used here).
+It contains the job to insert new airline's data using plain files as the source (`fs2.io` is used here).
 
 #### Common
 
-At the moment it just contains some utils for `cats.effect.IO`.
+It contains some utils for `cats.effect.IO`, `fs2.Stream`, logging, testing, etc.
 
 #### Scraper
 
-It has all the html page parsers and scrapers, SQL scripts for table creation and all the jobs to insert parsed data into the DB.
+It has all the html page parsers and scrapers and all the jobs to insert parsed data into the DB.
 
 ### Database
 
 Smart Backpacker uses [PostgreSQL](https://www.postgresql.org/) as the main data storage.
+
+### Tech Stack
+
+We love Functional Programming. That's why we choose and support the [Typelevel](https://typelevel.org/) stack. We also use a few other dependencies (see `build.sbt` for more):
+
+| Dependency    | Version    | 
+| ------------- |:----------:|
+| cats          | 1.0.1      |
+| cats-effect   | 0.7        |
+| http4s        | 0.18.0-M8  |
+| circe         | 0.9.0      |
+| doobie        | 0.5.0-M12  |
+| fs2           | 0.10.0-M11 |
+| tsec-jwt-mac  | 0.0.1-M7   |
+| scala-scraper | 2.0.0      |
+| scalatest     | 3.0.3      |
+| scalacheck    | 1.13.4     |
 
 ## LICENSE
 
