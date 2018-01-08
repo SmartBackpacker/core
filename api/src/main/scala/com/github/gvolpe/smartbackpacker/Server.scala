@@ -31,6 +31,7 @@ class HttpServer[F[_] : Effect] extends StreamApp[F] {
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
     for {
       _              <- Scheduler(corePoolSize = 2)
+      _              <- Stream.eval(ctx.migrateDb)
       apiToken       <- Stream.eval(ctx.ApiToken)
       authMiddleware <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
       exitCode       <- BlazeBuilder[F]

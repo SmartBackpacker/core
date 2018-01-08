@@ -17,7 +17,7 @@
 package com.github.gvolpe.smartbackpacker
 
 import cats.effect.Effect
-import cats.syntax.semigroupk._ // For appending http services with <+>
+import cats.syntax.semigroupk._
 import com.github.gvolpe.smartbackpacker.common.instances.log._
 import com.github.gvolpe.smartbackpacker.config.SBConfiguration
 import com.github.gvolpe.smartbackpacker.http._
@@ -25,23 +25,36 @@ import com.github.gvolpe.smartbackpacker.repository._
 import com.github.gvolpe.smartbackpacker.repository.algebra._
 import com.github.gvolpe.smartbackpacker.service._
 import doobie.util.transactor.Transactor
+import org.flywaydb.core.Flyway
 import org.http4s.AuthedService
-import org.http4s.client.blaze.{Http1Client, PooledHttp1Client}
+import org.http4s.client.blaze.Http1Client
 
 // It wires all the instances together
 class Module[F[_]](implicit F: Effect[F]) {
 
   // Database config
-  private val devDbUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+  private val devDbFullUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+  private val devDbUrl      = sys.env.getOrElse("DATABASE_URL", "")
+  private val devDbUser     = sys.env.getOrElse("JDBC_DATABASE_USERNAME", "")
+  private val devDbPass     = sys.env.getOrElse("JDBC_DATABASE_PASSWORD", "")
+
   private val dbDriver  = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
   private val dbUrl     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
   private val dbUser    = sys.env.getOrElse("SB_DB_USER", "postgres")
   private val dbPass    = sys.env.getOrElse("SB_DB_PASSWORD", "")
 
   private def xa: Transactor[F] = {
-    if (devDbUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbUrl)
+    if (devDbFullUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbFullUrl)
     else Transactor.fromDriverManager[F](dbDriver, dbUrl, dbUser, dbPass)
   }
+
+  def migrateDb: F[Unit] =
+    F.delay {
+      val flyway = new Flyway
+      if (devDbFullUrl.nonEmpty) flyway.setDataSource(devDbUrl, devDbUser, devDbPass)
+      else flyway.setDataSource(dbUrl, dbUser, dbPass)
+      flyway.migrate()
+    }
 
   // App Config
   private lazy val sbConfig: SBConfiguration[F] = new SBConfiguration[F]
