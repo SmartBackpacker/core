@@ -45,18 +45,18 @@ class AirlinesJob[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
   def program(airlineFile: AirlineFile,
               allowanceFile: AllowanceFile): Stream[F, ExitCode] =
     for {
-      _       <- if (ctx.devDbUrl.nonEmpty) putStrLn(s"DEV DB connection established: ${ctx.devDbUrl}")
-                 else putStrLn(s"DB connection established: ${ctx.dbUrl}")
-      _       <- putStrLn("Starting job")
-      _       <- ctx.airlinesInsertData(airlineFile, allowanceFile).run
-      _       <- putStrLn("Job finished successfully")
+      _ <- if (ctx.devDbUrl.nonEmpty) putStrLn(s"DEV DB connection established: ${ctx.devDbUrl}")
+           else putStrLn(s"DB connection established: ${ctx.dbUrl}")
+      _ <- putStrLn("Starting job")
+      _ <- ctx.airlinesInsertData(airlineFile, allowanceFile).run
+      _ <- putStrLn("Job finished successfully")
     } yield ExitCode.Success
 
   def stream(args: List[String], requestShutdown: F[Unit]): Stream[F,ExitCode] =
     for {
-      files     <- Stream.eval(readArgs(args))
-      (x, y)    = files
-      exitCode  <- program(x, y)
+      files    <- Stream.eval(readArgs(args))
+      (x, y)   = files
+      exitCode <- program(x, y)
     } yield exitCode
 
 }

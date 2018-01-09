@@ -185,10 +185,7 @@ trait ConversionsArbitraries {
       x <- Gen.alphaStr
       c <- Gen.listOf(arbitrary[DiseaseCategory])
     } yield {
-      val categories = {
-        if (c.isEmpty) List(UnknownDiseaseCategory)
-        else c
-      }
+      val categories = if (c.isEmpty) List(UnknownDiseaseCategory) else c
       Vaccine(d.as[Disease], x, categories)
     }
   }

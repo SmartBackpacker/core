@@ -18,7 +18,6 @@ package com.smartbackpackerapp.airlines
 
 import cats.effect.Async
 import com.smartbackpackerapp.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
-import com.smartbackpackerapp.airlines.parser.AirlinesFileParser
 import com.smartbackpackerapp.airlines.sql.AirlinesInsertData
 import doobie.util.transactor.Transactor
 
