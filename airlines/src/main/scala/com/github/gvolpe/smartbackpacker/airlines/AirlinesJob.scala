@@ -23,10 +23,10 @@ import com.github.gvolpe.smartbackpacker.airlines.parser.{AirlineFile, Allowance
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 
-object AirlinesJob extends Airlines[IO]
+object AirlinesApp extends AirlinesJob[IO]
 
 // See: https://wikitravel.org/en/Discount_airlines_in_Europe
-class Airlines[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
+class AirlinesJob[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
 
   private val ctx = new AirlinesModule[F]
 

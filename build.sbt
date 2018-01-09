@@ -32,7 +32,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.5" cross CrossVersion.binary),
   // TODO: The following objects / classes should be excluded but currently it's not possible: https://github.com/scoverage/sbt-scoverage/issues/245
   //;.*ExchangeRateService*, VisaRequirementsParser, VisaRestrictionsIndexParser
-  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\\\.common.*;.*Server*;.*Bindings*;.*AirlinesJob*;.*ScraperJob*;.*ApiTokenGenerator*;.*TokenGeneration*;.*VisaRequirementsInsertData*;.*JwtTokenAuthMiddleware*;.*Module*;.*ScraperModule*;.*AirlinesModule*",
+  coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\\\.common.*;.*Server*;.*Bindings*;.*AirlinesJob*;.*AirlinesApp*;.*ScraperJob*;.*ApiTokenGenerator*;.*TokenGeneration*;.*VisaRequirementsInsertData*;.*JwtTokenAuthMiddleware*;.*Module*;.*ScraperModule*;.*AirlinesModule*;.*IOApp*;",
   libraryDependencies ++= Seq(
     http4sServer,
     http4sClient,
@@ -70,7 +70,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       </developers>
 )
 
-val AirlinesDependencies: Seq[ModuleID] = Seq(
+val AirlineDependencies: Seq[ModuleID] = Seq(
   fs2Core, fs2IO
 )
 
@@ -89,7 +89,7 @@ lazy val api = project.in(file("api"))
 
 lazy val airlines = project.in(file("airlines"))
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= AirlinesDependencies)
+  .settings(libraryDependencies ++= AirlineDependencies)
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(AutomateHeaderPlugin)
   .dependsOn(api)
