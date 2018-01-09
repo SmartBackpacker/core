@@ -5,7 +5,7 @@ name := "Smart Backpacker Backend"
 
 lazy val testSettings: Seq[SettingsDefinition] = Seq(
 //  sbt.Keys.fork in Test := false,
-//  testOptions in Test += Tests.Setup(_.loadClass("com.github.gvolpe.smartbackpacker.common.sql.TestDBManager$").getMethod("createTablesUnsafe").invoke(null)),
+//  testOptions in Test += Tests.Setup(_.loadClass("com.smartbackpackerapp.common.sql.TestDBManager$").getMethod("createTablesUnsafe").invoke(null)),
   testOptions in Test += Tests.Setup( () => println(">>> Setup") ),
   testOptions in Test += Tests.Cleanup( () => println(">>> Cleanup") )
 )

@@ -27,6 +27,33 @@ It contains some utils for `cats.effect.IO`, `fs2.Stream`, logging, testing, etc
 
 It has all the html page parsers and scrapers and all the jobs to insert parsed data into the DB.
 
+```
+sbt project scraper
+```
+
+- Retrieve Visa Requirements from Wikipedia and persist it to the DB:
+```
+run visaRequirements
+```
+
+- Retrieve Visa Restrictions Index (Passport Ranking) from Wikipedia and persist it to the DB:
+```
+run visaRanking
+```
+
+- Retrieve Health information from CDC and persist it to the DB:
+```
+run healthInfo
+```
+
+- Insert initial data (Countries and Visa Categories) into the DB:
+```
+run loadCountries
+run updateCountries
+run loadVisaCategories
+```
+
+
 ### Database
 
 Smart Backpacker uses [PostgreSQL](https://www.postgresql.org/) as the main data storage.
