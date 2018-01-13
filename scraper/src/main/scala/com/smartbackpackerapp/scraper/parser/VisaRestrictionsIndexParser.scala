@@ -86,7 +86,7 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_]](scraperConfig: ScraperC
   private val wikiTableExtractor: HtmlExtractor[Element, Iterable[VisaRestrictionsIndexValues]] = _.map { e =>
     Try(e.text.toInt) match {
       case Success(n) =>
-        if (e.innerHtml.contains("#199502")) PlacesCount(n)
+        if (e.innerHtml.contains("#ffc90e")) PlacesCount(n)
         else Rank(n)
       case Failure(_) =>
         val countries = e.text.split(",").toList.map(_.trim.noWhiteSpaces)

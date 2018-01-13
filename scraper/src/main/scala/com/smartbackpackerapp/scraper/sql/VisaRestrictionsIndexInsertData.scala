@@ -34,7 +34,8 @@ class VisaRestrictionsIndexInsertData[F[_] : Async](xa: Transactor[F]) {
   }
 
   def run(list: List[(CountryCode, VisaRestrictionsIndex)]): F[Unit] = {
-    insertVisaIndexBulk(list).transact(xa).map(_ => ())
+    // Netherlands is duplicated in ranking 2018
+    insertVisaIndexBulk(list.toSet.toList).transact(xa).map(_ => ())
   }
 
 }

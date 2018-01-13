@@ -33,13 +33,13 @@ class VisaRestrictionsIndexParserSpec extends FlatSpecLike with Matchers {
 
     override val htmlDocument: IO[Document] = IO {
       val browser = JsoupBrowser()
-      val fileContent = Source.fromResource(s"visaRestrictionsWikiPageTest.html").mkString
+      val fileContent = Source.fromResource("passportRanking2018.html").mkString
       browser.parseString(fileContent).asInstanceOf[Document]
     }
 
   }
 
-  it should "parse visa restrictions index wiki page" in IOAssertion {
+  it should "parse visa restrictions index 2018 wiki page" in IOAssertion {
     parser.parse.map { result =>
       result should not be empty
       // Not all the countries are part of the ranking
