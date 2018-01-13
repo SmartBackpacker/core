@@ -10,7 +10,7 @@
 
 #### Api
 
-It's the main back-end application exposing the Http Rest API. It also contains a token generator.
+It's the main back-end application exposing the Http Rest API (See [documentation](http://docs.smartbackpackerapp.com/)). It also contains a token generator.
 
 - Dependencies
     - [Fixer.io](http://fixer.io/) running on [localhost:8081](http://localhost:8081) using `docker-compose`. See the source code [here](https://github.com/hakanensari/fixer). Or you can also use the public API, just change the URL in the configuration.
@@ -65,11 +65,11 @@ We love Functional Programming. That's why we choose and support the [Typelevel]
 | Dependency    | Version    | 
 | ------------- |:----------:|
 | cats          | 1.0.1      |
-| cats-effect   | 0.7        |
+| cats-effect   | 0.8        |
 | http4s        | 0.18.0-M8  |
 | circe         | 0.9.0      |
-| doobie        | 0.5.0-M12  |
-| fs2           | 0.10.0-M11 |
+| doobie        | 0.5.0-M13  |
+| fs2           | 0.10.0-RC1 |
 | tsec-jwt-mac  | 0.0.1-M7   |
 | scala-scraper | 2.0.0      |
 | scalatest     | 3.0.3      |

@@ -13,7 +13,7 @@ lazy val testSettings: Seq[SettingsDefinition] = Seq(
 lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   inThisBuild(List(
     organization := "com.github.gvolpe",
-    scalaVersion := "2.12.3",
+    scalaVersion := "2.12.4",
     version      := "1.2.0",
     scalacOptions := Seq(
       "-deprecation",
@@ -34,24 +34,26 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   //;.*ExchangeRateService*, VisaRequirementsParser, VisaRestrictionsIndexParser
   coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\\\.common.*;.*Server*;.*Bindings*;.*AirlinesJob*;.*AirlinesApp*;.*ScraperJob*;.*ApiTokenGenerator*;.*TokenGeneration*;.*VisaRequirementsInsertData*;.*JwtTokenAuthMiddleware*;.*Module*;.*ScraperModule*;.*AirlinesModule*;.*IOApp*;",
   libraryDependencies ++= Seq(
-    http4sServer,
-    http4sClient,
-    http4sDsl,
-    http4sCirce,
-    tsecJwtMac,
-    circe,
-    circeGeneric,
-    h2,
-    flyway,
-    doobieCore,
-    doobieH2,
-    doobiePostgres,
-    doobieTest,
-    scalaScraper,
-    typesafeConfig,
-    logback,
-    scalaTest,
-    scalaCheck
+    Libraries.catsEffect,
+    Libraries.fs2Core,
+    Libraries.http4sServer,
+    Libraries.http4sClient,
+    Libraries.http4sDsl,
+    Libraries.http4sCirce,
+    Libraries.tsecJwtMac,
+    Libraries.circeCore,
+    Libraries.circeGeneric,
+    Libraries.h2,
+    Libraries.flyway,
+    Libraries.doobieCore,
+    Libraries.doobieH2,
+    Libraries.doobiePostgres,
+    Libraries.doobieTest,
+    Libraries.scalaScraper,
+    Libraries.typesafeConfig,
+    Libraries.logback,
+    Libraries.scalaTest,
+    Libraries.scalaCheck
   ),
   organizationName := "Smart Backpacker App",
   startYear := Some(2017),
@@ -70,9 +72,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
       </developers>
 )
 
-val AirlineDependencies: Seq[ModuleID] = Seq(
-  fs2Core, fs2IO
-)
+val AirlineDependencies: Seq[ModuleID] = Seq(Libraries.fs2IO)
 
 lazy val root = project.in(file("."))
   .aggregate(api, airlines, common, scraper)
