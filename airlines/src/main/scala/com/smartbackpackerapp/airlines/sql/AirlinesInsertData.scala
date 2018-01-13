@@ -19,6 +19,7 @@ package com.smartbackpackerapp.airlines.sql
 import cats.effect.Async
 import cats.instances.list._
 import com.smartbackpackerapp.airlines.parser.AirlinesFileParser
+import com.smartbackpackerapp.common.Log
 import com.smartbackpackerapp.model.{Airline, BaggagePolicy}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -26,7 +27,9 @@ import doobie.util.transactor.Transactor
 import doobie.util.update.{Update, Update0}
 import fs2.Stream
 
-class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: AirlinesFileParser[F]) {
+class AirlinesInsertData[F[_] : Async](xa: Transactor[F],
+                                       airlinesParser: AirlinesFileParser[F])
+                                      (implicit L: Log[F]) {
 
   import AirlineInsertStatement._
 
@@ -38,9 +41,12 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F], airlinesParser: Airlin
     } yield ()
 
   def run: Stream[F, Unit] = {
-    airlinesParser.airlines.flatMap { a =>
-      Stream.eval(program(a).transact(xa))
-    }
+    val p = for {
+      a <- airlinesParser.airlines
+      _ <- Stream.eval(L.info(s"Persisting: $a"))
+      _ <- Stream.eval(program(a).transact(xa))
+    } yield ()
+    Stream.eval(p.compile.drain)
   }
 
 }

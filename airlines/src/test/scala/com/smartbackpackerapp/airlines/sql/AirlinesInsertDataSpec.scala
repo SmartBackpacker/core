@@ -18,6 +18,7 @@ package com.smartbackpackerapp.airlines.sql
 
 import cats.effect.IO
 import com.smartbackpackerapp.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
+import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.common.StreamAssertion
 import com.smartbackpackerapp.common.sql.RepositorySpec
 import com.smartbackpackerapp.model.{BaggageAllowance, BaggagePolicy}
