@@ -21,7 +21,7 @@ import org.joda.time.Instant
 
 trait IOApp {
   def start(args: List[String]): IO[Unit]
-  def main(args: Array[String]): Unit = start(args.toList).unsafeRunSync()
+  def main(args: Array[String]): Unit = start(args.toList).runAsync(_ => IO.unit).unsafeRunSync()
 
   def putStrLn(value: String): IO[Unit] = IO(println(value))
   def getLine: IO[String] = IO(scala.io.StdIn.readLine())

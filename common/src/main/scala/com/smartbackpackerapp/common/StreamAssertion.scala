@@ -20,5 +20,6 @@ import cats.effect.IO
 import fs2.Stream
 
 object StreamAssertion {
-  def apply[A](stream: Stream[IO, A]): Unit = stream.compile.drain.unsafeRunSync()
+  def apply[A](stream: Stream[IO, A]): Unit =
+    stream.compile.drain.runAsync(_ => IO.unit).unsafeRunSync()
 }

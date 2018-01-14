@@ -19,7 +19,7 @@ package com.smartbackpackerapp.common
 import cats.effect.IO
 
 object IOAssertion {
-  def apply[A](ioa: IO[A]): A = ioa.unsafeRunSync()
+  def apply[A](ioa: IO[A]): Unit = ioa.runAsync(_ => IO.unit).unsafeRunSync()
   def when[A](predicate: Boolean)(ioa: IO[A]): Unit = {
     if (predicate) apply(ioa)
     else ()
