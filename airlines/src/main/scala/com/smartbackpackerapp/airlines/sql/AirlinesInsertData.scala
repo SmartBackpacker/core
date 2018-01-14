@@ -40,14 +40,12 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F],
       _         <- insertManyBaggageAllowance(policyId).updateMany(airline.baggagePolicy.allowance.toDTO(policyId))
     } yield ()
 
-  def run: Stream[F, Unit] = {
-    val p = for {
+  def run: Stream[F, Unit] =
+    for {
       a <- airlinesParser.airlines
       _ <- Stream.eval(L.info(s"Persisting: $a"))
       _ <- Stream.eval(program(a).transact(xa))
     } yield ()
-    Stream.eval(p.compile.drain)
-  }
 
 }
 
