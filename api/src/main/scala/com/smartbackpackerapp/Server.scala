@@ -20,24 +20,28 @@ import cats.effect.{Effect, IO}
 import com.smartbackpackerapp.http.auth.JwtTokenAuthMiddleware
 import fs2.StreamApp.ExitCode
 import fs2.{Scheduler, Stream, StreamApp}
+import org.http4s.client.blaze.Http1Client
 import org.http4s.server.blaze.BlazeBuilder
 
 object Server extends HttpServer[IO]
 
-class HttpServer[F[_] : Effect] extends StreamApp[F] {
+class HttpServer[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
 
-  private val ctx = new Module[F]
+  private lazy val ApiToken: F[Option[String]] = F.delay(sys.env.get("SB_API_TOKEN"))
 
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
-    for {
-      _              <- Scheduler(corePoolSize = 2)
-      _              <- Stream.eval(ctx.migrateDb)
-      apiToken       <- Stream.eval(ctx.ApiToken)
-      authMiddleware <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
-      exitCode       <- BlazeBuilder[F]
-                          .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
-                          .mountService(authMiddleware(ctx.httpEndpoints))
-                          .serve
-    } yield exitCode
+    Scheduler(corePoolSize = 2).flatMap { implicit scheduler =>
+      for {
+        httpClient      <- Stream.eval(Http1Client[F]())
+        ctx             = new Module[F](httpClient)
+        _               <- Stream.eval(ctx.migrateDb)
+        apiToken        <- Stream.eval(ApiToken)
+        authMiddleware  <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
+        exitCode        <- BlazeBuilder[F]
+                            .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
+                            .mountService(authMiddleware(ctx.httpEndpoints))
+                            .serve
+      } yield exitCode
+    }
 
 }

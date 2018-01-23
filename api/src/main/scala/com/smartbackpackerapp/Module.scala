@@ -27,10 +27,10 @@ import com.smartbackpackerapp.service._
 import doobie.util.transactor.Transactor
 import org.flywaydb.core.Flyway
 import org.http4s.AuthedService
-import org.http4s.client.blaze.Http1Client
+import org.http4s.client.Client
 
 // It wires all the instances together
-class Module[F[_]](implicit F: Effect[F]) {
+class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F]) {
 
   // Database config
   private val devDbFullUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
@@ -76,7 +76,7 @@ class Module[F[_]](implicit F: Effect[F]) {
     new PostgresVisaRequirementsRepository[F](xa)
 
   private lazy val exchangeRateService: ExchangeRateService[F] =
-    new ExchangeRateService[F](Http1Client[F](), sbConfig)
+    new ExchangeRateService[F](httpClient, sbConfig)
 
   private lazy val destinationInfoService: DestinationInfoService[F] =
     new DestinationInfoService[F](sbConfig, visaRequirementsRepo, exchangeRateService)
@@ -95,8 +95,6 @@ class Module[F[_]](implicit F: Effect[F]) {
 
   // Http stuff
   private implicit val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
-
-  lazy val ApiToken: F[Option[String]] = F.delay(sys.env.get("SB_API_TOKEN"))
 
   // Http Endpoints
   private lazy val destinationInfoHttpEndpoint: AuthedService[String, F] =
