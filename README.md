@@ -1,6 +1,9 @@
 ![logo](sb.png) Smart Backpacker
 ================
 
+[![Build Status](https://travis-ci.org/SmartBackpacker/core.svg?branch=master)](https://travis-ci.org/SmartBackpacker/core)
+[![codecov](https://codecov.io/gh/SmartBackpacker/core/branch/master/graph/badge.svg)](https://codecov.io/gh/SmartBackpacker/core)
+
 [Smart Backpacker](http://smartbackpackerapp.com) is an App where you can find Visa Requirements information for any country in the world regardless of your nationality, currency exchange, health information and airline's baggage policy among others.
 
 - Download it for `Android` [here](https://play.google.com/store/apps/details?id=io.github.gvolpe.sb).
