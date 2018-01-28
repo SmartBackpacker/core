@@ -23,6 +23,8 @@ import fs2.{Scheduler, Stream, StreamApp}
 import org.http4s.client.blaze.Http1Client
 import org.http4s.server.blaze.BlazeBuilder
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object Server extends HttpServer[IO]
 
 class HttpServer[F[_]](implicit F: Effect[F]) extends StreamApp[F] {

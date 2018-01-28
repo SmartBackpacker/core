@@ -4,11 +4,11 @@ object Dependencies {
 
   object Versions {
     val CatsEffect  = "0.8"
-    val Fs2         = "0.10.0-RC1"
-    val Http4s      = "0.18.0-M8"
+    val Fs2         = "0.10.0-RC2"
+    val Http4s      = "0.18.0-M9"
     val Tsec        = "0.0.1-M7"
-    val Circe       = "0.9.0"
-    val Doobie      = "0.5.0-M13"
+    val Circe       = "0.9.1"
+    val Doobie      = "0.5.0-M14"
     val H2          = "1.4.196"
     val Flyway      = "5.0.5"
     val Scraper     = "2.0.0"
