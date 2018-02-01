@@ -17,7 +17,7 @@
 package com.smartbackpackerapp.config
 
 import cats.effect.Sync
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{CountryCode, Currency}
 import com.typesafe.config.ConfigFactory
 
 class SBConfiguration[F[_]](implicit F: Sync[F]) {
@@ -30,7 +30,7 @@ class SBConfiguration[F[_]](implicit F: Sync[F]) {
   }
 
   def countryCurrency(countryCode: CountryCode, default: Currency): F[Currency] = F.delay {
-    safeConfig.string(s"countries.currency.${countryCode.value}").map(_.as[Currency]).getOrElse(default)
+    safeConfig.string(s"countries.currency.${countryCode.value}").map(Currency.apply).getOrElse(default)
   }
 
 }

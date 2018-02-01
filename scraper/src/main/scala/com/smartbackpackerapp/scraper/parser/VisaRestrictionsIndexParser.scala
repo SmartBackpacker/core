@@ -73,9 +73,9 @@ abstract class AbstractVisaRestrictionsIndexParser[F[_]](scraperConfig: ScraperC
           if names.contains(country)
         } yield {
           val visaIndex = VisaRestrictionsIndex(
-            rank = new Ranking(index.rank),
-            count = new Count(index.count),
-            sharing = new Sharing(index.countries.size)
+            rank = Ranking(index.rank),
+            count = Count(index.count),
+            sharing = Sharing(index.countries.size)
           )
           (code, visaIndex)
         }

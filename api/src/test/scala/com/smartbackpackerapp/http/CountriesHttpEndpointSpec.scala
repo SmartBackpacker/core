@@ -19,7 +19,7 @@ package com.smartbackpackerapp.http
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.http.Http4sUtils._
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{Country, CountryCode, CountryName, Currency}
 import com.smartbackpackerapp.repository.algebra.CountryRepository
 import com.smartbackpackerapp.service.CountryService
 import org.http4s.{HttpService, Query, Request, Status, Uri}
@@ -54,11 +54,11 @@ class CountriesHttpEndpointSpec extends FlatSpecLike with Matchers with Countrie
 trait CountriesHttpEndpointFixture {
 
   private val testCountries = List(
-    Country("AR".as[CountryCode], "Argentina".as[CountryName], "ARS".as[Currency])
+    Country(CountryCode("AR"), CountryName("Argentina"), Currency("ARS"))
   )
 
   private val testSchengenCountries = List(
-    Country("PL".as[CountryCode], "Poland".as[CountryName], "PLN".as[Currency])
+    Country(CountryCode("PL"), CountryName("Poland"), Currency("PLN"))
   )
 
   private val repo = new CountryRepository[IO] {

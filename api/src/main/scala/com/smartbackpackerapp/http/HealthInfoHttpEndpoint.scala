@@ -19,7 +19,7 @@ package com.smartbackpackerapp.http
 import cats.Monad
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.CountryCode
 import com.smartbackpackerapp.service.HealthService
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -33,7 +33,7 @@ class HealthInfoHttpEndpoint[F[_] : Monad](healthService: HealthService[F])
   val service: AuthedService[String, F] = AuthedService {
     case GET -> Root / ApiVersion / "health" / countryCode as _ =>
       for {
-        healthInfo  <- healthService.findHealthInfo(countryCode.as[CountryCode])
+        healthInfo  <- healthService.findHealthInfo(CountryCode(countryCode))
         response    <- healthInfo.fold(handler.handle, x => Ok(x.asJson))
       } yield response
   }

@@ -64,7 +64,7 @@ class AirlinesFileParser[F[_] : Sync](airlineFile: AirlineFile, allowanceFile: A
       val bas = allowanceGroupedByName.filter(_.map(_._1).contains(dto.name))
       bas map { ba =>
         Airline(
-          name = new AirlineName(dto.name),
+          name = AirlineName(dto.name),
           baggagePolicy = BaggagePolicy(
             allowance = ba.map(_._2),
             extra = dto.extra,

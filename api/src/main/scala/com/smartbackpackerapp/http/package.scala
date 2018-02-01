@@ -23,11 +23,11 @@ package object http {
 
   val ApiVersion = "v1"
 
-  class ApiErrorCode(val value: Int) extends AnyVal
+  case class ApiErrorCode(value: Int) extends AnyVal
 
   object ApiErrorCode {
-    val ENTITY_NOT_FOUND = new ApiErrorCode(100)
-    val SAME_COUNTRIES_SEARCH = new ApiErrorCode(101)
+    val ENTITY_NOT_FOUND = ApiErrorCode(100)
+    val SAME_COUNTRIES_SEARCH = ApiErrorCode(101)
   }
 
   case class ApiError(code: ApiErrorCode, error: String)

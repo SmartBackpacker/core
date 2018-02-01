@@ -60,7 +60,7 @@ trait ConversionsArbitraries {
       t <- Gen.alphaUpperStr
       c <- arbitrary[VisaCategory]
       d <- Gen.alphaStr
-    } yield VisaRequirementsFor(f.as[CountryCode], t.as[CountryCode], c, d)
+    } yield VisaRequirementsFor(CountryCode(f), CountryCode(t), c, d)
   }
 
   implicit val diseaseCategory: Arbitrary[DiseaseCategory] = Arbitrary[DiseaseCategory] {
@@ -77,7 +77,7 @@ trait ConversionsArbitraries {
       d <- Gen.alphaStr
       x <- Gen.alphaStr
       c <- Gen.listOf(arbitrary[DiseaseCategory])
-    } yield Vaccine(d.as[Disease], x, c)
+    } yield Vaccine(Disease(d), x, c)
   }
 
 }

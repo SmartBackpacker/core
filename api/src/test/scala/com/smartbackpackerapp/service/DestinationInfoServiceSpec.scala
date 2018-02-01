@@ -33,8 +33,8 @@ class DestinationInfoServiceSpec extends FlatSpecLike with Matchers {
   private val repo = new VisaRequirementsRepository[IO] {
     override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
       VisaRequirementsData(
-        from = Country("AR".as[CountryCode], "Argentina".as[CountryName], "ARS".as[Currency]),
-        to   = Country("RO".as[CountryCode], "Romania".as[CountryName], "RON".as[Currency]),
+        from = Country(CountryCode("AR"), CountryName("Argentina"), Currency("ARS")),
+        to   = Country(CountryCode("RO"), CountryName("Romania"), Currency("RON")),
         visaCategory = VisaNotRequired,
         description = "90 days within any 180 day period"
       ).some
@@ -50,16 +50,16 @@ class DestinationInfoServiceSpec extends FlatSpecLike with Matchers {
   private val service = new DestinationInfoService[IO](sbConfig, repo, rateService)
 
   it should "retrieve destination information" in IOAssertion {
-    EitherT(service.find("AR".as[CountryCode], "RO".as[CountryCode], "EUR".as[Currency])).map { info =>
+    EitherT(service.find(CountryCode("AR"), CountryCode("RO"), Currency("EUR"))).map { info =>
       info.countryCode.value  should be ("RO")
       info.countryName.value  should be ("Romania")
-      info.exchangeRate       should be (ExchangeRate("EUR".as[Currency], "RON".as[Currency], 4.59))
+      info.exchangeRate       should be (ExchangeRate(Currency("EUR"), Currency("RON"), 4.59))
       info.visaRequirements   should be (VisaRequirements(VisaNotRequired, "90 days within any 180 day period"))
     }.value
   }
 
   it should "validate countries" in IOAssertion {
-    EitherT(service.find("AR".as[CountryCode], "AR".as[CountryCode], "EUR".as[Currency])).leftMap { error =>
+    EitherT(service.find(CountryCode("AR"), CountryCode("AR"), Currency("EUR"))).leftMap { error =>
       error should be (CountriesMustBeDifferent)
     }.value
   }

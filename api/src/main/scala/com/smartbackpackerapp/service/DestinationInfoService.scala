@@ -22,7 +22,7 @@ import cats.syntax.apply._
 import cats.syntax.either._
 import cats.syntax.functor._
 import com.smartbackpackerapp.config.SBConfiguration
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{CountryCode, Currency, DestinationInfo, ExchangeRate, VisaRequirements, VisaRequirementsData}
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
 
 class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
@@ -36,7 +36,7 @@ class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
     val result =
       for {
         _  <- EitherT.fromEither(validateCountries(from, to))
-        fc <- EitherT.liftF(sbConfig.countryCurrency(to, default = "EUR".as[Currency]))
+        fc <- EitherT.liftF(sbConfig.countryCurrency(to, default = Currency("EUR")))
         rs <- EitherT(retrieveDestinationInfoInParallel(from, to, baseCurrency, fc))
       } yield rs
 
@@ -53,7 +53,7 @@ class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
           countryName = vr.to.name,
           countryCode = vr.to.code,
           visaRequirements = VisaRequirements(vr.visaCategory, vr.description),
-          exchangeRate = ExchangeRate(er.base.as[Currency], foreignCurrency, er.rates.getOrElse(foreignCurrency.value, -1.0))
+          exchangeRate = ExchangeRate(Currency(er.base), foreignCurrency, er.rates.getOrElse(foreignCurrency.value, -1.0))
         ).asRight[ValidationError]
       case (Left(e), _) =>
         e.asLeft[DestinationInfo]

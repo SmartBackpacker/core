@@ -48,7 +48,7 @@ trait VisaRestrictionIndexFixture extends PropertyChecks {
   private val repo = new VisaRestrictionsIndexRepository[IO] {
     override def findRestrictionsIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] =
       IO {
-        if (countryCode.value == "AR") Some(VisaRestrictionsIndex(new Ranking(0), new Count(0), new Sharing(0)))
+        if (countryCode.value == "AR") Some(VisaRestrictionsIndex(Ranking(0), Count(0), Sharing(0)))
         else None
       }
   }

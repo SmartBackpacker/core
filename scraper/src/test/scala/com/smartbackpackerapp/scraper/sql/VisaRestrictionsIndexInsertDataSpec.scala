@@ -26,9 +26,9 @@ class VisaRestrictionsIndexInsertDataSpec extends RepositorySpec {
   override def testDbName: String = getClass.getSimpleName
 
   private val countries = List(
-    (new CountryCode("AR"), VisaRestrictionsIndex(new Ranking(1), new Count(176), new Sharing(1))),
-    (new CountryCode("DE"), VisaRestrictionsIndex(new Ranking(2), new Count(175), new Sharing(1))),
-    (new CountryCode("JP"), VisaRestrictionsIndex(new Ranking(3), new Count(173), new Sharing(2)))
+    (CountryCode("AR"), VisaRestrictionsIndex(Ranking(1), Count(176), Sharing(1))),
+    (CountryCode("DE"), VisaRestrictionsIndex(Ranking(2), Count(175), Sharing(1))),
+    (CountryCode("JP"), VisaRestrictionsIndex(Ranking(3), Count(173), Sharing(2)))
   )
 
   test("insert visa restrictions index data") {

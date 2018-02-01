@@ -44,7 +44,7 @@ package object repository {
   implicit class AirlineConversions(airline: AirlineDTO) {
     def toAirline(b: List[BaggageAllowanceDTO]): Airline =
       Airline(
-        name = airline(1).as[AirlineName],
+        name = AirlineName(airline(1)),
         baggagePolicy = BaggagePolicy(
           allowance = b.map(_.toBaggageAllowance),
           extra = airline(3),
@@ -56,9 +56,9 @@ package object repository {
   implicit class RestrictionsIndexConversions(index: RestrictionsIndexDTO) {
     def toVisaRestrictionsIndex: VisaRestrictionsIndex =
       VisaRestrictionsIndex(
-        rank = new Ranking(index.head),
-        count = new Count(index.tail.head),
-        sharing = new Sharing(index.last.getOrElse(0))
+        rank = Ranking(index.head),
+        count = Count(index.tail.head),
+        sharing = Sharing(index.last.getOrElse(0))
       )
   }
 
@@ -79,7 +79,7 @@ package object repository {
 
     def toVaccine: Vaccine =
       Vaccine(
-        disease = dto.head.as[Disease],
+        disease = Disease(dto.head),
         description = dto.tail.head,
         diseaseCategories = parseDiseaseCategories(dto.last.getOrElse(""))
       )
@@ -89,7 +89,7 @@ package object repository {
     def toHealthAlert: HealthAlert =
       HealthAlert(
         title = dto.head,
-        link = dto.tail.head.getOrElse("").as[WebLink],
+        link = WebLink(dto.tail.head.getOrElse("")),
         description = dto.last.getOrElse("")
       )
   }
@@ -101,9 +101,9 @@ package object repository {
   implicit class CountryConversions(dto: CountryDTO) {
     def toCountry: Country =
       Country(
-        code = new CountryCode(dto(1)),
-        name = new CountryName(dto(2)),
-        currency = new Currency(dto.last)
+        code = CountryCode(dto(1)),
+        name = CountryName(dto(2)),
+        currency = Currency(dto.last)
       )
   }
 

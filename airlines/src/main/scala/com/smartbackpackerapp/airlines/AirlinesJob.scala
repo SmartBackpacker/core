@@ -38,7 +38,7 @@ class AirlinesJob[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
     for {
       x <- args.headOption.fold(ifEmpty)(F.delay(_))
       y <- args.lastOption.fold(ifEmpty)(F.delay(_))
-    } yield (new AirlineFile(x), new AllowanceFile(y))
+    } yield (AirlineFile(x), AllowanceFile(y))
   }
 
   def program(airlineFile: AirlineFile,

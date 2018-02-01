@@ -22,9 +22,9 @@ import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.http.Http4sUtils._
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{Country, CountryCode, CountryName, Currency, VisaNotRequired, VisaRequirementsData}
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
-import com.smartbackpackerapp.service.{AbstractExchangeRateService, DestinationInfoService, CurrencyExchangeDTO}
+import com.smartbackpackerapp.service.{AbstractExchangeRateService, CurrencyExchangeDTO, DestinationInfoService}
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -63,8 +63,8 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
       if (to.value == "KO") none[VisaRequirementsData]
       else
       VisaRequirementsData(
-        from = Country("AR".as[CountryCode], "Argentina".as[CountryName], "ARS".as[Currency]),
-        to   = Country("GB".as[CountryCode], "United Kingdom".as[CountryName], "GBP".as[Currency]),
+        from = Country(CountryCode("AR"), CountryName("Argentina"), Currency("ARS")),
+        to   = Country(CountryCode("GB"), CountryName("United Kingdom"), Currency("GBP")),
         visaCategory = VisaNotRequired,
         description = "90 days within any 180 day period"
       ).some

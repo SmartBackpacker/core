@@ -46,7 +46,7 @@ class AirlinesHttpEndpointSpec extends FlatSpecLike with Matchers with AirlinesH
 trait AirlinesHttpEndpointFixture extends PropertyChecks {
 
   private val airlines: List[Airline] = List(
-    Airline("Aer Lingus".as[AirlineName], BaggagePolicy(
+    Airline(AirlineName("Aer Lingus"), BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, Some(10), BaggageSize(55, 40, 24)),
         BaggageAllowance(SmallBag, None, BaggageSize(25, 33, 20))
@@ -54,7 +54,7 @@ trait AirlinesHttpEndpointFixture extends PropertyChecks {
       extra = None,
       website = Some("https://www.aerlingus.com/travel-information/baggage-information/cabin-baggage/"))
     ),
-    Airline("Transavia".as[AirlineName], BaggagePolicy(
+    Airline(AirlineName("Transavia"), BaggagePolicy(
       allowance = List(
         BaggageAllowance(CabinBag, None, BaggageSize(55, 40, 25))
       ),

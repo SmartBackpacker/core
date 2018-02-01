@@ -19,7 +19,7 @@ package com.smartbackpackerapp.repository
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.common.sql.RepositorySpec
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.AirlineName
 
 class AirlineRepositorySpec extends RepositorySpec {
 
@@ -30,7 +30,7 @@ class AirlineRepositorySpec extends RepositorySpec {
   test("NOT find the airline") {
     IOAssertion {
       for {
-        rs <- repo.findAirline(new AirlineName("Aer Lingus"))
+        rs <- repo.findAirline(AirlineName("Aer Lingus"))
       } yield {
         assert(rs.isEmpty)
       }
@@ -38,7 +38,7 @@ class AirlineRepositorySpec extends RepositorySpec {
   }
 
   test("find airline query") {
-    check(AirlineStatement.findAirline("Ryan Air".as[AirlineName]))
+    check(AirlineStatement.findAirline(AirlineName("Ryan Air")))
   }
 
   test("find baggage allowance query") {

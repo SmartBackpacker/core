@@ -19,7 +19,7 @@ package com.smartbackpackerapp.repository
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.common.sql.RepositorySpec
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.CountryCode
 
 class VisaRequirementsRepositorySpec extends RepositorySpec {
 
@@ -30,7 +30,7 @@ class VisaRequirementsRepositorySpec extends RepositorySpec {
   test("NOT find visa requirements") {
     IOAssertion {
       for {
-        vr <- repo.findVisaRequirements("AR".as[CountryCode], "PL".as[CountryCode])
+        vr <- repo.findVisaRequirements(CountryCode("AR"), CountryCode("PL"))
       } yield {
         assert(vr.isEmpty)
       }
@@ -38,11 +38,11 @@ class VisaRequirementsRepositorySpec extends RepositorySpec {
   }
 
   test("find country 'from' query") {
-    check(VisaRequirementsStatement.from("AR".as[CountryCode]))
+    check(VisaRequirementsStatement.from(CountryCode("AR")))
   }
 
   test("find country 'to' query") {
-    check(VisaRequirementsStatement.to("AR".as[CountryCode]))
+    check(VisaRequirementsStatement.to(CountryCode("AR")))
   }
 
   test("find visa requirements query") {

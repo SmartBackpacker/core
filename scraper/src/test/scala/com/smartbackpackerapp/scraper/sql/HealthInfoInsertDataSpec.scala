@@ -48,13 +48,13 @@ class HealthInfoInsertDataSpec extends RepositorySpec {
     IOAssertion {
       for {
         _  <- new CountryInsertData[IO](scraperConfig, transactor).run
-        _  <- new HealthInsertData[IO](transactor, parser).run("BI".as[CountryCode])
+        _  <- new HealthInsertData[IO](transactor, parser).run(CountryCode("BI"))
       } yield ()
     }
   }
 
   test("find country id query") {
-    check(HealthInsertStatement.findCountryId(new CountryCode("AR")))
+    check(HealthInsertStatement.findCountryId(CountryCode("AR")))
   }
 
   test("insert vaccine statement") {
@@ -84,7 +84,5 @@ class HealthInfoInsertDataSpec extends RepositorySpec {
   test("insert health notice statement") {
     check(HealthInsertStatement.insertHealthNotice)
   }
-
-  // TODO: Check the rest of the statements and run the health info Scraper to test performance now that everything runs in one transaction
 
 }

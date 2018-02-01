@@ -19,13 +19,13 @@ package com.smartbackpackerapp.service
 import cats.data.EitherT
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{Count, CountryCode, Ranking, Sharing, VisaRestrictionsIndex}
 import com.smartbackpackerapp.repository.algebra.VisaRestrictionsIndexRepository
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class VisaRestrictionsIndexServiceSpec extends FlatSpecLike with Matchers {
 
-  private val testIndex = VisaRestrictionsIndex(new Ranking(3), new Count(2), new Sharing(1))
+  private val testIndex = VisaRestrictionsIndex(Ranking(3), Count(2), Sharing(1))
 
   private val repo = new VisaRestrictionsIndexRepository[IO] {
     override def findRestrictionsIndex(countryCode: CountryCode): IO[Option[VisaRestrictionsIndex]] = IO {
@@ -37,13 +37,13 @@ class VisaRestrictionsIndexServiceSpec extends FlatSpecLike with Matchers {
   private val service = new VisaRestrictionIndexService[IO](repo)
 
   it should "find the visa restrictions index" in IOAssertion {
-    EitherT(service.findIndex("AR".as[CountryCode])).map { index =>
+    EitherT(service.findIndex(CountryCode("AR"))).map { index =>
       index should be (testIndex)
     }.value
   }
 
   it should "NOT find the visa restrictions index" in IOAssertion {
-    EitherT(service.findIndex("XX".as[CountryCode])).leftMap { error =>
+    EitherT(service.findIndex(CountryCode("XX"))).leftMap { error =>
       error shouldBe a [VisaRestrictionsIndexNotFound]
     }.value
   }

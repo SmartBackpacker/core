@@ -18,18 +18,18 @@ package com.smartbackpackerapp.service
 
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{Country, CountryCode, CountryName, Currency}
 import com.smartbackpackerapp.repository.algebra.CountryRepository
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class CountryServiceSpec extends FlatSpecLike with Matchers {
 
   private val testCountries = List(
-    Country("AR".as[CountryCode], "Argentina".as[CountryName], "ARS".as[Currency])
+    Country(CountryCode("AR"), CountryName("Argentina"), Currency("ARS"))
   )
 
   private val testSchengenCountries = List(
-    Country("PL".as[CountryCode], "Poland".as[CountryName], "PLN".as[Currency])
+    Country(CountryCode("PL"), CountryName("Poland"), Currency("PLN"))
   )
 
   private val repo = new CountryRepository[IO] {

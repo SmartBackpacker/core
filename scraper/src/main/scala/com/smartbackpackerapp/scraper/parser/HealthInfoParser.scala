@@ -83,7 +83,7 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
       } yield list
 
     List(titles, links, summaries).transpose.flatten.grouped(3).collect {
-      case (t :: l :: s :: Nil) => HealthAlert(t, l.as[WebLink], s)
+      case (t :: l :: s :: Nil) => HealthAlert(t, WebLink(l), s)
     }
   }
 
@@ -134,15 +134,15 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
 
       // Drop category and group per disease
       val mandatory: List[Vaccine] = all.tailOrEmpty.grouped(3).toList.collect {
-        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) if n != "Routine vaccines" => Vaccine(n.as[Disease], d, c)
+        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) if n != "Routine vaccines" => Vaccine(Disease(n), d, c)
       }
 
       val recommended: List[Vaccine] = most.tailOrEmpty.grouped(3).toList.collect {
-        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(n.as[Disease], d, c)
+        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(Disease(n), d, c)
       }
 
       val optional: List[Vaccine] = some.tailOrEmpty.grouped(3).toList.collect {
-        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(n.as[Disease], d, c)
+        case (DiseaseName(n) :: DiseaseDescription(d) :: List(DiseaseCategories(c))) => Vaccine(Disease(n), d, c)
       }
 
       // Health Travel Notices section

@@ -60,7 +60,7 @@ abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfig
     parseVisaRequirements(from) flatMap { vrp =>
       vrp.traverse { vr =>
         // If we can't find the code we just use the same the country name instead to easily trace the data
-        val ifEmpty = VisaRequirementsFor(from, vr.to.value.as[CountryCode], vr.visaCategory, vr.description)
+        val ifEmpty = VisaRequirementsFor(from, CountryCode(vr.to.value), vr.visaCategory, vr.description)
         countryCodeFor(vr.to).map(_.fold(ifEmpty)(VisaRequirementsFor(from, _, vr.visaCategory, vr.description)))
       }
     }
@@ -93,30 +93,30 @@ abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfig
   private val normalTableMapper: List[String] => VisaRequirementsParsing = {
     case (c :: v :: d :: x :: Nil) =>
       val extra = if (x == "X" || x == "√") "" else x
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(extra))
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(extra))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, "")
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], UnknownVisaCategory, "")
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsParsing("Not Found".as[CountryName], UnknownVisaCategory, "")
+      VisaRequirementsParsing(CountryName("Not Found"), UnknownVisaCategory, "")
   }
 
   private val colspanTableMapper: List[String] => VisaRequirementsParsing = {
     case (c :: v :: d :: x :: _ :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: x :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(x))
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(x))
     case (c :: v :: d :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, d.asDescription(""))
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(""))
     case (c :: v :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], v.asVisaCategory, "")
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, "")
     case (c :: Nil) =>
-      VisaRequirementsParsing(c.noWhiteSpaces.as[CountryName], UnknownVisaCategory, "")
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), UnknownVisaCategory, "")
     case _ =>
-      VisaRequirementsParsing("Not Found".as[CountryName], UnknownVisaCategory, "")
+      VisaRequirementsParsing(CountryName("Not Found"), UnknownVisaCategory, "")
   }
 
   private val parseColumns: Element => List[String] = e => {

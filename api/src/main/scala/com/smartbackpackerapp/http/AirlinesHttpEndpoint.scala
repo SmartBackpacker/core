@@ -19,7 +19,7 @@ package com.smartbackpackerapp.http
 import cats.Monad
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.AirlineName
 import com.smartbackpackerapp.service.AirlineService
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -35,7 +35,7 @@ class AirlinesHttpEndpoint[F[_] : Monad](airlineService: AirlineService[F])
   val service: AuthedService[String, F] = AuthedService {
     case GET -> Root / ApiVersion / "airlines" :? AirlineNameQueryParamMatcher(airline) as _ =>
       for {
-        policy    <- airlineService.baggagePolicy(airline.as[AirlineName])
+        policy    <- airlineService.baggagePolicy(AirlineName(airline))
         response  <- policy.fold(handler.handle, x => Ok(x.asJson))
       } yield response
   }

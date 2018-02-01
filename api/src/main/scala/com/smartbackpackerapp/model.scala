@@ -16,22 +16,12 @@
 
 package com.smartbackpackerapp
 
-import scala.reflect.ClassTag
-
 object model {
 
-  class CountryCode(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
-  class CountryName(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
-  class Currency(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
-  class AirlineName(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
+  case class CountryCode(value: String) extends AnyVal
+  case class CountryName(value: String) extends AnyVal
+  case class Currency(value: String) extends AnyVal
+  case class AirlineName(value: String) extends AnyVal
 
   sealed trait VisaCategory extends Product with Serializable
   case object VisaNotRequired                 extends VisaCategory
@@ -83,11 +73,6 @@ object model {
       ).find(_.toString == name).getOrElse(UnknownVisaCategory)
     }
 
-  }
-
-  implicit class ValueClasses(value: String) {
-    def as[A](implicit ct: ClassTag[A]): A =
-      ct.runtimeClass.getConstructors.head.newInstance(value).asInstanceOf[A]
   }
 
   implicit class VisaCategoryOps(value: String) {
@@ -159,25 +144,15 @@ object model {
   case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
   case class PlacesCount(value: Int)        extends VisaRestrictionsIndexValues
 
-  class Ranking(val value: Int) extends AnyVal {
-    override def toString: String = value.toString
-  }
-  class Count(val value: Int) extends AnyVal {
-    override def toString: String = value.toString
-  }
-  class Sharing(val value: Int) extends AnyVal {
-    override def toString: String = value.toString
-  }
+  case class Ranking(value: Int) extends AnyVal
+  case class Count(value: Int) extends AnyVal
+  case class Sharing(value: Int) extends AnyVal
 
   case class VisaRestrictionsIndex(rank: Ranking, count: Count, sharing: Sharing)
 
   // Health Information
-  class Disease(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
-  class WebLink(val value: String) extends AnyVal {
-    override def toString: String = value.toString
-  }
+  case class Disease(value: String) extends AnyVal
+  case class WebLink(value: String) extends AnyVal
 
   sealed trait AlertLevel extends Product with Serializable
   case object LevelOne extends AlertLevel

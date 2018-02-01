@@ -37,7 +37,7 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
       val allowanceDto: BaggageAllowanceDTO = ba.baggageType.toString :: ba.kgs :: ba.size.height :: ba.size.width :: ba.size.depth :: HNil
 
       val expected: Airline = Airline(
-        name = new AirlineName(dto(1)),
+        name = AirlineName(dto(1)),
         baggagePolicy = BaggagePolicy(
           allowance = List(ba),
           extra = dto(3),
@@ -51,7 +51,7 @@ class ConversionsSpec extends FunSuite with ConversionsArbitraries with Property
 
   forAll { (dto: RestrictionsIndexDTO) =>
     test(s"convert a $dto to VisaRestrictionsIndex") {
-      val expected = VisaRestrictionsIndex(new Ranking(dto(0)), new Count(dto(1)), new Sharing(dto(2).getOrElse(0)))
+      val expected = VisaRestrictionsIndex(Ranking(dto(0)), Count(dto(1)), Sharing(dto(2).getOrElse(0)))
       assert(dto.toVisaRestrictionsIndex == expected)
     }
   }
@@ -139,7 +139,7 @@ trait ConversionsArbitraries {
       r <- Gen.posNum[Int]
       c <- Gen.posNum[Int]
       s <- Gen.posNum[Int]
-    } yield VisaRestrictionsIndex(new Ranking(r), new Count(c), new Sharing(s))
+    } yield VisaRestrictionsIndex(Ranking(r), Count(c), Sharing(s))
   }
 
   implicit val country: Arbitrary[Country] = Arbitrary[Country] {
@@ -147,7 +147,7 @@ trait ConversionsArbitraries {
       c <- Gen.alphaUpperStr
       n <- Gen.alphaStr
       u <- Gen.alphaStr
-    } yield Country(new CountryCode(c), new CountryName(n), new Currency(u))
+    } yield Country(CountryCode(c), CountryName(n), Currency(u))
   }
 
   implicit val visaCategory: Arbitrary[VisaCategory] = Arbitrary[VisaCategory] {
@@ -186,7 +186,7 @@ trait ConversionsArbitraries {
       c <- Gen.listOf(arbitrary[DiseaseCategory])
     } yield {
       val categories = if (c.isEmpty) List(UnknownDiseaseCategory) else c
-      Vaccine(d.as[Disease], x, categories)
+      Vaccine(Disease(d), x, categories)
     }
   }
 
@@ -195,7 +195,7 @@ trait ConversionsArbitraries {
       t <- Gen.alphaStr
       w <- Gen.alphaStr
       d <- Gen.alphaStr
-    } yield HealthAlert(t, w.as[WebLink], d)
+    } yield HealthAlert(t, WebLink(w), d)
   }
 
   implicit val alertLevel: Arbitrary[AlertLevel] = Arbitrary[AlertLevel] {

@@ -20,8 +20,8 @@ import scala.util.Try
 
 package object parser {
 
-  class AirlineFile(val value: String) extends AnyVal
-  class AllowanceFile(val value: String) extends AnyVal
+  case class AirlineFile(value: String) extends AnyVal
+  case class AllowanceFile(value: String) extends AnyVal
 
   case class AirlineDTO(name: String,
                         extra: Option[String],

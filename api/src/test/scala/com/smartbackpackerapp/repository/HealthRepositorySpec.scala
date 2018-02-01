@@ -30,7 +30,7 @@ class HealthRepositorySpec extends RepositorySpec {
   test("NOT find the health information") {
     IOAssertion {
       for {
-        idx <- repo.findHealthInfo(new CountryCode("AR"))
+        idx <- repo.findHealthInfo(CountryCode("AR"))
       } yield {
         assert(idx.isEmpty)
       }
@@ -38,7 +38,7 @@ class HealthRepositorySpec extends RepositorySpec {
   }
 
   test("find country id query") {
-    check(HealthStatement.findCountryId(new CountryCode("AR")))
+    check(HealthStatement.findCountryId(CountryCode("AR")))
   }
 
   test("find mandatory vaccinations query") {

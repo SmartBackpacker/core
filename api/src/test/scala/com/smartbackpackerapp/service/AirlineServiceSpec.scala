@@ -19,14 +19,14 @@ package com.smartbackpackerapp.service
 import cats.data.EitherT
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{Airline, AirlineName, BaggageAllowance, BaggagePolicy}
 import com.smartbackpackerapp.repository.algebra.AirlineRepository
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class AirlineServiceSpec extends FlatSpecLike with Matchers {
 
   private val testAirline = Airline(
-    name = "Ryan Air".as[AirlineName],
+    name = AirlineName("Ryan Air"),
     baggagePolicy = BaggagePolicy(
       allowance = List.empty[BaggageAllowance],
       extra = None,
@@ -44,13 +44,13 @@ class AirlineServiceSpec extends FlatSpecLike with Matchers {
   private val service  = new AirlineService[IO](repo)
 
   it should "find the airline" in IOAssertion {
-    EitherT(service.baggagePolicy("Ryan Air".as[AirlineName])).map { airline =>
+    EitherT(service.baggagePolicy(AirlineName("Ryan Air"))).map { airline =>
       airline should be (testAirline)
     }.value
   }
 
   it should "NOT find the airline" in IOAssertion {
-    EitherT(service.baggagePolicy("Futur Airways".as[AirlineName])).leftMap { error =>
+    EitherT(service.baggagePolicy(AirlineName("Futur Airways"))).leftMap { error =>
       error shouldBe a [AirlineNotFound]
     }.value
   }

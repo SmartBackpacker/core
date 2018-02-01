@@ -43,13 +43,13 @@ class HealthServiceSpec extends FlatSpecLike with Matchers {
   private val service = new HealthService[IO](repo)
 
   it should "find the health information" in IOAssertion {
-    EitherT(service.findHealthInfo("AR".as[CountryCode])).map { index =>
+    EitherT(service.findHealthInfo(CountryCode("AR"))).map { index =>
       index should be (testHealth)
     }.value
   }
 
   it should "NOT find the health information" in IOAssertion {
-    EitherT(service.findHealthInfo("XX".as[CountryCode])).leftMap { error =>
+    EitherT(service.findHealthInfo(CountryCode("XX"))).leftMap { error =>
       error shouldBe a [HealthInfoNotFound]
     }.value
   }

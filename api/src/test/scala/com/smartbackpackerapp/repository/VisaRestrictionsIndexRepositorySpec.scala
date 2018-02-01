@@ -30,7 +30,7 @@ class VisaRestrictionsIndexRepositorySpec extends RepositorySpec {
   test("NOT find the visa restriction index") {
     IOAssertion {
       for {
-        idx <- repo.findRestrictionsIndex(new CountryCode("AR"))
+        idx <- repo.findRestrictionsIndex(CountryCode("AR"))
       } yield {
         assert(idx.isEmpty)
       }
@@ -38,7 +38,7 @@ class VisaRestrictionsIndexRepositorySpec extends RepositorySpec {
   }
 
   test("find visa restrictions index query") {
-    check(VisaRestrictionsIndexStatement.findIndex(new CountryCode("AR")))
+    check(VisaRestrictionsIndexStatement.findIndex(CountryCode("AR")))
   }
 
 }

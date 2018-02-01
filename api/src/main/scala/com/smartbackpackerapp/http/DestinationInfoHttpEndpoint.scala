@@ -19,7 +19,7 @@ package com.smartbackpackerapp.http
 import cats.Monad
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.{CountryCode, Currency}
 import com.smartbackpackerapp.service.DestinationInfoService
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -35,7 +35,7 @@ class DestinationInfoHttpEndpoint[F[_] : Monad](destinationInfoService: Destinat
   val service: AuthedService[String, F] = AuthedService {
     case GET -> Root / ApiVersion / "traveling" / from / "to" / to :? BaseCurrencyQueryParamMatcher(baseCurrency) as _ =>
       for {
-        info      <- destinationInfoService.find(from.as[CountryCode], to.as[CountryCode], baseCurrency.as[Currency])
+        info      <- destinationInfoService.find(CountryCode(from), CountryCode(to), Currency(baseCurrency))
         response  <- info.fold(handler.handle, x => Ok(x.asJson))
       } yield response
   }

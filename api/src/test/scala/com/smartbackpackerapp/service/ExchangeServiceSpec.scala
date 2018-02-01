@@ -20,7 +20,7 @@ import cats.effect.IO
 import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.config.SBConfiguration
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.Currency
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class ExchangeServiceSpec extends FlatSpecLike with Matchers {
@@ -34,13 +34,13 @@ class ExchangeServiceSpec extends FlatSpecLike with Matchers {
   }
 
   it should "retrieve a fake exchange rate" in IOAssertion {
-    service.exchangeRateFor("EUR".as[Currency], "RON".as[Currency]).map { exchangeRate =>
+    service.exchangeRateFor(Currency("EUR"), Currency("RON")).map { exchangeRate =>
       exchangeRate should be(CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59)))
     }
   }
 
   it should "return an empty exchange rate" in IOAssertion {
-    service.exchangeRateFor("".as[Currency], "".as[Currency]).map { exchangeRate =>
+    service.exchangeRateFor(Currency(""), Currency("")).map { exchangeRate =>
       exchangeRate should be(CurrencyExchangeDTO("", "", Map("" -> 0.0)))
     }
   }

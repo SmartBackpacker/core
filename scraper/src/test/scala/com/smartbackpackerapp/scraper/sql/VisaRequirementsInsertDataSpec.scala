@@ -20,7 +20,7 @@ import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.common.sql.RepositorySpec
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.CountryCode
 import com.smartbackpackerapp.scraper.config.ScraperConfiguration
 import com.smartbackpackerapp.scraper.parser.AbstractVisaRequirementsParser
 import net.ruippeixotog.scalascraper.browser.JsoupBrowser
@@ -48,7 +48,7 @@ class VisaRequirementsInsertDataSpec extends RepositorySpec {
       for {
         _  <- new CountryInsertData[IO](scraperConfig, transactor).run
         _  <- new VisaCategoryInsertData[IO](transactor).run
-        _  <- new VisaRequirementsInsertData[IO](transactor, parser).run("AR".as[CountryCode])
+        _  <- new VisaRequirementsInsertData[IO](transactor, parser).run(CountryCode("AR"))
       } yield ()
     }
   }

@@ -19,7 +19,7 @@ package com.smartbackpackerapp.http
 import cats.Monad
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.smartbackpackerapp.model._
+import com.smartbackpackerapp.model.CountryCode
 import com.smartbackpackerapp.service.VisaRestrictionIndexService
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -33,7 +33,7 @@ class VisaRestrictionIndexHttpEndpoint[F[_] : Monad](visaRestrictionIndexService
   val service: AuthedService[String, F] = AuthedService {
     case GET -> Root / ApiVersion / "ranking" / countryCode as _ =>
       for {
-        index     <- visaRestrictionIndexService.findIndex(countryCode.as[CountryCode])
+        index     <- visaRestrictionIndexService.findIndex(CountryCode(countryCode))
         response  <- index.fold(handler.handle, x => Ok(x.asJson))
       } yield response
   }

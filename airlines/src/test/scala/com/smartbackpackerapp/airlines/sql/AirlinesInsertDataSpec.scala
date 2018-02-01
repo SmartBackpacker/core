@@ -28,8 +28,8 @@ class AirlinesInsertDataSpec extends RepositorySpec {
   override def testDbName: String = getClass.getSimpleName
 
   private val parser: AirlinesFileParser[IO] = AirlinesFileParser[IO](
-    new AirlineFile(getClass.getResource("/airlines-file-sample").getPath),
-    new AllowanceFile(getClass.getResource("/allowance-file-sample").getPath)
+    AirlineFile(getClass.getResource("/airlines-file-sample").getPath),
+    AllowanceFile(getClass.getResource("/allowance-file-sample").getPath)
   )
 
   test("Insert airlines data from files") {
