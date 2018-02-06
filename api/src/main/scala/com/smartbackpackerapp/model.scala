@@ -18,10 +18,18 @@ package com.smartbackpackerapp
 
 object model {
 
-  case class CountryCode(value: String) extends AnyVal
-  case class CountryName(value: String) extends AnyVal
-  case class Currency(value: String) extends AnyVal
-  case class AirlineName(value: String) extends AnyVal
+  case class CountryCode(value: String) extends AnyVal {
+    override def toString: String = value
+  }
+  case class CountryName(value: String) extends AnyVal {
+    override def toString: String = value
+  }
+  case class Currency(value: String) extends AnyVal {
+    override def toString: String = value
+  }
+  case class AirlineName(value: String) extends AnyVal {
+    override def toString: String = value
+  }
 
   sealed trait VisaCategory extends Product with Serializable
   case object VisaNotRequired                 extends VisaCategory
@@ -144,15 +152,25 @@ object model {
   case class Countries(names: List[String]) extends VisaRestrictionsIndexValues
   case class PlacesCount(value: Int)        extends VisaRestrictionsIndexValues
 
-  case class Ranking(value: Int) extends AnyVal
-  case class Count(value: Int) extends AnyVal
-  case class Sharing(value: Int) extends AnyVal
+  case class Ranking(value: Int) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  case class Count(value: Int) extends AnyVal {
+    override def toString: String = value.toString
+  }
+  case class Sharing(value: Int) extends AnyVal {
+    override def toString: String = value.toString
+  }
 
   case class VisaRestrictionsIndex(rank: Ranking, count: Count, sharing: Sharing)
 
   // Health Information
-  case class Disease(value: String) extends AnyVal
-  case class WebLink(value: String) extends AnyVal
+  case class Disease(value: String) extends AnyVal {
+    override def toString: String = value
+  }
+  case class WebLink(value: String) extends AnyVal {
+    override def toString: String = value
+  }
 
   sealed trait AlertLevel extends Product with Serializable
   case object LevelOne extends AlertLevel
