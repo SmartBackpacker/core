@@ -16,36 +16,22 @@
 
 package com.smartbackpackerapp.http.metrics
 
-import java.net.InetSocketAddress
-import java.util.concurrent.TimeUnit
-
 import cats.data.{Kleisli, OptionT}
 import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.codahale.metrics._
-import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
 import com.smartbackpackerapp.common.Log
 import org.http4s.AuthedService
 import org.joda.time.Instant
 
-class HttpMetrics[F[_]](implicit F: Sync[F], L: Log[F]) {
-
-  private val registry = new MetricRegistry()
+class HttpMetricsMiddleware[F[_]](registry: MetricRegistry)
+                                 (implicit F: Sync[F], L: Log[F]) {
 
   private val requestsCount   = registry.meter("http-requests")
   private val responseSuccess = registry.meter("http-response-success")
   private val responseError   = registry.meter("http-response-failure")
   private val responseTime    = registry.histogram("http-response-time")
-
-  private lazy val graphite = new Graphite(new InetSocketAddress("localhost", 2003))
-
-  private lazy val reporter =
-    GraphiteReporter
-      .forRegistry(registry)
-      .convertRatesTo(TimeUnit.SECONDS)
-      .convertDurationsTo(TimeUnit.MILLISECONDS)
-      .build(graphite)
 
   def metrics(service: AuthedService[String, F]): AuthedService[String, F] =
     Kleisli { authReq =>
@@ -62,9 +48,5 @@ class HttpMetrics[F[_]](implicit F: Sync[F], L: Log[F]) {
         }
       }
     }
-
-  val startMetricsReporter: F[Unit] = F.delay {
-    reporter.start(15, TimeUnit.SECONDS)
-  }
 
 }

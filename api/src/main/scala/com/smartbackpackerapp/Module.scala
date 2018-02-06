@@ -18,10 +18,11 @@ package com.smartbackpackerapp
 
 import cats.effect.Effect
 import cats.syntax.semigroupk._
+import com.codahale.metrics.MetricRegistry
 import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.http._
-import com.smartbackpackerapp.http.metrics.HttpMetrics
+import com.smartbackpackerapp.http.metrics.{HttpMetricsMiddleware, MetricsReporter}
 import com.smartbackpackerapp.repository._
 import com.smartbackpackerapp.repository.algebra._
 import com.smartbackpackerapp.service._
@@ -119,9 +120,10 @@ class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F]) {
       <+> countriesHttpEndpoint)
 
   // Http Metrics Middleware
-  private lazy val httpMetrics = new HttpMetrics[F]
+  private lazy val registry = new MetricRegistry()
+  lazy val metricsReporter  = new MetricsReporter[F](registry)
 
-  lazy val startMetricsReporter: F[Unit] = httpMetrics.startMetricsReporter
+  private lazy val httpMetrics = new HttpMetricsMiddleware[F](registry)
 
   lazy val httpEndpointsWithMetrics: AuthedService[String, F] =
     httpMetrics.metrics(httpEndpoints)

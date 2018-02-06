@@ -37,9 +37,9 @@ class HttpServer[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
         httpClient      <- Stream.eval(Http1Client[F]())
         ctx             = new Module[F](httpClient)
         _               <- Stream.eval(ctx.migrateDb)
+        _               <- Stream.eval(ctx.metricsReporter.start)
         apiToken        <- Stream.eval(ApiToken)
         authMiddleware  <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
-        _               <- Stream.eval(ctx.startMetricsReporter)
         exitCode        <- BlazeBuilder[F]
                             .bindHttp(sys.env.getOrElse("PORT", "8080").toInt, "0.0.0.0")
                             .mountService(authMiddleware(ctx.httpEndpointsWithMetrics))
