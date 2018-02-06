@@ -16,6 +16,7 @@ object Dependencies {
     val ScalaCheck  = "1.13.4"
     val Logback     = "1.2.1"
     val TypesafeCfg = "1.3.1"
+    val Metrics     = "4.0.0"
   }
 
   object Libraries {
@@ -48,6 +49,9 @@ object Dependencies {
 
     lazy val scalaTest      = "org.scalatest"       %% "scalatest"                    % Versions.ScalaTest   % Test
     lazy val scalaCheck     = "org.scalacheck"      %% "scalacheck"                   % Versions.ScalaCheck  % Test
+
+    lazy val metricsCore      = "io.dropwizard.metrics" % "metrics-core"              % Versions.Metrics
+    lazy val metricsGraphite  = "io.dropwizard.metrics" % "metrics-graphite"          % Versions.Metrics
   }
 
 }

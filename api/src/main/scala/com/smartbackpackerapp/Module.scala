@@ -21,6 +21,7 @@ import cats.syntax.semigroupk._
 import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.http._
+import com.smartbackpackerapp.http.metrics.HttpMetrics
 import com.smartbackpackerapp.repository._
 import com.smartbackpackerapp.repository.algebra._
 import com.smartbackpackerapp.service._
@@ -112,9 +113,17 @@ class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F]) {
   private lazy val countriesHttpEndpoint: AuthedService[String, F] =
     new CountriesHttpEndpoint[F](countryService).service
 
-  lazy val httpEndpoints: AuthedService[String, F] =
+  private lazy val httpEndpoints: AuthedService[String, F] =
     (destinationInfoHttpEndpoint <+> airlinesHttpEndpoint
       <+> visaRestrictionIndexHttpEndpoint <+> healthInfoHttpEndpoint
       <+> countriesHttpEndpoint)
+
+  // Http Metrics Middleware
+  private lazy val httpMetrics = new HttpMetrics[F]
+
+  lazy val startMetricsReporter: F[Unit] = httpMetrics.startMetricsReporter
+
+  lazy val httpEndpointsWithMetrics: AuthedService[String, F] =
+    httpMetrics.metrics(httpEndpoints)
 
 }

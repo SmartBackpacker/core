@@ -53,7 +53,9 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
     Libraries.typesafeConfig,
     Libraries.logback,
     Libraries.scalaTest,
-    Libraries.scalaCheck
+    Libraries.scalaCheck,
+    Libraries.metricsCore,
+    Libraries.metricsGraphite
   ),
   organizationName := "Smart Backpacker App",
   startYear := Some(2017),
