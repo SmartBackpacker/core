@@ -31,11 +31,11 @@ class PostgresCountryRepository[F[_] : Monad](xa: Transactor[F]) extends Country
   }
 
   override def findAll: F[List[Country]] = {
-    findCountries(CountryStatement.findCountries.list)
+    findCountries(CountryStatement.findCountries.to[List])
   }
 
   override def findSchengen: F[List[Country]] = {
-    findCountries(CountryStatement.findSchengen.list)
+    findCountries(CountryStatement.findSchengen.to[List])
   }
 
 }

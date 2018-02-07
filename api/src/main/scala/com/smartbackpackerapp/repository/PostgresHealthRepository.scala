@@ -35,10 +35,10 @@ class PostgresHealthRepository[F[_]](xa: Transactor[F])
     val program: ConnectionIO[Health] =
       for {
         c <- HealthStatement.findCountryId(from).unique
-        m <- HealthStatement.mandatory(c).list
-        r <- HealthStatement.recommendations(c).list
-        o <- HealthStatement.optional(c).list
-        n <- HealthStatement.healthNotices(c).list
+        m <- HealthStatement.mandatory(c).to[List]
+        r <- HealthStatement.recommendations(c).to[List]
+        o <- HealthStatement.optional(c).to[List]
+        n <- HealthStatement.healthNotices(c).to[List]
         a <- HealthStatement.healthAlert(c).unique
       } yield {
         val mandatory       = m.map(_.toVaccine)

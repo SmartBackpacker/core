@@ -71,8 +71,9 @@ We love Functional Programming. That's why we choose and support the [Typelevel]
 | cats-effect   | 0.8        |
 | http4s        | 0.18.0     |
 | circe         | 0.9.1      |
-| doobie        | 0.5.0-RC1  |
+| doobie        | 0.5.0-RC2  |
 | fs2           | 0.10.0     |
+| monix         | 3.0.0-M3   |
 | tsec-jwt-mac  | 0.0.1-M7   |
 | scala-scraper | 2.0.0      |
 | scalatest     | 3.0.3      |

@@ -35,7 +35,7 @@ class PostgresAirlineRepository[F[_]](xa: Transactor[F])
     val program: ConnectionIO[Airline] =
       for {
         a <- AirlineStatement.findAirline(airlineName).unique
-        b <- AirlineStatement.baggageAllowance(a.head).list
+        b <- AirlineStatement.baggageAllowance(a.head).to[List]
       } yield a.toAirline(b)
 
     program.map(Option.apply).transact(xa).recoverWith {
