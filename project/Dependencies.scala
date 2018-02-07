@@ -4,6 +4,7 @@ object Dependencies {
 
   object Versions {
     val CatsEffect  = "0.8"
+    val Monix       = "3.0.0-M3"
     val Fs2         = "0.10.0"
     val Http4s      = "0.18.0"
     val Tsec        = "0.0.1-M7"
@@ -20,6 +21,7 @@ object Dependencies {
 
   object Libraries {
     lazy val catsEffect     = "org.typelevel"       %% "cats-effect"                  % Versions.CatsEffect
+    lazy val monix          = "io.monix"            %% "monix"                        % Versions.Monix
 
     lazy val fs2Core        = "co.fs2"              %% "fs2-core"                     % Versions.Fs2
     lazy val fs2IO          = "co.fs2"              %% "fs2-io"                       % Versions.Fs2

@@ -35,6 +35,7 @@ lazy val commonSettings: Seq[SettingsDefinition] = Seq(
   coverageExcludedPackages := "com\\.github\\.gvolpe\\.smartbackpacker\\\\.common.*;.*Server*;.*Bindings*;.*AirlinesJob*;.*AirlinesApp*;.*ScraperJob*;.*ApiTokenGenerator*;.*TokenGeneration*;.*VisaRequirementsInsertData*;.*JwtTokenAuthMiddleware*;.*Module*;.*ScraperModule*;.*AirlinesModule*;.*IOApp*;",
   libraryDependencies ++= Seq(
     Libraries.catsEffect,
+    Libraries.monix,
     Libraries.fs2Core,
     Libraries.http4sServer,
     Libraries.http4sClient,

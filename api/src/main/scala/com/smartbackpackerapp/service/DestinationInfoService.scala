@@ -16,9 +16,8 @@
 
 package com.smartbackpackerapp.service
 
-import cats.MonadError
+import cats.{MonadError, NonEmptyParallel, Parallel}
 import cats.data.EitherT
-import cats.syntax.apply._
 import cats.syntax.either._
 import cats.syntax.functor._
 import com.smartbackpackerapp.config.SBConfiguration
@@ -28,7 +27,7 @@ import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
 class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
                                    visaRequirementsRepo: VisaRequirementsRepository[F],
                                    exchangeRateService: AbstractExchangeRateService[F])
-                                  (implicit F: MonadError[F, Throwable]) {
+                                  (implicit F: MonadError[F, Throwable], P: NonEmptyParallel[F,F]) {
 
   def find(from: CountryCode,
            to: CountryCode,
@@ -47,7 +46,7 @@ class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
                                                 to: CountryCode,
                                                 baseCurrency: Currency,
                                                 foreignCurrency: Currency): F[ValidationError Either DestinationInfo] = {
-    (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).mapN {
+    Parallel.parMap2(visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)) {
       case (Right(vr), er) =>
         DestinationInfo(
           countryName = vr.to.name,
