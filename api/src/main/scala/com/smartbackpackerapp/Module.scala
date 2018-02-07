@@ -123,9 +123,7 @@ class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F]) {
   private lazy val registry = new MetricRegistry()
   lazy val metricsReporter  = new MetricsReporter[F](registry)
 
-  private lazy val httpMetrics = new HttpMetricsMiddleware[F](registry)
-
   lazy val httpEndpointsWithMetrics: AuthedService[String, F] =
-    httpMetrics.metrics(httpEndpoints)
+    HttpMetricsMiddleware[F](registry, httpEndpoints)
 
 }

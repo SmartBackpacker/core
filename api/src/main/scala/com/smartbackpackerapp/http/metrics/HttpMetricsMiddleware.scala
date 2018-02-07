@@ -24,18 +24,20 @@ import com.codahale.metrics._
 import com.smartbackpackerapp.common.Log
 import org.http4s.AuthedService
 
-class HttpMetricsMiddleware[F[_]](registry: MetricRegistry)
-                                 (implicit F: Sync[F], L: Log[F]) {
+object HttpMetricsMiddleware {
 
-  private val requestsCount   = registry.meter("http-requests")
-  private val responseSuccess = registry.meter("http-response-success")
-  private val responseError   = registry.meter("http-response-failure")
-  private val responseTime    = registry.histogram("http-response-time")
+  def apply[F[_]](registry: MetricRegistry,
+                  service: AuthedService[String, F])
+                 (implicit F: Sync[F], L: Log[F]): AuthedService[String, F] = {
 
-  def metrics(service: AuthedService[String, F]): AuthedService[String, F] =
-    Kleisli { authReq =>
+    val requestsCount   = registry.meter("http-requests")
+    val responseSuccess = registry.meter("http-response-success")
+    val responseError   = registry.meter("http-response-failure")
+    val responseTime    = registry.histogram("http-response-time")
+
+    Kleisli { req =>
       OptionT.liftF(F.delay(System.nanoTime())).flatMap { start =>
-        service(authReq).semiflatMap { response =>
+        service(req).semiflatMap { response =>
           for {
             _    <- F.delay(requestsCount.mark())
             _    <- if (response.status.isSuccess) F.delay(responseSuccess.mark())
@@ -47,5 +49,6 @@ class HttpMetricsMiddleware[F[_]](registry: MetricRegistry)
         }
       }
     }
+  }
 
 }
