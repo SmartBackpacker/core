@@ -16,6 +16,7 @@
 
 package com.smartbackpackerapp
 
+import cats.NonEmptyParallel
 import cats.effect.Effect
 import cats.syntax.semigroupk._
 import com.codahale.metrics.MetricRegistry
@@ -32,7 +33,7 @@ import org.http4s.AuthedService
 import org.http4s.client.Client
 
 // It wires all the instances together
-class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F]) {
+class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F], P: NonEmptyParallel[F,F]) {
 
   // Database config
   private val devDbFullUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")

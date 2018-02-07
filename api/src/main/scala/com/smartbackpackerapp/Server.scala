@@ -16,18 +16,19 @@
 
 package com.smartbackpackerapp
 
-import cats.effect.{Effect, IO}
+import cats.NonEmptyParallel
+import cats.effect.Effect
 import com.smartbackpackerapp.http.auth.JwtTokenAuthMiddleware
 import fs2.StreamApp.ExitCode
 import fs2.{Scheduler, Stream, StreamApp}
+import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
 import org.http4s.client.blaze.Http1Client
 import org.http4s.server.blaze.BlazeBuilder
 
-import scala.concurrent.ExecutionContext.Implicits.global
+object Server extends HttpServer[Task]
 
-object Server extends HttpServer[IO]
-
-class HttpServer[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
+class HttpServer[F[_]](implicit F: Effect[F], P: NonEmptyParallel[F,F]) extends StreamApp[F] {
 
   private lazy val ApiToken: F[Option[String]] = F.delay(sys.env.get("SB_API_TOKEN"))
 

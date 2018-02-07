@@ -16,15 +16,15 @@
 
 package com.smartbackpackerapp.http
 
-import cats.effect.IO
 import cats.syntax.option._
+import com.smartbackpackerapp.common.TaskAssertion
 import com.smartbackpackerapp.common.instances.log._
-import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.http.Http4sUtils._
 import com.smartbackpackerapp.model.{Country, CountryCode, CountryName, Currency, VisaNotRequired, VisaRequirementsData}
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
 import com.smartbackpackerapp.service.{AbstractExchangeRateService, CurrencyExchangeDTO, DestinationInfoService}
+import monix.eval.Task
 import org.http4s.{HttpService, Query, Request, Status, Uri}
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -32,8 +32,8 @@ import org.scalatest.{FlatSpecLike, Matchers}
 class DestinationInfoHttpEndpointSpec extends FlatSpecLike with Matchers with DestinationInfoHttpEndpointFixture {
 
   forAll(examples) { (from, to, expectedStatus, expectedCountry, expectedVisa) =>
-    it should s"retrieve visa requirements from $from to $to" in IOAssertion {
-      val request = Request[IO](uri = Uri(path = s"/$ApiVersion/traveling/$from/to/$to", query = Query(("baseCurrency", Some("EUR")))))
+    it should s"retrieve visa requirements from $from to $to" in TaskAssertion {
+      val request = Request[Task](uri = Uri(path = s"/$ApiVersion/traveling/$from/to/$to", query = Query(("baseCurrency", Some("EUR")))))
 
       httpService(request).value.map { task =>
         task.fold(fail("Empty response")){ response =>
@@ -58,8 +58,8 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     ("AR", "AR", Status.BadRequest, "Countries must be different", """{"code":"101","error":"Countries must be different!"}""")
   )
 
-  private val repo = new VisaRequirementsRepository[IO] {
-    override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
+  private val repo = new VisaRequirementsRepository[Task] {
+    override def findVisaRequirements(from: CountryCode, to: CountryCode): Task[Option[VisaRequirementsData]] = Task {
       if (to.value == "KO") none[VisaRequirementsData]
       else
       VisaRequirementsData(
@@ -71,20 +71,20 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
     }
   }
 
-  private lazy val sbConfig = new SBConfiguration[IO]
+  private lazy val sbConfig = new SBConfiguration[Task]
 
-  private val rateService = new AbstractExchangeRateService[IO](sbConfig) {
-    override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
+  private val rateService = new AbstractExchangeRateService[Task](sbConfig) {
+    override protected def retrieveExchangeRate(uri: String): Task[CurrencyExchangeDTO] = Task {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
 
-  private implicit val errorHandler = new HttpErrorHandler[IO]
+  private implicit val errorHandler = new HttpErrorHandler[Task]
 
-  val httpService: HttpService[IO] =
-    middleware(
+  val httpService: HttpService[Task] =
+    taskMiddleware(
       new DestinationInfoHttpEndpoint(
-        new DestinationInfoService[IO](sbConfig, repo, rateService)
+        new DestinationInfoService[Task](sbConfig, repo, rateService)
       ).service
     )
 
