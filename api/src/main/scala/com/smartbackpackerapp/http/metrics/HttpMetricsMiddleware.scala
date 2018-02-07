@@ -23,7 +23,6 @@ import cats.syntax.functor._
 import com.codahale.metrics._
 import com.smartbackpackerapp.common.Log
 import org.http4s.AuthedService
-import org.joda.time.Instant
 
 class HttpMetricsMiddleware[F[_]](registry: MetricRegistry)
                                  (implicit F: Sync[F], L: Log[F]) {
@@ -35,13 +34,13 @@ class HttpMetricsMiddleware[F[_]](registry: MetricRegistry)
 
   def metrics(service: AuthedService[String, F]): AuthedService[String, F] =
     Kleisli { authReq =>
-      OptionT.liftF(F.delay(Instant.now())).flatMap { start =>
+      OptionT.liftF(F.delay(System.nanoTime())).flatMap { start =>
         service(authReq).semiflatMap { response =>
           for {
             _    <- F.delay(requestsCount.mark())
             _    <- if (response.status.isSuccess) F.delay(responseSuccess.mark())
                     else F.delay(responseError.mark())
-            time <- F.delay(Instant.now().getMillis - start.getMillis)
+            time <- F.delay((System.nanoTime() - start) / 1000000)
             _    <- F.delay(responseTime.update(time))
             _    <- L.info(s"HTTP Response Time: $time ms")
           } yield response
