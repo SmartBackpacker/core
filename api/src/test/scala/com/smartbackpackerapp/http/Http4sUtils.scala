@@ -16,21 +16,37 @@
 
 package com.smartbackpackerapp.http
 
+import cats.{Applicative, Monad}
 import cats.data.{Kleisli, OptionT}
 import cats.effect.IO
+import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
 import org.http4s.server.AuthMiddleware
 import org.http4s.{EntityBody, Request}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 object Http4sUtils {
 
-  private val authUser: Kleisli[OptionT[IO, ?], Request[IO], String] =
-    Kleisli(_ => OptionT.liftF(IO("access_token")))
+  private def authUser[F[_]](implicit F: Applicative[F]): Kleisli[OptionT[F, ?], Request[F], String] =
+    Kleisli(_ => OptionT.liftF(F.pure("access_token")))
 
-  val middleware: AuthMiddleware[IO, String] = AuthMiddleware(authUser)
+  def middleware[F[_]: Monad]: AuthMiddleware[F, String] = AuthMiddleware.apply[F, String](authUser)
+
+  val taskMiddleware: AuthMiddleware[Task, String] = middleware[Task]
+  val ioMiddleware: AuthMiddleware[IO, String] = middleware[IO]
 
   implicit class ByteVector2String(body: EntityBody[IO]) {
     def asString: String = {
       val array = body.compile.toVector.unsafeRunSync().toArray
+      new String(array.map(_.toChar))
+    }
+  }
+
+  implicit class ByteVector2StringTask(body: EntityBody[Task]) {
+    def asString: String = {
+      val array = Await.result(body.compile.toVector.runAsync, Duration.Inf).toArray
       new String(array.map(_.toChar))
     }
   }

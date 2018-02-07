@@ -69,7 +69,7 @@ trait CountriesHttpEndpointFixture {
   private implicit val errorHandler = new HttpErrorHandler[IO]
 
   val httpService: HttpService[IO] =
-    middleware(
+    ioMiddleware(
       new CountriesHttpEndpoint[IO](
         new CountryService[IO](repo)
       ).service

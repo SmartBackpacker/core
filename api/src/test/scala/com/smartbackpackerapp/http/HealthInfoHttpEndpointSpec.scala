@@ -63,7 +63,7 @@ trait HealthInfoFixture extends PropertyChecks {
   private implicit val errorHandler = new HttpErrorHandler[IO]
 
   val httpService: HttpService[IO] =
-    middleware(
+    ioMiddleware(
       new HealthInfoHttpEndpoint(
         new HealthService[IO](repo)
       ).service

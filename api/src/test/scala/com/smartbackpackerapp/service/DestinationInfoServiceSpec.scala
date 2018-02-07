@@ -17,21 +17,21 @@
 package com.smartbackpackerapp.service
 
 import cats.data.EitherT
-import cats.effect.IO
 import cats.syntax.option._
+import com.smartbackpackerapp.common.TaskAssertion
 import com.smartbackpackerapp.common.instances.log._
-import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.model._
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
+import monix.eval.Task
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class DestinationInfoServiceSpec extends FlatSpecLike with Matchers {
 
-  private lazy val sbConfig = new SBConfiguration[IO]
+  private lazy val sbConfig = new SBConfiguration[Task]
 
-  private val repo = new VisaRequirementsRepository[IO] {
-    override def findVisaRequirements(from: CountryCode, to: CountryCode): IO[Option[VisaRequirementsData]] = IO {
+  private val repo = new VisaRequirementsRepository[Task] {
+    override def findVisaRequirements(from: CountryCode, to: CountryCode): Task[Option[VisaRequirementsData]] = Task {
       VisaRequirementsData(
         from = Country(CountryCode("AR"), CountryName("Argentina"), Currency("ARS")),
         to   = Country(CountryCode("RO"), CountryName("Romania"), Currency("RON")),
@@ -41,15 +41,15 @@ class DestinationInfoServiceSpec extends FlatSpecLike with Matchers {
     }
   }
 
-  private val rateService = new AbstractExchangeRateService[IO](sbConfig) {
-    override protected def retrieveExchangeRate(uri: String): IO[CurrencyExchangeDTO] = IO {
+  private val rateService = new AbstractExchangeRateService[Task](sbConfig) {
+    override protected def retrieveExchangeRate(uri: String): Task[CurrencyExchangeDTO] = Task {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
 
-  private val service = new DestinationInfoService[IO](sbConfig, repo, rateService)
+  private val service = new DestinationInfoService[Task](sbConfig, repo, rateService)
 
-  it should "retrieve destination information" in IOAssertion {
+  it should "retrieve destination information" in TaskAssertion {
     EitherT(service.find(CountryCode("AR"), CountryCode("RO"), Currency("EUR"))).map { info =>
       info.countryCode.value  should be ("RO")
       info.countryName.value  should be ("Romania")
@@ -58,7 +58,7 @@ class DestinationInfoServiceSpec extends FlatSpecLike with Matchers {
     }.value
   }
 
-  it should "validate countries" in IOAssertion {
+  it should "validate countries" in TaskAssertion {
     EitherT(service.find(CountryCode("AR"), CountryCode("AR"), Currency("EUR"))).leftMap { error =>
       error should be (CountriesMustBeDifferent)
     }.value
