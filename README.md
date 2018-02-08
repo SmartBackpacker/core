@@ -18,6 +18,10 @@ It's the main back-end application exposing the Http Rest API (See [documentatio
 - Dependencies
     - [Fixer.io](http://fixer.io/) running on [localhost:8081](http://localhost:8081) using `docker-compose`. See the source code [here](https://github.com/hakanensari/fixer). Or you can also use the public API, just change the URL in the configuration.
 
+### Metrics Snapshot (8th Feb of 2018)
+
+![metrics](metrics.png)
+
 #### Airlines
 
 It contains the job to insert new airline's data using plain files as the source (`fs2.io` is used here).
@@ -71,7 +75,7 @@ We love Functional Programming. That's why we choose and support the [Typelevel]
 | cats-effect   | 0.8        |
 | http4s        | 0.18.0     |
 | circe         | 0.9.1      |
-| doobie        | 0.5.0-RC2  |
+| doobie        | 0.5.0      |
 | fs2           | 0.10.0     |
 | monix         | 3.0.0-M3   |
 | tsec-jwt-mac  | 0.0.1-M7   |
