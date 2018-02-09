@@ -17,7 +17,6 @@
 package com.smartbackpackerapp.service
 
 import cats.effect.IO
-import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.common.IOAssertion
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.model.Currency

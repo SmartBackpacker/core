@@ -20,6 +20,7 @@ import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
 import cats.effect.Sync
+import cats.syntax.functor._
 import com.codahale.metrics._
 import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
 
@@ -30,15 +31,15 @@ class MetricsReporter[F[_]](registry: MetricRegistry)(implicit F: Sync[F]) {
 
   private lazy val graphite = new Graphite(new InetSocketAddress(graphiteHost, graphitePort))
 
-  private lazy val reporter =
+  private lazy val reporter = F.delay {
     GraphiteReporter
       .forRegistry(registry)
       .convertRatesTo(TimeUnit.SECONDS)
       .convertDurationsTo(TimeUnit.MILLISECONDS)
       .build(graphite)
-
-  val start: F[Unit] = F.delay {
-    reporter.start(15, TimeUnit.SECONDS)
   }
+
+  val start: F[Unit] =
+    reporter.map(_.start(15, TimeUnit.SECONDS))
 
 }

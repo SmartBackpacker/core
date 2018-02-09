@@ -20,7 +20,6 @@ import cats.NonEmptyParallel
 import cats.effect.Effect
 import cats.syntax.semigroupk._
 import com.codahale.metrics.MetricRegistry
-import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.http._
 import com.smartbackpackerapp.http.metrics.{HttpMetricsMiddleware, MetricsReporter}

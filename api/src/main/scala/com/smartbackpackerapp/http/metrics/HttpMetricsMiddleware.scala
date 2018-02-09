@@ -32,7 +32,7 @@ object HttpMetricsMiddleware {
 
     val requestsCount   = registry.meter("http-requests")
     val responseSuccess = registry.meter("http-response-success")
-    val responseError   = registry.meter("http-response-failure")
+    val responseFailure = registry.meter("http-response-failure")
     val responseTime    = registry.histogram("http-response-time")
 
     Kleisli { req =>
@@ -41,7 +41,7 @@ object HttpMetricsMiddleware {
           for {
             _    <- F.delay(requestsCount.mark())
             _    <- if (response.status.isSuccess) F.delay(responseSuccess.mark())
-                    else F.delay(responseError.mark())
+                    else F.delay(responseFailure.mark())
             time <- F.delay((System.nanoTime() - start) / 1000000)
             _    <- F.delay(responseTime.update(time))
             _    <- L.info(s"HTTP Response Time: $time ms")

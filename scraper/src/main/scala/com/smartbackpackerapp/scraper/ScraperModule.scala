@@ -17,7 +17,6 @@
 package com.smartbackpackerapp.scraper
 
 import cats.effect.Async
-import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.scraper.config.ScraperConfiguration
 import com.smartbackpackerapp.scraper.parser.{HealthInfoParser, VisaRequirementsParser, VisaRestrictionsIndexParser}
 import com.smartbackpackerapp.scraper.sql.{CountryInsertData, HealthInsertData, VisaCategoryInsertData, VisaRequirementsInsertData, VisaRestrictionsIndexInsertData}

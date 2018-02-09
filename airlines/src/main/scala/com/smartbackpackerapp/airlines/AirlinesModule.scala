@@ -19,7 +19,6 @@ package com.smartbackpackerapp.airlines
 import cats.effect.Async
 import com.smartbackpackerapp.airlines.parser.{AirlineFile, AirlinesFileParser, AllowanceFile}
 import com.smartbackpackerapp.airlines.sql.AirlinesInsertData
-import com.smartbackpackerapp.common.instances.log._
 import doobie.util.transactor.Transactor
 
 class AirlinesModule[F[_] : Async] {

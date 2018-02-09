@@ -18,7 +18,6 @@ package com.smartbackpackerapp.http
 
 import cats.syntax.option._
 import com.smartbackpackerapp.common.TaskAssertion
-import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.http.Http4sUtils._
 import com.smartbackpackerapp.model.{Country, CountryCode, CountryName, Currency, VisaNotRequired, VisaRequirementsData}

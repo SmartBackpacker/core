@@ -19,7 +19,6 @@ package com.smartbackpackerapp.service
 import cats.data.EitherT
 import cats.syntax.option._
 import com.smartbackpackerapp.common.TaskAssertion
-import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.model._
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository

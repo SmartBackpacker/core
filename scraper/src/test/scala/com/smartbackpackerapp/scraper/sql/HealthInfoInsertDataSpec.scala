@@ -18,7 +18,6 @@ package com.smartbackpackerapp.scraper.sql
 
 import cats.effect.IO
 import com.smartbackpackerapp.common.IOAssertion
-import com.smartbackpackerapp.common.instances.log._
 import com.smartbackpackerapp.common.sql.RepositorySpec
 import com.smartbackpackerapp.model._
 import com.smartbackpackerapp.scraper.config.ScraperConfiguration
