@@ -22,7 +22,9 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.codahale.metrics._
 import com.smartbackpackerapp.common.Log
+import com.smartbackpackerapp.http.ApiVersion
 import org.http4s.AuthedService
+import org.http4s.Uri.Path
 
 object HttpMetricsMiddleware {
 
@@ -30,25 +32,35 @@ object HttpMetricsMiddleware {
                   service: AuthedService[String, F])
                  (implicit F: Sync[F], L: Log[F]): AuthedService[String, F] = {
 
-    val requestsCount   = registry.meter("http-requests")
-    val responseSuccess = registry.meter("http-response-success")
-    val responseFailure = registry.meter("http-response-failure")
-    val responseTime    = registry.histogram("http-response-time")
-
     Kleisli { req =>
       OptionT.liftF(F.delay(System.nanoTime())).flatMap { start =>
         service(req).semiflatMap { response =>
-          for {
-            _    <- F.delay(requestsCount.mark())
-            _    <- if (response.status.isSuccess) F.delay(responseSuccess.mark())
-                    else F.delay(responseFailure.mark())
-            time <- F.delay((System.nanoTime() - start) / 1000000)
-            _    <- F.delay(responseTime.update(time))
-            _    <- L.info(s"HTTP Response Time: $time ms")
-          } yield response
+          HttpMetrics.parse(req.req.uri.path).fold(F.delay(response)) { path =>
+            for {
+              _    <- F.delay(registry.meter(s"requests-$path").mark())
+              _    <- if (response.status.isSuccess) F.delay(registry.meter(s"success-$path").mark())
+                      else F.delay(registry.meter(s"failure-${response.status.code}-$path").mark())
+              time <- F.delay((System.nanoTime() - start) / 1000000)
+              _    <- F.delay(registry.histogram(s"response-time-$path").update(time))
+              _    <- L.info(s"HTTP Response Time: $time ms")
+            } yield response
+          }
         }
       }
     }
+  }
+
+}
+
+object HttpMetrics {
+
+  def parse(path: Path): Option[String] = {
+    if (path.contains("/traveling")) Some(s"$ApiVersion-traveling")
+    else if (path.contains("/airlines")) Some(s"$ApiVersion-airlines")
+    else if (path.contains("/ranking")) Some(s"$ApiVersion-ranking")
+    else if (path.contains("/health")) Some(s"$ApiVersion-health")
+    else if (path.contains("/countries")) Some(s"$ApiVersion-countries")
+    else None
   }
 
 }
