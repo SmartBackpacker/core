@@ -9,6 +9,12 @@
 - Download it for `Android` [here](https://play.google.com/store/apps/details?id=io.github.gvolpe.sb).
 - Download it for `iOS` [here](https://itunes.apple.com/us/app/smartbackpackerapp/id1322542121?ls=1&mt=8)
 
+### Metrics Snapshot (12th Feb of 2018)
+
+![metrics](metrics.png)
+
+> Anybody with a GitHub account can view these metrics in real time on http://stats.smartbackpackerapp.com/
+
 ### Modules
 
 #### Api
@@ -17,10 +23,6 @@ It's the main back-end application exposing the Http Rest API (See [documentatio
 
 - Dependencies
     - [Fixer.io](http://fixer.io/) running on [localhost:8081](http://localhost:8081) using `docker-compose`. See the source code [here](https://github.com/hakanensari/fixer). Or you can also use the public API, just change the URL in the configuration.
-
-### Metrics Snapshot (8th Feb of 2018)
-
-![metrics](metrics.png)
 
 #### Airlines
 
@@ -69,7 +71,7 @@ Smart Backpacker uses [PostgreSQL](https://www.postgresql.org/) as the main data
 
 We love Functional Programming. That's why we choose and support the [Typelevel](https://typelevel.org/) stack. We also use a few other dependencies (see `build.sbt` for more):
 
-| Dependency    | Version    | 
+| Dependency    | Version    |
 | ------------- |:----------:|
 | cats          | 1.0.1      |
 | cats-effect   | 0.8        |
