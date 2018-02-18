@@ -78,9 +78,9 @@ We love Functional Programming. That's why we choose and support the [Typelevel]
 | http4s        | 0.18.0     |
 | circe         | 0.9.1      |
 | doobie        | 0.5.0      |
-| fs2           | 0.10.0     |
+| fs2           | 0.10.2     |
 | monix         | 3.0.0-M3   |
-| tsec-jwt-mac  | 0.0.1-M7   |
+| tsec-jwt-mac  | 0.0.1-M9   |
 | scala-scraper | 2.0.0      |
 | scalatest     | 3.0.3      |
 | scalacheck    | 1.13.4     |
