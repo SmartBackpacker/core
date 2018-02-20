@@ -120,7 +120,12 @@ class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F], P: NonEmptyPara
 
   // Http Metrics Middleware
   private lazy val registry = new MetricRegistry()
-  lazy val metricsReporter  = new MetricsReporter[F](registry)
+  private lazy val metricsReporter  = new MetricsReporter[F](registry)
+
+  lazy val startMetricsReporter: F[Unit] = {
+    if (devDbUrl.nonEmpty) F.unit
+    else metricsReporter.start
+  }
 
   lazy val httpEndpointsWithMetrics: AuthedService[String, F] = {
     if (devDbUrl.nonEmpty) httpEndpoints

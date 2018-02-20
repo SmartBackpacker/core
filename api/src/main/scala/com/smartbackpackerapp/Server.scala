@@ -38,7 +38,7 @@ class HttpServer[F[_]](implicit F: Effect[F], P: NonEmptyParallel[F,F]) extends 
         httpClient      <- Stream.eval(Http1Client[F]())
         ctx             = new Module[F](httpClient)
         _               <- Stream.eval(ctx.migrateDb)
-        _               <- Stream.eval(ctx.metricsReporter.start)
+        _               <- Stream.eval(ctx.startMetricsReporter)
         apiToken        <- Stream.eval(ApiToken)
         authMiddleware  <- Stream.eval(JwtTokenAuthMiddleware[F](apiToken))
         exitCode        <- BlazeBuilder[F]
