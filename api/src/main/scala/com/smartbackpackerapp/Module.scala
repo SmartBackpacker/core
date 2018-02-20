@@ -35,10 +35,9 @@ import org.http4s.client.Client
 class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F], P: NonEmptyParallel[F,F]) {
 
   // Database config
-  private val devDbFullUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
-  private val devDbUrl      = sys.env.getOrElse("DATABASE_URL", "")
-  private val devDbUser     = sys.env.getOrElse("JDBC_DATABASE_USERNAME", "")
-  private val devDbPass     = sys.env.getOrElse("JDBC_DATABASE_PASSWORD", "")
+  private val devDbUrl  = sys.env.getOrElse("JDBC_DATABASE_URL", "")
+  private val devDbUser = sys.env.getOrElse("JDBC_DATABASE_USERNAME", "")
+  private val devDbPass = sys.env.getOrElse("JDBC_DATABASE_PASSWORD", "")
 
   private val dbDriver  = sys.env.getOrElse("SB_DB_DRIVER", "org.postgresql.Driver")
   private val dbUrl     = sys.env.getOrElse("SB_DB_URL", "jdbc:postgresql:sb")
@@ -46,14 +45,14 @@ class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F], P: NonEmptyPara
   private val dbPass    = sys.env.getOrElse("SB_DB_PASSWORD", "")
 
   private def xa: Transactor[F] = {
-    if (devDbFullUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbFullUrl)
+    if (devDbUrl.nonEmpty) Transactor.fromDriverManager[F](dbDriver, devDbUrl)
     else Transactor.fromDriverManager[F](dbDriver, dbUrl, dbUser, dbPass)
   }
 
   def migrateDb: F[Unit] =
     F.delay {
       val flyway = new Flyway
-      if (devDbFullUrl.nonEmpty) flyway.setDataSource(devDbUrl, devDbUser, devDbPass)
+      if (devDbUrl.nonEmpty) flyway.setDataSource(devDbUrl, devDbUser, devDbPass)
       else flyway.setDataSource(dbUrl, dbUser, dbPass)
       flyway.migrate()
     }
@@ -121,9 +120,16 @@ class Module[F[_]](httpClient: Client[F])(implicit F: Effect[F], P: NonEmptyPara
 
   // Http Metrics Middleware
   private lazy val registry = new MetricRegistry()
-  lazy val metricsReporter  = new MetricsReporter[F](registry)
+  private lazy val metricsReporter  = new MetricsReporter[F](registry)
 
-  lazy val httpEndpointsWithMetrics: AuthedService[String, F] =
-    HttpMetricsMiddleware[F](registry, httpEndpoints)
+  lazy val startMetricsReporter: F[Unit] = {
+    if (devDbUrl.nonEmpty) F.unit
+    else metricsReporter.start
+  }
+
+  lazy val httpEndpointsWithMetrics: AuthedService[String, F] = {
+    if (devDbUrl.nonEmpty) httpEndpoints
+    else HttpMetricsMiddleware[F](registry, httpEndpoints)
+  }
 
 }
