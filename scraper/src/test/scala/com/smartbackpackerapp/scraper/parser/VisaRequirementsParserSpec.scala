@@ -57,7 +57,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for AR -> $to" in IOAssertion.when(to != "Argentina" && to != "France") { // it's France and territories for AR
+    ignore should s"parse the visa requirements for AR -> $to" in IOAssertion.when(to != "Argentina" && to != "France") { // it's France and territories for AR
       parser.visaRequirementsFor(CountryCode("AR")).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
@@ -68,7 +68,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for GB -> $to" in IOAssertion.when(to != "United Kingdom") {
+    ignore should s"parse the visa requirements for GB -> $to" in IOAssertion.when(to != "United Kingdom") {
       parser.visaRequirementsFor(CountryCode("GB")).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
@@ -79,7 +79,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for IE -> $to" in IOAssertion.when(to != "Ireland") {
+    ignore should s"parse the visa requirements for IE -> $to" in IOAssertion.when(to != "Ireland") {
       parser.visaRequirementsFor(CountryCode("IE")).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
@@ -90,8 +90,8 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for KR -> $to" in IOAssertion.when(to != "South Korea" && to != "France") { // it's France and territories for KR
-      parser.visaRequirementsFor(CountryCode("KR")).map { list =>
+    ignore should s"parse the visa requirements for DE -> $to" in IOAssertion.when(to != "Germany") {
+      parser.visaRequirementsFor(CountryCode("DE")).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty
@@ -101,7 +101,7 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for CA -> $to" in IOAssertion.when(
+    ignore should s"parse the visa requirements for CA -> $to" in IOAssertion.when(
       to != "Canada" && to != "France" && to != "Australia" // it's France and territories, etc
       && to != "Denmark" && to != "Netherlands" && to != "United Kingdom") {
         parser.visaRequirementsFor(CountryCode("CA")).map { list =>
@@ -114,8 +114,8 @@ class VisaRequirementsParserSpec extends FlatSpecLike with Matchers with VisaReq
   }
 
   forAll(countries) { to =>
-    it should s"parse the visa requirements for RU -> $to" in IOAssertion.when(to != "Russia" && to != "United Kingdom") { // it's France and territories, etc
-      parser.visaRequirementsFor(CountryCode("RU")).map { list =>
+    ignore should s"parse the visa requirements for ZA -> $to" in IOAssertion.when(to != "South Africa") {
+      parser.visaRequirementsFor(CountryCode("ZA")).map { list =>
         list.foreach { req =>
           req.visaCategory should not be UnknownVisaCategory
           req.description  should not be empty

@@ -91,6 +91,9 @@ abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfig
   }
 
   private val normalTableMapper: List[String] => VisaRequirementsParsing = {
+    case (c :: v :: d :: xt :: x :: Nil) =>
+      val extra = if (x == "X" || x == "√") xt else xt + " " + x
+      VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(extra))
     case (c :: v :: d :: x :: Nil) =>
       val extra = if (x == "X" || x == "√") "" else x
       VisaRequirementsParsing(CountryName(c.noWhiteSpaces), v.asVisaCategory, d.asDescription(extra))
@@ -123,21 +126,25 @@ abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfig
     e.children.toList.flatMap(_ >> extractor("td", wikiTableExtractor))
   }
 
-  private val rowspanMapper: List[Element] => List[String] = {
+  private val rowspanMapper: Int => List[Element] => List[String] = tableSize => {
     case (x :: y :: xs) =>
       if (x.children.exists(_.hasAttr("rowspan"))) {
         val first  = parseColumns(x)
         val second = parseColumns(y)
         val lastCombined = first.lastOption.toList.map(_ ++ " " ++ second.mkString)
         // Drop the last element and append the combined one
-        (first.dropRight(1) ::: lastCombined) ::: rowspanMapper(xs)
+        (first.dropRight(1) ::: lastCombined) ::: rowspanMapper(tableSize)(xs)
       } else {
-        val noRowspan = parseColumns(x)
-        noRowspan ::: rowspanMapper(y :: xs)
+        parseColumns(x) match {
+          case Nil => Nil ::: rowspanMapper(tableSize)(y :: xs)
+          case ys if ys.lengthCompare(tableSize) == 0 => ys ::: rowspanMapper(tableSize)(y :: xs)
+          case ys if ys.lengthCompare(tableSize) > 0 => ys.dropRight(1) ::: rowspanMapper(tableSize)(y :: xs) // See Marshal Islands in Brazil visa requirements
+          case ys => ys ::: "" :: rowspanMapper(tableSize)(y :: xs) // See Iceland in US visa requirements
+        }
       }
     case (x :: xs) =>
       val noRowspan = parseColumns(x)
-      noRowspan ::: rowspanMapper(xs)
+      noRowspan ::: rowspanMapper(tableSize)(xs)
     case _ =>
       List.empty[String]
   }
@@ -155,13 +162,10 @@ abstract class AbstractVisaRequirementsParser[F[_]](scraperConfig: ScraperConfig
       // Extract all the rows with visa information
       val table = wikiTables.toList.flatMap(_ >> extractor(".sortable tr", elementList))
       // Parse every row, extract the field and combine them whenever there's a rowspan
-      val info  = rowspanMapper(table)
-
+      val info  = rowspanMapper(tableSize.getOrElse(3))(table)
       // Group it per country using the corresponding mapper
       val mapper = colspan.fold(normalTableMapper)(_ => colspanTableMapper)
-      val result = info.grouped(tableSize.getOrElse(3)).map(mapper).toList
-
-      result
+      info.grouped(tableSize.getOrElse(3)).map(mapper).toList
     }
 
 }
