@@ -35,7 +35,7 @@ class HttpServer[F[_]](implicit F: Effect[F], P: NonEmptyParallel[F,F]) extends 
   override def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
     Scheduler(corePoolSize = 2).flatMap { implicit scheduler =>
       for {
-        httpClient      <- Stream.eval(Http1Client[F]())
+        httpClient      <- Http1Client.stream[F]()
         ctx             = new Module[F](httpClient)
         _               <- Stream.eval(ctx.migrateDb)
         _               <- Stream.eval(ctx.startMetricsReporter)
