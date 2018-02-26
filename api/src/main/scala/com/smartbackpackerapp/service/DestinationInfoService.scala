@@ -16,10 +16,11 @@
 
 package com.smartbackpackerapp.service
 
-import cats.{MonadError, NonEmptyParallel, Parallel}
 import cats.data.EitherT
 import cats.syntax.either._
 import cats.syntax.functor._
+import cats.syntax.parallel._
+import cats.{MonadError, NonEmptyParallel}
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.model.{CountryCode, Currency, DestinationInfo, ExchangeRate, VisaRequirements, VisaRequirementsData}
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
@@ -46,7 +47,7 @@ class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
                                                 to: CountryCode,
                                                 baseCurrency: Currency,
                                                 foreignCurrency: Currency): F[ValidationError Either DestinationInfo] = {
-    Parallel.parMap2(visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)) {
+    (visaRequirementsFor(from, to), exchangeRateService.exchangeRateFor(baseCurrency, foreignCurrency)).parMapN {
       case (Right(vr), er) =>
         DestinationInfo(
           countryName = vr.to.name,

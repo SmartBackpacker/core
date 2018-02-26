@@ -58,8 +58,8 @@ abstract class AbstractHealthInfoParser[F[_]: Sync] {
 
   private def extractWebLink(e: Element): String = {
     Try(e >> attr("href")) match {
-      case Success(link) => linksBaseUri + link
-      case Failure(e)    => println(s"Error parsing link: ${e.getMessage}"); ""
+      case Success(link)  => linksBaseUri + link
+      case Failure(error) => println(s"Error parsing link: ${error.getMessage}"); ""
     }
   }
 

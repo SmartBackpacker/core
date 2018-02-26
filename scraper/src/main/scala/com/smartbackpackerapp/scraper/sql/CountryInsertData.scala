@@ -18,8 +18,8 @@ package com.smartbackpackerapp.scraper.sql
 
 import cats.effect.Async
 import cats.instances.list._
+import cats.syntax.apply._
 import cats.syntax.flatMap._
-import cats.syntax.functor._
 import com.smartbackpackerapp.model._
 import com.smartbackpackerapp.scraper.config.ScraperConfiguration
 import doobie.free.connection.ConnectionIO
@@ -27,8 +27,9 @@ import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 
-class CountryInsertData[F[_] : Async](scraperConfig: ScraperConfiguration[F],
-                                      xa : Transactor[F]) {
+class CountryInsertData[F[_]](scraperConfig: ScraperConfiguration[F],
+                              xa : Transactor[F])
+                             (implicit F: Async[F]) {
 
   private def insertCountriesBulk(countries: List[Country]): ConnectionIO[Int] = {
     CountryInsertStatement.insertCountries
@@ -47,13 +48,13 @@ class CountryInsertData[F[_] : Async](scraperConfig: ScraperConfiguration[F],
 
   private def runSchengenUpdate: F[Unit] = {
     scraperConfig.schengen() flatMap { countries =>
-      updateSchengenCountriesBulk(countries).transact(xa).map(_ => ())
+      updateSchengenCountriesBulk(countries).transact(xa) *> F.unit
     }
   }
 
   private def runCurrencyUpdate: F[Unit] = {
     scraperConfig.countries() flatMap { countries =>
-      updateCountriesCurrencyBulk(countries).transact(xa).map(_ => ())
+      updateCountriesCurrencyBulk(countries).transact(xa) *> F.unit
     }
   }
 
@@ -63,7 +64,7 @@ class CountryInsertData[F[_] : Async](scraperConfig: ScraperConfiguration[F],
 
   def run: F[Unit] = {
     scraperConfig.countries() flatMap { countries =>
-      insertCountriesBulk(countries).transact(xa).map(_ => ())
+      insertCountriesBulk(countries).transact(xa) *> F.unit
     }
   }
 

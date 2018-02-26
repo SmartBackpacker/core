@@ -18,7 +18,7 @@ package com.smartbackpackerapp.scraper.sql
 
 import cats.effect.Async
 import cats.instances.list._
-import cats.syntax.functor._
+import cats.syntax.apply._
 import com.smartbackpackerapp.model._
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -26,7 +26,7 @@ import doobie.util.update.Update
 
 import scala.reflect.runtime.{universe => ru}
 
-class VisaCategoryInsertData[F[_] : Async](xa : Transactor[F]) {
+class VisaCategoryInsertData[F[_]](xa : Transactor[F])(implicit F: Async[F]) {
 
   private def insertVisaCategoriesBulk(categories: List[String]) = {
     VisaCategoryInsertStatement.insertVisaCategories.updateMany(categories)
@@ -39,7 +39,7 @@ class VisaCategoryInsertData[F[_] : Async](xa : Transactor[F]) {
   }
 
   def run: F[Unit] = {
-    insertVisaCategoriesBulk(visaCategories).transact(xa).map(_ => ())
+    insertVisaCategoriesBulk(visaCategories).transact(xa) *> F.unit
   }
 
 }

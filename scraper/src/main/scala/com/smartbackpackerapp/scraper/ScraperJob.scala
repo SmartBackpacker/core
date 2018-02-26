@@ -18,11 +18,12 @@ package com.smartbackpackerapp.scraper
 
 import cats.effect.IO
 import cats.instances.list._
+import cats.syntax.apply._
 import cats.syntax.traverse._
 import com.smartbackpackerapp.common.IOApp
 import com.smartbackpackerapp.model._
+import org.joda.time.Seconds
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{Instant, Seconds}
 
 object ScraperJob extends IOApp {
 
@@ -67,7 +68,7 @@ object ScraperJob extends IOApp {
 
   val visaRequirementsProgram: IO[Unit] = {
     ctx.scraperConfig.countriesCode() flatMap { codes =>
-      codes.traverse(c => visaRequirementsProgramFor(c)).map(_ => ())
+      codes.traverse(c => visaRequirementsProgramFor(c)) *> IO.unit
     }
   }
 
@@ -80,7 +81,7 @@ object ScraperJob extends IOApp {
 
   val healthInfoProgram: IO[Unit] = {
     ctx.scraperConfig.countriesCode() flatMap { codes =>
-      codes.traverse(c => healthInfoProgramFor(c)).map(_ => ())
+      codes.traverse(c => healthInfoProgramFor(c)) *> IO.unit
     }
   }
 

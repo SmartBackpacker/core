@@ -18,13 +18,13 @@ package com.smartbackpackerapp.scraper.sql
 
 import cats.effect.Async
 import cats.instances.list._
-import cats.syntax.functor._
+import cats.syntax.apply._
 import com.smartbackpackerapp.model._
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update
 
-class VisaRestrictionsIndexInsertData[F[_] : Async](xa: Transactor[F]) {
+class VisaRestrictionsIndexInsertData[F[_]](xa: Transactor[F])(implicit F: Async[F]) {
 
   private def insertVisaIndexBulk(list: List[(CountryCode, VisaRestrictionsIndex)]) = {
     VisaRestrictionsIndexInsertStatement.insertVisaIndex
@@ -35,7 +35,7 @@ class VisaRestrictionsIndexInsertData[F[_] : Async](xa: Transactor[F]) {
 
   def run(list: List[(CountryCode, VisaRestrictionsIndex)]): F[Unit] = {
     // Netherlands is duplicated in ranking 2018
-    insertVisaIndexBulk(list.toSet.toList).transact(xa).map(_ => ())
+    insertVisaIndexBulk(list.toSet.toList).transact(xa) *> F.unit
   }
 
 }

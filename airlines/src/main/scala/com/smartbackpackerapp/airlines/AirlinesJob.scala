@@ -20,6 +20,7 @@ import cats.effect.{Effect, IO}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.smartbackpackerapp.airlines.parser.{AirlineFile, AllowanceFile}
+import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
 
 object AirlinesApp extends AirlinesJob[IO]
@@ -51,7 +52,7 @@ class AirlinesJob[F[_]](implicit F: Effect[F]) extends StreamApp[F] {
       _ <- putStrLn("Job finished successfully")
     } yield ()
 
-  def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, Nothing] =
+  def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
     for {
       files    <- Stream.eval(readArgs(args))
       (x, y)   = files

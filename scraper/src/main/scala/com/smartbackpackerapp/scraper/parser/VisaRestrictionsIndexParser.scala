@@ -33,9 +33,10 @@ import net.ruippeixotog.scalascraper.scraper.HtmlExtractor
 
 import scala.util.{Failure, Success, Try}
 
-class VisaRestrictionsIndexParser[F[_] : Sync](scraperConfig: ScraperConfiguration[F]) extends AbstractVisaRestrictionsIndexParser[F](scraperConfig) {
+class VisaRestrictionsIndexParser[F[_]](scraperConfig: ScraperConfiguration[F])
+                                       (implicit F: Sync[F]) extends AbstractVisaRestrictionsIndexParser[F](scraperConfig) {
 
-  override val htmlDocument: F[Document] = Sync[F].delay {
+  override val htmlDocument: F[Document] = F.delay {
     val browser = new JsoupBrowser()
     browser.get("https://en.wikipedia.org/wiki/Travel_visa")
   }
@@ -45,7 +46,7 @@ class VisaRestrictionsIndexParser[F[_] : Sync](scraperConfig: ScraperConfigurati
 abstract class AbstractVisaRestrictionsIndexParser[F[_]](scraperConfig: ScraperConfiguration[F])
                                                         (implicit F: Monad[F]) {
 
-  val CountriesOnIndex: Int = 104 // Number of countries that are part of the ranking
+  private val CountriesOnIndex: Int = 104 // Number of countries that are part of the ranking
 
   def htmlDocument: F[Document]
 
