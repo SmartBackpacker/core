@@ -16,9 +16,7 @@
 
 package com.smartbackpackerapp
 
-import com.smartbackpackerapp.model._
 import io.circe.Encoder
-import io.circe.generic.extras.decoding.UnwrappedDecoder
 import io.circe.generic.extras.encoding.UnwrappedEncoder
 
 package object http {
@@ -35,8 +33,5 @@ package object http {
   case class ApiError(code: ApiErrorCode, error: String)
 
   implicit def valueClassEncoder[A: UnwrappedEncoder]: Encoder[A] = implicitly
-
-  //implicit def jsonDecoder[A <: Product : Decoder](implicit F: Sync[F]): EntityDecoder[F, A] = jsonOf[F, A]
-  //implicit def jsonEncoder[A <: Product : Encoder](implicit F: Sync[F]): EntityEncoder[F, A] = jsonEncoderOf[F, A]
 
 }

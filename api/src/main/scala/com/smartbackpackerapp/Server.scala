@@ -16,7 +16,7 @@
 
 package com.smartbackpackerapp
 
-import cats.NonEmptyParallel
+import cats.Parallel
 import cats.effect.Effect
 import com.smartbackpackerapp.http.auth.JwtTokenAuthMiddleware
 import fs2.StreamApp.ExitCode
@@ -26,9 +26,12 @@ import monix.execution.Scheduler.Implicits.global
 import org.http4s.client.blaze.Http1Client
 import org.http4s.server.blaze.BlazeBuilder
 
-object Server extends HttpServer[Task]
+object Server extends HttpServer[Task, Task.Par]
 
-class HttpServer[F[_]](implicit F: Effect[F], P: NonEmptyParallel[F,F]) extends StreamApp[F] {
+class HttpServer[F[_], G[_]](implicit F: Effect[F], P: Parallel[F, G]) extends StreamApp[F] {
+
+  // Workaround until something like mirror comes out: https://github.com/typelevel/cats/pull/2019
+  implicit val parallel: Parallel[F, F] = P.asInstanceOf[Parallel[F, F]]
 
   private lazy val ApiToken: F[Option[String]] = F.delay(sys.env.get("SB_API_TOKEN"))
 

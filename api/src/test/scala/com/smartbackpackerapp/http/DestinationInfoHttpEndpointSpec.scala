@@ -16,6 +16,7 @@
 
 package com.smartbackpackerapp.http
 
+import cats.Parallel
 import cats.syntax.option._
 import com.smartbackpackerapp.common.TaskAssertion
 import com.smartbackpackerapp.config.SBConfiguration
@@ -79,6 +80,9 @@ trait DestinationInfoHttpEndpointFixture extends PropertyChecks {
   }
 
   private implicit val errorHandler = new HttpErrorHandler[Task]
+
+  private implicit val parallel: Parallel[Task, Task] =
+    Parallel[Task, Task.Par].asInstanceOf[Parallel[Task, Task]]
 
   val httpService: HttpService[Task] =
     taskMiddleware(

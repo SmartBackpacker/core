@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.syntax.either._
 import cats.syntax.functor._
 import cats.syntax.parallel._
-import cats.{MonadError, NonEmptyParallel}
+import cats.{MonadError, Parallel}
 import com.smartbackpackerapp.config.SBConfiguration
 import com.smartbackpackerapp.model.{CountryCode, Currency, DestinationInfo, ExchangeRate, VisaRequirements, VisaRequirementsData}
 import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
@@ -28,7 +28,7 @@ import com.smartbackpackerapp.repository.algebra.VisaRequirementsRepository
 class DestinationInfoService[F[_]](sbConfig: SBConfiguration[F],
                                    visaRequirementsRepo: VisaRequirementsRepository[F],
                                    exchangeRateService: AbstractExchangeRateService[F])
-                                  (implicit F: MonadError[F, Throwable], P: NonEmptyParallel[F,F]) {
+                                  (implicit F: MonadError[F, Throwable], P: Parallel[F, F]) {
 
   def find(from: CountryCode,
            to: CountryCode,
