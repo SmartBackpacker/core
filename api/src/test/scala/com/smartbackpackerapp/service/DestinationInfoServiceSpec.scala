@@ -16,6 +16,7 @@
 
 package com.smartbackpackerapp.service
 
+import cats.Parallel
 import cats.data.EitherT
 import cats.syntax.option._
 import com.smartbackpackerapp.common.TaskAssertion
@@ -45,6 +46,9 @@ class DestinationInfoServiceSpec extends FlatSpecLike with Matchers {
       CurrencyExchangeDTO("EUR", "", Map("RON" -> 4.59))
     }
   }
+
+  private implicit val parallel: Parallel[Task, Task] =
+    Parallel[Task, Task.Par].asInstanceOf[Parallel[Task, Task]]
 
   private val service = new DestinationInfoService[Task](sbConfig, repo, rateService)
 
