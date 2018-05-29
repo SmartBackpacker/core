@@ -16,15 +16,15 @@
 
 package com.smartbackpackerapp.service
 
-import cats.effect.Sync
+import cats.Functor
 import cats.syntax.functor._
 import com.smartbackpackerapp.model.{Airline, AirlineName}
 import com.smartbackpackerapp.repository.algebra.AirlineRepository
 
-class AirlineService[F[_] : Sync](airlineRepo: AirlineRepository[F]) {
+class AirlineService[F[_] : Functor](airlineRepo: AirlineRepository[F]) {
 
   def baggagePolicy(airlineName: AirlineName): F[ValidationError Either Airline] =
-    airlineRepo.findAirline(airlineName) map { airline =>
+    airlineRepo.findAirline(airlineName).map { airline =>
       airline.toRight[ValidationError](AirlineNotFound(airlineName))
     }
 

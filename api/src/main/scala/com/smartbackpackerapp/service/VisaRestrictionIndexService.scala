@@ -24,7 +24,7 @@ import com.smartbackpackerapp.repository.algebra.VisaRestrictionsIndexRepository
 class VisaRestrictionIndexService[F[_] : Functor](visaRestrictionsIndexRepo: VisaRestrictionsIndexRepository[F]) {
 
   def findIndex(countryCode: CountryCode): F[ValidationError Either VisaRestrictionsIndex] =
-    visaRestrictionsIndexRepo.findRestrictionsIndex(countryCode) map { index =>
+    visaRestrictionsIndexRepo.findRestrictionsIndex(countryCode).map { index =>
       index.toRight[ValidationError](VisaRestrictionsIndexNotFound(countryCode))
     }
 
