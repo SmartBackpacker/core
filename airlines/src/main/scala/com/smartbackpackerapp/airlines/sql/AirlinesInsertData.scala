@@ -37,7 +37,7 @@ class AirlinesInsertData[F[_] : Async](xa: Transactor[F],
     for {
       airlineId <- insertAirline(airline.name.value).withUniqueGeneratedKeys[Int]("airline_id")
       policyId  <- insertBaggagePolicy(airlineId, airline.baggagePolicy).withUniqueGeneratedKeys[Int]("policy_id")
-      _         <- insertManyBaggageAllowance(policyId).updateMany(airline.baggagePolicy.allowance.toDTO(policyId))
+      _         <- insertManyBaggageAllowance.updateMany(airline.baggagePolicy.allowance.toDTO(policyId))
     } yield ()
 
   def run: Stream[F, Unit] =
@@ -62,7 +62,7 @@ object AirlineInsertStatement {
       .update
   }
 
-  def insertManyBaggageAllowance(policyId: Int): Update[CreateBaggageAllowanceDTO] = {
+  val insertManyBaggageAllowance: Update[CreateBaggageAllowanceDTO] = {
     val sql = "INSERT INTO baggage_allowance (policy_id, baggage_type, kgs, height, width, depth) VALUES (?, ?, ?, ?, ?, ?)"
     Update[CreateBaggageAllowanceDTO](sql)
   }
